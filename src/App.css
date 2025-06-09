@@ -1,0 +1,406 @@
+:root {
+  --sidebar-width: 20%;
+}
+
+.bodyContainer {
+  height: 100vh;
+  display: flex;
+}
+
+.sidebarMain {
+  width: var(--sidebar-width);
+  background-color: #fff;
+  height: 100vh;
+  transition: width 0.3s ease-in-out;
+  overflow: auto;
+}
+
+.sidebarHidden {
+  width: 0;
+}
+
+.sidebarVisible {
+  width: var(--sidebar-width);
+}
+.brandLogo img {
+  height: 70px;
+}
+.brandLogo p {
+  font-size: 30px;
+  font-weight: 500;
+  font-family: poppins;
+  color: #0e0ed4;
+}
+.lightBlack {
+  background-color: #4a4a4a !important;
+}
+.menuItem img {
+  height: 18px;
+}
+.menuItem p {
+  font-size: 14px;
+  font-family: poppins;
+  font-weight: 600;
+}
+.dropIcon {
+  height: 10px;
+}
+.mainContainer {
+  background-color: white;
+  width: calc(100% - var(--sidebar-width));
+  height: 100vh;
+  transition: width 0.3s ease-in-out;
+  overflow: auto;
+}
+
+.sidebarHidden + .mainContainer {
+  width: 100%;
+}
+.subMenu {
+  font-family: 10px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-weight: 600;
+  opacity: 0.7;
+}
+.subMenu i {
+  font-size: 6px;
+  margin-right: 4px;
+  position: relative;
+  top: -3px;
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+  :root {
+    --sidebar-width: 100%;
+  }
+  .sidebarMain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    z-index: 2;
+  }
+  .sidebarHidden {
+    width: 0;
+  }
+  .sidebarVisible {
+    width: 100%;
+  }
+}
+.barIcon {
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+.topNavMain {
+  background-color: #0e0ed4;
+  height: 130px;
+}
+.navRightDiv img {
+  height: 30px;
+}
+.textPrimary {
+  color: #0e0ed4;
+}
+.notificationDiv p {
+  font-size: 10px;
+  background-color: red;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  text-align: center;
+  color: white;
+  font-weight: 500;
+  position: relative;
+  top: 15px;
+  left: -10px;
+}
+.notificationDiv img {
+  height: 28px;
+  position: relative;
+  top: 2px;
+  filter: brightness(0) invert(1);
+}
+.notificationDiv {
+  cursor: pointer;
+}
+.loginMain {
+  width: 400px;
+}
+.bgGradient {
+  background: linear-gradient(to bottom, skyblue, white);
+}
+.loginMain h3 {
+  font-family: poppins;
+}
+.topCard {
+  background: white;
+}
+.topCard img {
+  height: 35px;
+  filter: brightness(0) invert(1);
+}
+.topCard h2 {
+  font-family: poppins;
+  margin-bottom: 0px;
+}
+.topCard h6 {
+  font-family: sans-serif;
+  font-weight: 600;
+  margin-bottom: 0px;
+}
+.borderRadius24 {
+  border-radius: 24px;
+}
+.borderRadius16 {
+  border-radius: 16px;
+}
+
+.topActionForm input,
+select,
+button {
+  height: 45px;
+}
+.table > :not(caption) > * > * {
+  padding: 1.5rem 0.5rem;
+  background-color: var(--bs-table-bg);
+  border-bottom-width: 1px;
+  box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg);
+}
+.noRecordFoundMain {
+  height: 75vh;
+  background-color: #353535;
+  border-radius: 20px;
+}
+.noRecordFoundInner {
+  width: 800px;
+  white-space: wrap;
+  text-align: center;
+}
+.noRecordFoundInner h1 {
+  margin-bottom: 80px;
+  font-size: 50px;
+  font-family: "poppins";
+}
+.noRecordFoundInner p {
+  font-family: "sans-sirf";
+  font-size: 30px;
+}
+.driverApprovalMain input:checked {
+  height: 30px;
+  font-size: 30px;
+}
+.chatBox {
+  height: 65vh;
+  background-color: #f5f5f5;
+  border-radius: 30px;
+  position: relative;
+  overflow: scroll;
+}
+.bottomChatAction {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  margin: 0px 5px;
+  background: #fff;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+}
+.bottomChatAction img{
+  height: 30px;
+}
+.bottomChatAction input{
+  border: none;
+  outline: none;
+  border-radius: 24px 0px 0px 24px;
+}
+.bottomChatAction button{
+  height: 40px;
+  border-radius: 0px 24px 24px 0px;
+}
+.orderMainCard{
+  background-color: gainsboro;
+  border-radius: 20px;
+}
+
+.flatCart p{
+  margin-bottom: 0px;
+  font-size: 13px;
+  font-family: "poppins";
+}
+.boxCart{
+  border-radius: 12px;
+}
+.boxCart p{
+ margin-bottom: 4px;
+  font-size: 14px;
+  font-family: "poppins";
+}
+.boxCart b{
+  color: #363435;
+}
+.statusCircle{
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  z-index: 100;
+}
+.glowEffect {
+  box-shadow: 
+    0 0 5px #63ED7A,
+    0 0 10px #63ED7A,
+    0 0 20px #63ED7A,
+    0 0 40px #63ED7A;
+}
+.orderBox p{
+  font-family: poppins;
+  font-size: 11px;
+  text-align: center;
+}
+.orderBox{
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+}
+.trackLine{
+  height: 3px;
+  width: 95%;
+  border: 2px dashed gray;
+  position: relative;
+  top: -61px;
+  left: 30px;
+}
+.assignDriverBtn{
+  border-radius: 12px;
+cursor: pointer;
+}
+.assignDriverBtn img{
+  height: 20px;
+  margin-right: 10px;
+  filter: brightness(0) invert(1);
+}
+.productDetailsDiv h1{
+  font-family: poppins;
+  font-size: 30px;
+  font-weight: 600;
+  /* color: #3D9970; */
+  color:gray
+}
+.reviewDiv a{
+  font-family: sans-serif;
+}
+.productDetailsDiv h5{
+  font-family: poppins;
+  font-size: 16px;
+  font-weight: 500;
+}
+.varientDiv span{
+  border: 1px solid green;
+  border-radius: 2px;
+  font-family: sans-serif;
+}
+.counterDiv p{
+  font-family: 16px;
+  font-family: monospace;
+  border: 1px solid gray;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 2px;
+  margin-right: 6px;
+  color: gray;
+}
+.productDetailsBtn button{
+  width: 48%;
+  background-color: #3d9970;
+  padding: 8px 0px;
+  font-family: poppins;
+  border: none;
+  border-radius: 6px;
+  color: white;
+}
+.productDetailsLeftBtnGroup p{
+  font-family: 16px;
+  font-family: poppins;
+  border: 1px solid gray;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 2px;
+  width: 200px;
+  color: gray;
+  margin-bottom: 0px;
+  cursor: pointer;
+}
+.breadcrumb p{
+  font-family: poppins;
+  margin-right: 8px;
+}
+.discountedPrice{
+   font-size: 25px;
+   color: #00b33c;
+}
+@media (max-width: 500px) {
+  .productDetailsDiv h1{
+
+  font-size: 16px;
+  
+}
+.counterDiv p{
+  font-family: 10px;
+  
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+  color: gray;
+}
+.varientDiv span{
+  font-size: 12px;
+}
+.row {
+    
+    margin-left: 0px !important;
+    margin-right: 0px !important
+}
+.breadcrumb p{
+  font-size: 11px;
+  margin-bottom: 0px;
+}
+.productDetailsDiv h5{
+  
+  font-size: 12px;
+  
+}
+.productDetailsBtn button{
+  
+  padding: 6px 0px;
+  
+  border-radius: 4px;
+  
+}
+.discountedPrice{
+   font-size: 16px;
+   color: #00b33c;
+}
+.productDetailsLeftBtnGroup p{
+  font-size: 10px !important;
+  padding: 4px 7px;
+  border-radius: 2px;
+  width: 100px;
+}
+}
+.productDetailsDiv h4{
+   font-family: poppins;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 10px 0px;
+  color: gray;
+}
+.productDetailsDiv h3{
+   font-family: poppins;
+  font-size: 30px;
+  font-weight: 500;
+  margin: 10px 0px;
+  color: black;
+}
