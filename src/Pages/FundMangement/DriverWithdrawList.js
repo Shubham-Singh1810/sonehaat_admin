@@ -6,7 +6,7 @@ import {
   getWithdrawListServ,
   updateWithdrawRequestServ,
 } from "../../services/adminFund.services";
-import { getVendorDetailsServ } from "../../services/vender.services";
+import { getDriverDetailsServ } from "../../services/driver.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
@@ -14,7 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import { useNavigate } from "react-router-dom";
-function VendorWithdrawList() {
+function DriverWithdrawList() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -23,7 +23,7 @@ function VendorWithdrawList() {
     status: "",
     pageNo: 1,
     pageCount: 100,
-    userType: "Vender",
+    userType: "Driver",
   });
   const [showSkelton, setShowSkelton] = useState(false);
   const [details, setDetails] = useState(null);
@@ -37,17 +37,17 @@ function VendorWithdrawList() {
   const staticsArr = [
     {
       title: "Total Requests",
-      count: statics?.totalVendorRequestCount,
+      count: statics?.totalDriverRequestCount,
       bgColor: "#6777EF",
     },
     {
       title: "Completed Requests",
-      count: statics?.completedVendorRequestCount,
+      count: statics?.completedDriverRequestCount,
       bgColor: "#63ED7A",
     },
     {
       title: "Cancelled Requests",
-      count: statics?.cancelledVendorRequestCount,
+      count: statics?.cancelledDriverRequestCount,
       bgColor: "#FFA426",
     },
   ];
@@ -93,11 +93,11 @@ function VendorWithdrawList() {
     setIsLoading(false);
   };
   const [venderDetails, setVenderDetails] = useState();
-  const venderDetailsFunc = async (id) => {
+  const driverDetailsFunc = async (id) => {
     try {
-      let response = await getVendorDetailsServ(id);
+      let response = await getDriverDetailsServ(id);
       if (response?.data?.statusCode == "200") {
-        setVenderDetails(response?.data?.data?.venderDetails);
+        setVenderDetails(response?.data?.data);
       }
     } catch (error) {
       console.log(error);
@@ -107,7 +107,7 @@ function VendorWithdrawList() {
     <div className="bodyContainer">
       <Sidebar
         selectedMenu="Fund Management"
-        selectedItem="Vendor Withdraw Request"
+        selectedItem="Driver Withdraw Request"
       />
       <div className="mainContainer">
         <TopNav />
@@ -302,7 +302,7 @@ function VendorWithdrawList() {
                                         imgPrev: v?.image,
                                         rejectReason: v?.rejectReason,
                                       });
-                                      venderDetailsFunc(v?.userId);
+                                      driverDetailsFunc(v?.userId);
                                     }}
                                   >
                                     <option value="pending">Pending</option>
@@ -502,4 +502,4 @@ function VendorWithdrawList() {
   );
 }
 
-export default VendorWithdrawList;
+export default DriverWithdrawList;

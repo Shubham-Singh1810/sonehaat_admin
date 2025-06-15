@@ -6,6 +6,7 @@ import {
   deleteDriverServ,
 } from "../../services/driver.service";
 import Skeleton from "react-loading-skeleton";
+import socket from "../../utils/socket";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -55,6 +56,21 @@ function DriverList() {
   useEffect(() => {
     handleGetDriverFunc();
   }, [payload]);
+  useEffect(() => {
+      // Event listener jab new user register hoga
+      socket.on("new-driver-registered", (data) => {
+        handleGetDriverFunc(); // user list ko dubara fetch karo
+      });
+       socket.on("driver-updated", (data) => {
+        handleGetDriverFunc(); // user list ko dubara fetch karo
+      });
+  
+      // Clean up karna jaruri hai warna multiple listener lag jayenge
+      return () => {
+        socket.off("new-driver-registered");
+        socket.off("driver-updated");
+      };
+    }, []);
   const [isLoading, setIsLoading] = useState(false);
 
   const renderStatus = (profileStatus) => {

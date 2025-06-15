@@ -23,4 +23,23 @@ export const getAdminDetailsServ = async () => {
     throw error;
   }
 };
-
+export const getWithdrawListServ = async (formData) => {
+  try {
+    const response = await axios.post(BASE_URL + "withdraw-request/list", formData);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
+export const updateWithdrawRequestServ = async (formData) => {
+  try {
+    const response = await axios.put(BASE_URL + "withdraw-request/update", formData);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};

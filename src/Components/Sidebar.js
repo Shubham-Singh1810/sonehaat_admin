@@ -115,6 +115,16 @@ function Sidebar({ selectedMenu, selectedItem }) {
       ],
     },
     {
+      menuIcon: "https://cdn-icons-png.flaticon.com/128/33/33308.png",
+      menu: "User Management",
+      subMenu: [
+        {
+          name: "Users",
+          path: "/user-list",
+        },
+      ],
+    },
+    {
       menuIcon: "https://cdn-icons-png.flaticon.com/128/6020/6020135.png",
       menu: "Fund Management",
       subMenu: [
@@ -128,7 +138,7 @@ function Sidebar({ selectedMenu, selectedItem }) {
         },
         {
           name: "Driver Withdraw Request",
-          path: "/product-manufacture-location-list",
+          path: "/driver-withdraw",
         },
         
       ],

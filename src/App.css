@@ -404,3 +404,8 @@ cursor: pointer;
   margin: 10px 0px;
   color: black;
 }
+select.form-control {
+  appearance: auto;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+}

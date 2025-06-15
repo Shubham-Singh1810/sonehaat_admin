@@ -46,6 +46,8 @@ import AssignDriverOrders from '../Pages/Order/AssignDriverOrders';
 import ProductDetails from '../Pages/Product/ProductDetails';
 import AdminTransectionHistory from '../Pages/FundMangement/AdminTransectionHistory';
 import VendorWithdrawList from '../Pages/FundMangement/VendorWithrawList';
+import DriverWithdrawList from '../Pages/FundMangement/DriverWithdrawList';
+import UserList from '../Pages/User/UserList';
 
 function AuthenticatedRoutes() {
   return (
@@ -131,6 +133,10 @@ function AuthenticatedRoutes() {
         {/* fund management */}
         <Route path="/admin-transection-history" element={<AdminTransectionHistory/>}/>
         <Route path="/vendor-withdraw" element={<VendorWithdrawList/>}/>
+        <Route path="/driver-withdraw" element={<DriverWithdrawList/>}/>
+
+        {/* user management */}
+        <Route path="/user-list" element={<UserList/>}/>
     </Routes>
   )
 }

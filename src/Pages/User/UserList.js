@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
-import {
-  getVenderListServ,
-  deleteVendorServ,
-} from "../../services/vender.services";
-import Skeleton from "react-loading-skeleton";
 import socket from "../../utils/socket";
+import { getUserListServ, deleteUserServ } from "../../services/user.service";
+import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import { useNavigate } from "react-router-dom";
-function VendorList() {
+function UserList() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -25,12 +22,12 @@ function VendorList() {
     sortByField: "",
   });
   const [showSkelton, setShowSkelton] = useState(false);
-  const handleGetVenderFunc = async () => {
+  const handleGetUserFunc = async () => {
     if (list.length == 0) {
       setShowSkelton(true);
     }
     try {
-      let response = await getVenderListServ(payload);
+      let response = await getUserListServ(payload);
       setList(response?.data?.data);
       setStatics(response?.data?.documentCount);
     } catch (error) {}
@@ -38,12 +35,12 @@ function VendorList() {
   };
   const staticsArr = [
     {
-      title: "Total Vendor",
+      title: "Total User",
       count: statics?.totalCount,
       bgColor: "#6777EF",
     },
     {
-      title: "Active Vendor",
+      title: "Active User",
       count: statics?.activeCount,
       bgColor: "#63ED7A",
     },
@@ -54,23 +51,23 @@ function VendorList() {
     },
   ];
   useEffect(() => {
-    handleGetVenderFunc();
+    handleGetUserFunc();
   }, [payload]);
-   useEffect(() => {
-      // Event listener jab new user register hoga
-      socket.on("new-vendor-registered", (data) => {
-        handleGetVenderFunc(); // user list ko dubara fetch karo
-      });
-       socket.on("vendor-updated", (data) => {
-        handleGetVenderFunc(); // user list ko dubara fetch karo
-      });
+  useEffect(() => {
   
-      // Clean up karna jaruri hai warna multiple listener lag jayenge
-      return () => {
-        socket.off("new-vendor-registered");
-        socket.off("vendor-updated");
-      };
-    }, []);
+    socket.on("new-user-registered", (data) => {
+      handleGetUserFunc(); 
+    });
+    socket.on("user-updated", (data) => {
+      handleGetUserFunc(); 
+    });
+
+    return () => {
+      socket.off("new-user-registered");
+      socket.off("user-updated");
+    };
+  }, []);
+
   const renderStatus = (profileStatus) => {
     if (profileStatus == "incompleted") {
       return (
@@ -86,13 +83,7 @@ function VendorList() {
         </div>
       );
     }
-    if (profileStatus == "storeDetailsCompleted") {
-      return (
-        <div className="badge py-2" style={{ background: "#23532A" }}>
-          Store Details Added
-        </div>
-      );
-    }
+
     if (profileStatus == "completed") {
       return (
         <div className="badge py-2" style={{ background: "#63ED7A" }}>
@@ -100,38 +91,17 @@ function VendorList() {
         </div>
       );
     }
-    if (profileStatus == "approved") {
-      return (
-        <div className="badge py-2" style={{ background: "#157347" }}>
-          Active
-        </div>
-      );
-    }
-    if (profileStatus == "rejected") {
-      return (
-        <div className="badge py-2" style={{ background: "#FF0000" }}>
-          Rejected
-        </div>
-      );
-    }
-    if (profileStatus == "reUploaded") {
-      return (
-        <div className="badge py-2" style={{ background: "#6777EF" }}>
-          Re Uploaded
-        </div>
-      );
-    }
   };
-  const handleDeleteVenderFunc = async (id) => {
+  const handleDeleteUserFunc = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this Vendor?"
+      "Are you sure you want to delete this User?"
     );
     if (confirmed) {
       try {
-        let response = await deleteVendorServ(id);
+        let response = await deleteUserServ(id);
         if (response?.data?.statusCode == "200") {
           toast.success(response?.data?.message);
-          handleGetVenderFunc();
+          handleGetUserFunc();
         }
       } catch (error) {
         toast.error("Something went wrong");
@@ -140,7 +110,7 @@ function VendorList() {
   };
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Vendors" selectedItem="Manage Vendors" />
+      <Sidebar selectedMenu="User Management" selectedItem="Users" />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">
@@ -174,8 +144,8 @@ function VendorList() {
             })}
           </div>
           <div className="row m-0 p-0 d-flex align-items-center my-4 topActionForm">
-            <div className="col-lg-2 mb-2 col-md-12 col-12">
-              <h3 className="mb-0 text-bold text-secondary">Vendors</h3>
+            <div className="col-lg-5 mb-2 col-md-12 col-12">
+              <h3 className="mb-0 text-bold text-secondary">Users</h3>
             </div>
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
@@ -199,24 +169,14 @@ function VendorList() {
                   <option value="">Select Status</option>
                   <option value="incompleted">Profile Incomplete</option>
                   <option value="otpVerified">OTP Verified</option>
-                  <option value="storeDetailsCompleted">Store Details Completed</option>
+                  <option value="storeDetailsCompleted">
+                    Store Details Completed
+                  </option>
                   <option value="completed">Profile Completed</option>
                   <option value="approved">Active</option>
                   <option value="rejected">Rejected</option>
                   <option value="reUploaded">Reuploaded</option>
-                  
                 </select>
-              </div>
-            </div>
-            <div className="col-lg-3 mb-2 col-md-6 col-12">
-              <div>
-                <button
-                  className="btn btn-primary w-100 borderRadius24"
-                  style={{ background: "#6777EF" }}
-                  onClick={()=>alert("Work in progress")}
-                >
-                  Add Vendor
-                </button>
               </div>
             </div>
           </div>
@@ -291,18 +251,22 @@ function VendorList() {
                                 <td className="text-center">{i + 1}</td>
                                 <td className="text-center">
                                   <img
-                                    src={v?.profilePic}
+                                    src={
+                                      v?.profilePic
+                                        ? v?.profilePic
+                                        : "https://cdn-icons-png.flaticon.com/128/1077/1077114.png"
+                                    }
                                     style={{ height: "30px" }}
                                   />
                                 </td>
                                 <td className="font-weight-600 text-center">
-                                  {v?.firstName}
+                                  {v?.firstName || "N/A"}
                                 </td>
                                 <td className="font-weight-600 text-center">
-                                  {v?.lastName}
+                                  {v?.lastName || "N/A"}
                                 </td>
                                 <td className="font-weight-600 text-center">
-                                  {v?.email}
+                                  {v?.email || "N/A"}
                                 </td>
                                 <td className="font-weight-600 text-center">
                                   {v?.phone}
@@ -313,18 +277,8 @@ function VendorList() {
 
                                 <td className="text-center">
                                   <a
-                                    className="btn btn-info  mx-2 text-light shadow-sm"
-                                    onClick={() => {
-                                      navigate(`/vendor-approval/${v?._id}`);
-                                    }}
-                                  >
-                                    View
-                                  </a>
-                                  <a
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                    onClick={() =>
-                                      handleDeleteVenderFunc(v?._id)
-                                    }
+                                    className="btn btn-danger mx-2 text-light shadow-sm"
+                                    onClick={() => handleDeleteUserFunc(v?._id)}
                                   >
                                     Delete
                                   </a>
@@ -346,4 +300,4 @@ function VendorList() {
   );
 }
 
-export default VendorList;
+export default UserList;
