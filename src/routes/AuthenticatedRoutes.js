@@ -48,6 +48,7 @@ import AdminTransectionHistory from '../Pages/FundMangement/AdminTransectionHist
 import VendorWithdrawList from '../Pages/FundMangement/VendorWithrawList';
 import DriverWithdrawList from '../Pages/FundMangement/DriverWithdrawList';
 import UserList from '../Pages/User/UserList';
+import NotifyList from '../Pages/Notification/NotifyList';
 
 function AuthenticatedRoutes() {
   return (
@@ -110,6 +111,7 @@ function AuthenticatedRoutes() {
         
         {/* notification */}
         <Route path="/notification-list" element={<NotificationList/>}/>
+        <Route path="/notify-list" element={<NotifyList/>}/>
         
         {/* command center */}
         <Route path="/role-list" element={<RoleList/>}/>

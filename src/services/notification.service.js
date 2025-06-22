@@ -33,3 +33,24 @@ export const deleteNotificationServ = async (id) => {
     throw error;
   }
 };
+
+export const getNotifyServ = async (formData) => {
+  try {
+    const response = await axios.post(BASE_URL + "notify/list", formData);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
+export const deleteNotifyServ = async (id) => {
+  try {
+    const response = await axios.delete(BASE_URL + "notify/delete/"+id);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
