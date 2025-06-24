@@ -23,6 +23,7 @@ function DriverApproval() {
     isAddressApproved: "",
     isPincodeApproved: "",
     profileStatus: "",
+    isIfscCodeApproved:"",
     profilePicRejectReason: "",
     dlFrontImageRejectReason: "",
     dlBackImageRejectReason: "",
@@ -32,6 +33,7 @@ function DriverApproval() {
     phoneRejectReason: "",
     addressRejectReason: "",
     pincodeRejectReason: "",
+    isIfscCodeRejectReason:"",
   });
 
   const getDriverDetailsFunc = async () => {
@@ -61,6 +63,25 @@ function DriverApproval() {
           phoneRejectReason: response?.data?.data?.phoneRejectReason,
           addressRejectReason: response?.data?.data?.addressRejectReason,
           pincodeRejectReason: response?.data?.data?.pincodeRejectReason,
+          ifscCodeRejectReason:response?.data?.data?.ifscCodeRejectReason,
+          isIfscCodeApproved:response?.data?.data?.isIfscCodeApproved,
+          accountNumberRejectReason:response?.data?.data?.accountNumberRejectReason,
+          isAccountNumberApproved:response?.data?.data?.isAccountNumberApproved,
+          isPanNumberApproved:response?.data?.data?.isPanNumberApproved,
+          panNumberRejectReason:response?.data?.data?.panNumberRejectReason,
+          isUpiIdApproved:response?.data?.data?.isUpiIdApproved,
+          upiIdRejectReason:response?.data?.data?.upiIdRejectReason,
+          isAccountHolderNameApproved:response?.data?.data?.isAccountHolderNameApproved,
+          accountHolderNameRejectReason:response?.data?.data?.accountHolderNameRejectReason,
+          isBankNameApproved:response?.data?.data?.isBankNameApproved,
+          bankNameRejectReason:response?.data?.data?.bankNameRejectReason,
+          isBankBranchCodeApproved:response?.data?.data?.isBankBranchCodeApproved,
+          bankBranchCodeRejectReason:response?.data?.data?.bankBranchCodeRejectReason,
+          isSignatureApproved:response?.data?.data?.isSignatureApproved,
+          signatureRejectReason:response?.data?.data?.signatureRejectReason,
+          isAdharCardApproved:response?.data?.data?.isAdharCardApproved,
+          adharCardRejectReason:response?.data?.data?.adharCardRejectReason,
+
         });
       }
     } catch (error) {
@@ -487,55 +508,403 @@ function DriverApproval() {
                     </div>
                   </div>
 
-              {/* Profile Status Dropdown */}
-              <div className="col-12">
-                <div className="shadow-sm p-3 mb-3">
-                  <div className="d-flex mb-2">
-                    <label>Profile Staus</label>
-                  </div>
-                  <select
-                    className="form-control"
-                    value={formData.profileStatus}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        profileStatus: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">Select</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                </div>
+
+              <div className="px-3 py-1 mb-3 shadow border rounded mx-3">
+              <div className="d-flex align-items-center my-3">
+                <i
+                  className="fa fa-circle text-secondary me-2"
+                  style={{
+                    fontSize: "10px",
+                    position: "relative",
+                    top: "-3px",
+                  }}
+                ></i>
+                <h5>Account Details</h5>
               </div>
 
-              <div className="d-flex justify-content-center mx-3 my-2">
-                {loader ? (
-                  <button
-                    className="btn-success"
-                    style={{
-                      borderRadius: "20px",
-                      width: "100%",
-                      opacity: "0.6",
-                    }}
-                  >
-                    Updating ..
-                  </button>
-                ) : (
-                  <button
-                    className="btn-success"
-                    style={{
-                      borderRadius: "20px",
-                      width: "100%",
-                      opacity: "0.6",
-                    }}
-                    onClick={() => handleProfileUpdate()}
-                  >
-                    Submit
-                  </button>
-                )}
+              <div className="row">
+                {/* Profile Pic */}
+                <div className="col-4">
+                  <div className="d-flex justify-content-center">
+                    <div>
+                      <img
+                        src={details?.signature}
+                        style={{
+                          height: "120px",
+                          width: "120px",
+                          borderRadius: "50%",
+                        }}
+                        alt="profile"
+                      />
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isSignatureApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isSignatureApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>Signature</label>
+                      </div>
+                      {!formData.isSignatureApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.signatureRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              signatureRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="col-4">
+                  <div className="d-flex justify-content-center">
+                    <div>
+                      <img
+                        src={details?.adharCard}
+                        style={{
+                          height: "120px",
+                          width: "120px",
+                          borderRadius: "50%",
+                        }}
+                        alt="profile"
+                      />
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isAdharCardApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isAdharCardApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>Adhar Card</label>
+                      </div>
+                      {!formData.isAdharCardApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.adharCardRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              adharCardRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-12 row">
+                  <div className="col-6">
+                    <div className="shadow-sm p-3 mb-3">
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isAccountNumberApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isAccountNumberApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>Account Number</label>
+                      </div>
+                      <input
+                        className="form-control"
+                        value={details?.accountNumber}
+                        readOnly
+                      />
+                      {!formData.isAccountNumberApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.accountNumberRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              accountNumberRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="shadow-sm p-3 mb-3">
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isIfscCodeApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isIfscCodeApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>IFCS Code</label>
+                      </div>
+                      <input
+                        className="form-control"
+                        value={details?.ifscCode}
+                        readOnly
+                      />
+                      {!formData.isIfscCodeApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.ifscCodeRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              ifscCodeRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="col-6">
+                    <div className="shadow-sm p-3 mb-3">
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={
+                            formData.isAccountHolderNameApproved === true
+                          }
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isAccountHolderNameApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>Account Holder Name</label>
+                      </div>
+                      <input
+                        className="form-control"
+                        value={details?.accountHolderName}
+                        readOnly
+                      />
+                      {!formData.isAccountHolderNameApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.accountNumberRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              accountHolderNameRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="col-6">
+                    <div className="shadow-sm p-3 mb-3">
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isBankNameApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isBankNameApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>Bank Name</label>
+                      </div>
+                      <input
+                        className="form-control"
+                        value={details?.bankName}
+                        readOnly
+                      />
+                      {!formData.isBankNameApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.bankNameRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              bankNameRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="shadow-sm p-3 mb-3">
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isBankBranchCodeApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isBankBranchCodeApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>Bank Branch Code</label>
+                      </div>
+                      <input
+                        className="form-control"
+                        value={details?.bankBranchCode}
+                        readOnly
+                      />
+                      {!formData.isBankBranchCodeApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.bankBranchCodeRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              bankBranchCodeRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="shadow-sm p-3 mb-3">
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isUpiIdApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isUpiIdApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>UPI Id</label>
+                      </div>
+                      <input
+                        className="form-control"
+                        value={details?.upiId}
+                        readOnly
+                      />
+                      {!formData.isUpiIdApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.upiIdRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              upiIdRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="shadow-sm p-3 mb-3">
+                      <div className="d-flex mb-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isPanNumberApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isPanNumberApproved: e.target.checked,
+                            })
+                          }
+                        />
+                        <label>Pan Number</label>
+                      </div>
+                      <input
+                        className="form-control"
+                        value={details?.panNumber}
+                        readOnly
+                      />
+                      {!formData.isPanNumberApproved && (
+                        <input
+                          className="form-control mt-2"
+                          value={formData.panNumberRejectReason}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              panNumberRejectReason: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
+
+               <div className="col-12">
+              <div className="shadow-sm p-3 mb-3">
+                <div className="d-flex mb-2">
+                  <label>Profile Status</label>
+                </div>
+                <select
+                  className="form-control"
+                  value={formData.profileStatus}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      profileStatus: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Select</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+            {loader ?  <button
+              className="btn-success"
+              style={{
+                borderRadius: "20px",
+                width: "100%",
+                opacity: "0.6",
+              }}
+             
+            >
+              Updating ..
+            </button>: <button
+              className="btn-success"
+              style={{
+                borderRadius: "20px",
+                width: "100%",
+                opacity: "0.6",
+              }}
+              onClick={() => handleProfileUpdate()}
+            >
+              Submit
+            </button>}
             </div>
           </div>
         </div>

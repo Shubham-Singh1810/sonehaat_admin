@@ -15,7 +15,7 @@ const getConfig = () => {
 };
 export const getDriverListServ = async (formData) => {
   try {
-    const response = await axios.post(BASE_URL + "driver/list", formData, getConfig());
+    const response = await axios.post(BASE_URL + "driver/list", formData);
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)

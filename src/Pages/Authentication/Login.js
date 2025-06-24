@@ -58,8 +58,9 @@ export default function Login() {
         <div className="d-flex justify-content-center my-3">
           <img
             className="img-fluid"
-            src="https://cdn-icons-png.flaticon.com/128/7385/7385218.png"
+            src="/brandLogo.jpeg"
             alt="Login Icon"
+            style={{height:"100px"}}
           />
         </div>
         <h3 className="pt-3 px-3 mb-0 text-center">Welcome Back!</h3>

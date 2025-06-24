@@ -88,6 +88,13 @@ function DriverList() {
         </div>
       );
     }
+    if (profileStatus == "accountDetailsCompleted") {
+      return (
+        <div className="badge py-2" style={{ background: "#63ED7A" }}>
+          Account Details Stored
+        </div>
+      );
+    }
     if (profileStatus == "approved") {
       return (
         <div className="badge py-2" style={{ background: "#157347" }}>
@@ -191,6 +198,7 @@ function DriverList() {
                   <option value="approved">Active</option>
                   <option value="incompleted">Profile Incomplete</option>
                   <option value="completed">Profile Completed</option>
+                  <option value="accountDetailsCompleted">Account Details Uploaded</option>
                   <option value="rejected">Rejected</option>
                   <option value="reUploaded">Reuploaded</option>
                 </select>
