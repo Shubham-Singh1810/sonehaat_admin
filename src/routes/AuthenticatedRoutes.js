@@ -50,6 +50,7 @@ import DriverWithdrawList from '../Pages/FundMangement/DriverWithdrawList';
 import UserList from '../Pages/User/UserList';
 import NotifyList from '../Pages/Notification/NotifyList';
 import DeliveryZipcode from '../Pages/DeliveryLocation/DeliveryZipcode';
+import CouponList from '../Pages/PromoCode/CouponList';
 
 function AuthenticatedRoutes() {
   return (
@@ -143,6 +144,9 @@ function AuthenticatedRoutes() {
 
         {/* location management */}
         <Route path="/zipcode-list" element={<DeliveryZipcode/>}/>
+
+        {/* promo code */}
+        <Route path="/coupon-list" element={<CouponList/>}/>
     </Routes>
   )
 }

@@ -7,19 +7,14 @@ import {
   deleteCategoryServ,
   updateCategoryServ,
 } from "../../services/category.service";
-import {
-  getZipcodeServ,
-  addZipcodeServ,
-  deleteZipcodeServ,
-  updateZipcodeServ,
-} from "../../services/zipcode.service";
+import { getCouponServ , deleteCouponServ} from "../../services/coupon.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
-function DeliveryZipcode() {
+function CouponList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
   const [payload, setPayload] = useState({
@@ -30,12 +25,12 @@ function DeliveryZipcode() {
     sortByField: "",
   });
   const [showSkelton, setShowSkelton] = useState(false);
-  const handleGetZipcodeFunc = async () => {
+  const handleGetCouponFunc = async () => {
     if (list.length == 0) {
       setShowSkelton(true);
     }
     try {
-      let response = await getZipcodeServ(payload);
+      let response = await getCouponServ(payload);
       setList(response?.data?.data);
       setStatics(response?.data?.documentCount);
     } catch (error) {}
@@ -43,46 +38,57 @@ function DeliveryZipcode() {
   };
   const staticsArr = [
     {
-      title: "Total Location",
+      title: "Total Coupon",
       count: statics?.totalCount,
       bgColor: "#6777EF",
     },
     {
-      title: "Active Location",
+      title: "Active Coupon",
       count: statics?.activeCount,
       bgColor: "#63ED7A",
     },
     {
-      title: "Inactive Location",
+      title: "Inactive Coupon",
       count: statics?.inactiveCount,
       bgColor: "#FFA426",
     },
+    {
+      title: "Expired Coupon",
+      count: statics?.expiredCount,
+      bgColor: "red",
+    },
   ];
   useEffect(() => {
-    handleGetZipcodeFunc();
+    handleGetCouponFunc();
   }, [payload]);
   const [isLoading, setIsLoading] = useState(false);
   const [addFormData, setAddFormData] = useState({
-    city: "",
-    zipcode: "",
-    deliveryCharges: "",
-    minFreeDeliveryOrderAmount: "",
-    status: false,
+    name: "",
+    image: "",
+    status: "",
+    show: false,
+    imgPrev: "",
+    specialApperence: "",
   });
-  const handleAddZipcodeFunc = async () => {
+  const handleAddCategoryFunc = async () => {
     setIsLoading(true);
+    const formData = new FormData();
+    formData.append("name", addFormData?.name);
+    formData.append("image", addFormData?.image);
+    formData.append("status", addFormData?.status);
+    formData.append("specialApperence", addFormData?.specialApperence);
     try {
-      let response = await addZipcodeServ(addFormData);
+      let response = await addCategoryServ(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setAddFormData({
-          city: "",
-          zipcode: "",
-          deliveryCharges: "",
-          minFreeDeliveryOrderAmount: "",
-          status: false,
+          name: "",
+          image: "",
+          status: "",
+          show: false,
+          imgPrev: "",
         });
-        handleGetZipcodeFunc();
+        handleGetCouponFunc();
       }
     } catch (error) {
       toast.error(
@@ -93,16 +99,16 @@ function DeliveryZipcode() {
     }
     setIsLoading(false);
   };
-  const handleDeleteCategoryFunc = async (id) => {
+  const handleDeleteCouponFunc = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this Pincode?"
+      "Are you sure you want to delete this coupon?"
     );
     if (confirmed) {
       try {
-        let response = await deleteZipcodeServ(id);
+        let response = await deleteCouponServ(id);
         if (response?.data?.statusCode == "200") {
           toast?.success(response?.data?.message);
-          handleGetZipcodeFunc();
+          handleGetCouponFunc();
         }
       } catch (error) {
         toast.error(
@@ -114,27 +120,34 @@ function DeliveryZipcode() {
     }
   };
   const [editFormData, setEditFormData] = useState({
-    city: "",
-    zipcode: "",
-    deliveryCharges: "",
-    minFreeDeliveryOrderAmount: "",
-    status: false,
+    name: "",
+    image: "",
+    status: "",
+    _id: "",
+    imgPrev: "",
+    specialApperence: "",
   });
-  const handleUpdateZipcodeFunc = async () => {
+  const handleUpdateCategoryFunc = async () => {
     setIsLoading(true);
-
+    const formData = new FormData();
+    if (editFormData?.image) {
+      formData?.append("image", editFormData?.image);
+    }
+    formData?.append("name", editFormData?.name);
+    formData?.append("status", editFormData?.status);
+    formData?.append("_id", editFormData?._id);
+    formData?.append("specialApperence", editFormData?.specialApperence);
     try {
-      let response = await updateZipcodeServ(editFormData);
+      let response = await updateCategoryServ(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setEditFormData({
-          city: "",
-          zipcode: "",
-          deliveryCharges: "",
-          minFreeDeliveryOrderAmount: "",
-          status: false,
+          name: "",
+          image: "",
+          status: "",
+          _id: "",
         });
-        handleGetZipcodeFunc();
+        handleGetCouponFunc();
       }
     } catch (error) {
       toast.error(
@@ -147,10 +160,7 @@ function DeliveryZipcode() {
   };
   return (
     <div className="bodyContainer">
-      <Sidebar
-        selectedMenu="Location Management"
-        selectedItem="Deliverable Pincodes"
-      />
+      <Sidebar selectedMenu="Promo Code" selectedItem="Coupon" />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">
@@ -164,7 +174,7 @@ function DeliveryZipcode() {
           >
             {staticsArr?.map((v, i) => {
               return (
-                <div className="col-md-4 col-12 ">
+                <div className="col-md-3 col-12 ">
                   <div className="topCard shadow-sm py-4 px-3 rounded mb-3">
                     <div className="d-flex align-items-center ">
                       <div
@@ -185,9 +195,7 @@ function DeliveryZipcode() {
           </div>
           <div className="row m-0 p-0 d-flex align-items-center my-4 topActionForm">
             <div className="col-lg-2 mb-2 col-md-12 col-12">
-              <h3 className="mb-0 text-bold text-secondary">
-                Deliverable Pincodes
-              </h3>
+              <h3 className="mb-0 text-bold text-secondary">Coupons</h3>
             </div>
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
@@ -221,7 +229,7 @@ function DeliveryZipcode() {
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
-                  Add Pincode
+                  Add Coupon
                 </button>
               </div>
             </div>
@@ -229,7 +237,10 @@ function DeliveryZipcode() {
           <div className="mt-3">
             <div className="card-body px-2">
               <div className="table-responsive table-invoice">
-                <table className="table">
+                <table
+                  className="table"
+                  style={{ width: "1400px", overflow: "scroll" }}
+                >
                   <tbody>
                     <tr style={{ background: "#F3F3F3", color: "#000" }}>
                       <th
@@ -238,12 +249,13 @@ function DeliveryZipcode() {
                       >
                         Sr. No
                       </th>
-                      <th className="text-center py-3">Pincode</th>
-                      <th className="text-center py-3">City</th>
-                      <th className="text-center py-3">
-                        Minimum Order Amount <br /> (Free Delivery)
-                      </th>
-                      <th className="text-center py-3">Delivery Charges</th>
+                      <th className="text-center py-3">Image</th>
+                      <th className="text-center py-3">Promo Code</th>
+                      <th className="text-center py-3">Message</th>
+                      <th className="text-center py-3">Duration</th>
+                      <th className="text-center py-3">Discount</th>
+                      <th className="text-center py-3">Min Order Amount</th>
+                      <th className="text-center py-3">Usage</th>
                       <th className="text-center py-3">Status</th>
                       <th
                         className="text-center py-3 "
@@ -271,6 +283,18 @@ function DeliveryZipcode() {
                                 <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
+                                 <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                                 <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                                 <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                                 <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
                                 <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
@@ -290,16 +314,41 @@ function DeliveryZipcode() {
                             <>
                               <tr>
                                 <td className="text-center">{i + 1}</td>
-                                <td className="text-center">{v?.zipcode}</td>
+                                <td className="text-center">
+                                  <img
+                                    src={
+                                      v?.image
+                                        ? v?.image
+                                        : "https://cdn-icons-png.flaticon.com/128/9341/9341950.png"
+                                    }
+                                    style={{ height: "30px" }}
+                                  />
+                                </td>
                                 <td className="font-weight-600 text-center">
-                                  {v?.city}
+                                  {v?.code}
                                 </td>
 
-                                <td className="font-weight-600 text-center">
-                                  {v?.minFreeDeliveryOrderAmount}
+                                <td
+                                  className="font-weight-600 text-center"
+                                  style={{ width: "200px" }}
+                                >
+                                  {v?.message}
                                 </td>
                                 <td className="text-center">
-                                  {v?.deliveryCharges}
+                                  {moment(v?.validFrom).format("DD MMM YYYY")}{" "}
+                                  to {moment(v?.validTo).format("DD MMM YYYY")}
+                                </td>
+                                <td className="text-center">
+                                  {v?.discountValue}{" "}
+                                  {v?.discountType == "percentage"
+                                    ? "%"
+                                    : "INR"}
+                                </td>
+                                <td className="text-center">
+                                  {v?.minimumOrderAmount} INR
+                                </td>
+                                <td className="text-center">
+                                  {v?.usedCount}/{v?.usageLimit}
                                 </td>
                                 <td className="text-center">
                                   {v?.status ? (
@@ -322,13 +371,12 @@ function DeliveryZipcode() {
                                   <a
                                     onClick={() => {
                                       setEditFormData({
-                                        city: v?.city,
-                                        zipcode: v?.zipcode,
-                                        deliveryCharges: v?.deliveryCharges,
-                                        minFreeDeliveryOrderAmount:
-                                          v?.minFreeDeliveryOrderAmount,
+                                        name: v?.name,
+                                        image: "",
+                                        imgPrev: v?.image,
                                         status: v?.status,
                                         _id: v?._id,
+                                        specialApperence: v?.specialApperence,
                                       });
                                     }}
                                     className="btn btn-info mx-2 text-light shadow-sm"
@@ -337,7 +385,7 @@ function DeliveryZipcode() {
                                   </a>
                                   <a
                                     onClick={() =>
-                                      handleDeleteCategoryFunc(v?._id)
+                                      handleDeleteCouponFunc(v?._id)
                                     }
                                     className="btn btn-warning mx-2 text-light shadow-sm"
                                   >
@@ -396,52 +444,37 @@ function DeliveryZipcode() {
                   className="d-flex justify-content-center w-100"
                 >
                   <div className="w-100 px-2">
-                    <h5 className="mb-4">Add Pincode</h5>
-
-                    <label className="mt-3">Pincode</label>
+                    <h5 className="mb-4">Add Category</h5>
+                    <div className="p-3 border rounded mb-2">
+                      {addFormData?.imgPrev ? (
+                        <img
+                          src={addFormData?.imgPrev}
+                          className="img-fluid w-100 shadow rounded"
+                        />
+                      ) : (
+                        <p className="mb-0 text-center">No Item Selected !</p>
+                      )}
+                    </div>
+                    <label className="">Upload Image</label>
+                    <input
+                      className="form-control"
+                      type="file"
+                      onChange={(e) =>
+                        setAddFormData({
+                          ...addFormData,
+                          image: e.target.files[0],
+                          imgPrev: URL.createObjectURL(e.target.files[0]),
+                        })
+                      }
+                    />
+                    <label className="mt-3">Name</label>
                     <input
                       className="form-control"
                       type="text"
                       onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          zipcode: e.target.value,
-                        })
+                        setAddFormData({ ...addFormData, name: e.target.value })
                       }
                     />
-                    <label className="mt-3">City</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setAddFormData({ ...addFormData, city: e.target.value })
-                      }
-                    />
-                    <label className="mt-3">
-                      Minimum Free Delivery Order Amount
-                    </label>
-                    <input
-                      className="form-control"
-                      type="number"
-                      onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          minFreeDeliveryOrderAmount: e.target.value,
-                        })
-                      }
-                    />
-                    <label className="mt-3">Delivery Charges</label>
-                    <input
-                      className="form-control"
-                      type="number"
-                      onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          deliveryCharges: e.target.value,
-                        })
-                      }
-                    />
-
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"
@@ -456,34 +489,41 @@ function DeliveryZipcode() {
                       <option value={true}>Active</option>
                       <option value={false}>Inactive</option>
                     </select>
-
+                    <label className="mt-3">Special Apperence</label>
+                    <select
+                      className="form-control"
+                      onChange={(e) =>
+                        setAddFormData({
+                          ...addFormData,
+                          specialApperence: e.target.value,
+                        })
+                      }
+                      value={addFormData?.specialApperence}
+                    >
+                      <option value="">Select Status</option>
+                      <option value="Home">Home</option>
+                    </select>
                     <button
                       className="btn btn-success w-100 mt-4"
                       onClick={
-                        addFormData?.zipcode &&
-                        addFormData?.city &&
-                        addFormData?.minFreeDeliveryOrderAmount &&
-                        addFormData?.deliveryCharges &&
+                        addFormData?.name &&
                         addFormData?.status &&
+                        addFormData?.image &&
                         !isLoading
-                          ? handleAddZipcodeFunc
+                          ? handleAddCategoryFunc
                           : undefined
                       }
                       disabled={
-                        !addFormData?.zipcode ||
-                        !addFormData?.city ||
-                        !addFormData?.minFreeDeliveryOrderAmount ||
-                        !addFormData?.deliveryCharges ||
+                        !addFormData?.name ||
                         !addFormData?.status ||
+                        !addFormData?.image ||
                         isLoading
                       }
                       style={{
                         opacity:
-                          !addFormData?.zipcode ||
-                          !addFormData?.city ||
-                          !addFormData?.minFreeDeliveryOrderAmount ||
-                          !addFormData?.deliveryCharges ||
+                          !addFormData?.name ||
                           !addFormData?.status ||
+                          !addFormData?.image ||
                           isLoading
                             ? "0.5"
                             : "1",
@@ -520,11 +560,10 @@ function DeliveryZipcode() {
                   style={{ height: "20px" }}
                   onClick={() =>
                     setEditFormData({
-                      city: "",
-                      zipcode: "",
-                      deliveryCharges: "",
-                      minFreeDeliveryOrderAmount: "",
-                      status: false,
+                      name: "",
+                      image: "",
+                      status: "",
+                      specialApperence: "",
                       _id: "",
                     })
                   }
@@ -540,57 +579,37 @@ function DeliveryZipcode() {
                   className="d-flex justify-content-center w-100"
                 >
                   <div className="w-100 px-2">
-                    <label className="mt-3">Pincode</label>
+                    <h5 className="mb-4">Update Category</h5>
+                    <div className="p-3 border rounded mb-2">
+                      <img
+                        src={editFormData?.imgPrev}
+                        className="img-fluid w-100 shadow rounded"
+                      />
+                    </div>
+                    <label className="">Upload Image</label>
+                    <input
+                      className="form-control"
+                      type="file"
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          image: e.target.files[0],
+                          imgPrev: URL.createObjectURL(e.target.files[0]),
+                        })
+                      }
+                    />
+                    <label className="mt-3">Name</label>
                     <input
                       className="form-control"
                       type="text"
                       onChange={(e) =>
                         setEditFormData({
                           ...editFormData,
-                          zipcode: e.target.value,
+                          name: e.target.value,
                         })
                       }
-                      value={editFormData?.zipcode}
+                      value={editFormData?.name}
                     />
-                    <label className="mt-3">City</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          city: e.target.value,
-                        })
-                      }
-                      value={editFormData?.city}
-                    />
-                    <label className="mt-3">
-                      Min Free Delivery Order Amount
-                    </label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          minFreeDeliveryOrderAmount: e.target.value,
-                        })
-                      }
-                      value={editFormData?.zipcode}
-                    />
-                    <label className="mt-3">Delivery Charge</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          deliveryCharges: e.target.value,
-                        })
-                      }
-                      value={editFormData?.deliveryCharges}
-                    />
-
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"
@@ -606,15 +625,24 @@ function DeliveryZipcode() {
                       <option value={true}>Active</option>
                       <option value={false}>Inactive</option>
                     </select>
-
-                    {editFormData?.zipcode &&
-                    editFormData?.city &&
-                    editFormData?.deliveryCharges &&
-                    editFormData?.minFreeDeliveryOrderAmount &&
-                    editFormData?.status ? (
+                    <label className="mt-3">Special Apperence</label>
+                    <select
+                      className="form-control"
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          specialApperence: e.target.value,
+                        })
+                      }
+                      value={editFormData?.specialApperence}
+                    >
+                      <option value="">Select Status</option>
+                      <option value="Home">Home</option>
+                    </select>
+                    {editFormData?.name && editFormData?.status ? (
                       <button
                         className="btn btn-success w-100 mt-4"
-                        onClick={!isLoading && handleUpdateZipcodeFunc}
+                        onClick={!isLoading && handleUpdateCategoryFunc}
                       >
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
@@ -639,4 +667,4 @@ function DeliveryZipcode() {
   );
 }
 
-export default DeliveryZipcode;
+export default CouponList;
