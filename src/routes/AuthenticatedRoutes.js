@@ -49,6 +49,7 @@ import VendorWithdrawList from '../Pages/FundMangement/VendorWithrawList';
 import DriverWithdrawList from '../Pages/FundMangement/DriverWithdrawList';
 import UserList from '../Pages/User/UserList';
 import NotifyList from '../Pages/Notification/NotifyList';
+import DeliveryZipcode from '../Pages/DeliveryLocation/DeliveryZipcode';
 
 function AuthenticatedRoutes() {
   return (
@@ -139,6 +140,9 @@ function AuthenticatedRoutes() {
 
         {/* user management */}
         <Route path="/user-list" element={<UserList/>}/>
+
+        {/* location management */}
+        <Route path="/zipcode-list" element={<DeliveryZipcode/>}/>
     </Routes>
   )
 }

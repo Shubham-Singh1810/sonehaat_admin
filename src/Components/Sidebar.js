@@ -166,7 +166,7 @@ function Sidebar({ selectedMenu, selectedItem }) {
           path: "/product-manufacture-location-list",
         },
         {
-          name: "Zipcodes",
+          name: "Deliverable Pincodes",
           path: "/zipcode-list",
         },
       ],

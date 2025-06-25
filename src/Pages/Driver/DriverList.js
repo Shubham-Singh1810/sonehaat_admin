@@ -119,7 +119,7 @@ function DriverList() {
   };
   const deleteDriverFunc = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this category?"
+      "Are you sure you want to delete this driver?"
     );
     if (confirmed) {
       try {

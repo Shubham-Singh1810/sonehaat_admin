@@ -128,6 +128,16 @@ function DriverApproval() {
         phoneRejectReason: "",
         addressRejectReason: "",
         pincodeRejectReason: "",
+        addressRejectReason: "",
+        signatureRejectReason:"",
+        addressRejectReason:"",
+        accountHolderNameRejectReason:"",
+        isIfscCodeRejectReason:"",
+        accountNumberRejectReason:"",
+        bankBranchCodeRejectReason:"",
+        bankNameRejectReason:"",
+        upiIdRejectReason:"",
+        panNumberRejectReason:"",
         profileStatus: "approved",
       });
     }
