@@ -33,6 +33,16 @@ export const getProductDetailsServ = async (id) => {
     throw error;
   }
 };
+export const getProductRatingServ = async (id) => {
+  try {
+    const response = await axios.get(BASE_URL + "rating/details/"+id);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
 export const addProductServ = async (formData) => {
   try {
     const response = await axios.post(BASE_URL + "product/create", formData);

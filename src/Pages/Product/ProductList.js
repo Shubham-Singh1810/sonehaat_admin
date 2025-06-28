@@ -21,7 +21,7 @@ function ProductList() {
     searchKey: "",
     status: "",
     pageNo: 1,
-    pageCount: 10,
+    pageCount: 100,
     sortByField: "",
   });
   const [showSkelton, setShowSkelton] = useState(false);

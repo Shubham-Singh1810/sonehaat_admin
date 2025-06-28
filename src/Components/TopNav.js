@@ -2,16 +2,14 @@ import React from "react";
 import { useGlobalState } from "../GlobalProvider";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 function TopNav() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { globalState, setGlobalState } = useGlobalState();
-  
+
   const handleLogoutFunc = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to logout?"
-    );
-    if(confirmed){
+    const confirmed = window.confirm("Are you sure you want to logout?");
+    if (confirmed) {
       setGlobalState({
         user: null,
         token: null,
@@ -21,23 +19,32 @@ function TopNav() {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("permissions");
-      navigate("/")
+      navigate("/");
     }
-    
   };
   return (
-    <div className="topNavMain p-3  p-md-4 " style={{background:"#FF671E"}}>
+    <div className="topNavMain p-3  p-md-4 " style={{  background:"#FF671E" }}>
       <div className="d-flex justify-content-between align-items-center">
-        <img
-          src="https://cdn-icons-png.flaticon.com/128/2976/2976215.png"
-          onClick={() =>
-            setGlobalState({
-              ...globalState,
-              showFullSidebar: !globalState.showFullSidebar,
-            })
-          }
-          className="barIcon"
-        />
+        <div className="d-flex align-items-center">
+          <img
+            src="https://cdn-icons-png.flaticon.com/128/2976/2976215.png"
+            onClick={() =>
+              setGlobalState({
+                ...globalState,
+                showFullSidebar: !globalState.showFullSidebar,
+              })
+            }
+            className="barIcon"
+          />
+          <div className={globalState?.showFullSidebar ? " d-none":" d-block" + " ms-3"}>
+            <img
+              src="/brandName.jpeg"
+              style={{height:"50px", borderRadius:"10px"}}
+              className="px-2 py-1 border bg-light"
+            />
+          </div>
+        </div>
+
         <div className="d-flex align-items-center navRightDiv">
           <div className="me-3 notificationDiv d-flex">
             <img src="https://cdn-icons-png.flaticon.com/128/3602/3602123.png" />

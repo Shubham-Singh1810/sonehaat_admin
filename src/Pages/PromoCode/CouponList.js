@@ -7,7 +7,7 @@ import {
   deleteCategoryServ,
   updateCategoryServ,
 } from "../../services/category.service";
-import { getCouponServ , deleteCouponServ} from "../../services/coupon.service";
+import { getCouponServ, deleteCouponServ } from "../../services/coupon.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
@@ -283,16 +283,16 @@ function CouponList() {
                                 <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
-                                 <td className="text-center">
+                                <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
-                                 <td className="text-center">
+                                <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
-                                 <td className="text-center">
+                                <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
-                                 <td className="text-center">
+                                <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
                                 <td className="text-center">
@@ -416,7 +416,7 @@ function CouponList() {
               style={{
                 borderRadius: "16px",
                 background: "#f7f7f5",
-                width: "364px",
+                width: "600px",
               }}
             >
               <div className="d-flex justify-content-end pt-4 pb-0 px-4">
@@ -444,7 +444,7 @@ function CouponList() {
                   className="d-flex justify-content-center w-100"
                 >
                   <div className="w-100 px-2">
-                    <h5 className="mb-4">Add Category</h5>
+                    <h5 className="mb-4">Add Coupon</h5>
                     <div className="p-3 border rounded mb-2">
                       {addFormData?.imgPrev ? (
                         <img
@@ -467,14 +467,120 @@ function CouponList() {
                         })
                       }
                     />
-                    <label className="mt-3">Name</label>
+                    <div className="row">
+                      <div className="col-6">
+                        <label className="mt-3">Code</label>
                     <input
                       className="form-control"
                       type="text"
                       onChange={(e) =>
-                        setAddFormData({ ...addFormData, name: e.target.value })
+                        setAddFormData({ ...addFormData, code: e.target.value })
                       }
                     />
+                      </div>
+                      <div className="col-6">
+                        <label className="mt-3">Minimum Order Amount</label>
+                    <input
+                      className="form-control"
+                      type="text"
+                      onChange={(e) =>
+                        setAddFormData({ ...addFormData, code: e.target.value })
+                      }
+                    />
+                      </div>
+                    </div>
+                    <label className="mt-3">Message</label>
+                    <input
+                      className="form-control"
+                      type="text"
+                      onChange={(e) =>
+                        setAddFormData({
+                          ...addFormData,
+                          message: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="row">
+                      <div className="col-6">
+                        <label className="mt-3">Start Date</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          onChange={(e) =>
+                            setAddFormData({
+                              ...addFormData,
+                              validFrom: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="col-6">
+                        <label className="mt-3">End Date</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          onChange={(e) =>
+                            setAddFormData({
+                              ...addFormData,
+                              validTo: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-8 pe-0">
+                        <label className="mt-3">Discount</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          onChange={(e) =>
+                            setAddFormData({
+                              ...addFormData,
+                              validFrom: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="col-4 ps-0">
+                        <label className="mt-3">Type</label>
+                        <select className="form-control py-1" style={{height:"37px"}}>
+                          <option>Select</option>
+                          <option>Flat</option>
+                          <option>Percentage</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                     <div className="row">
+                      <div className="col-6">
+                        <label className="mt-3">Used</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          readOnly
+                          onChange={(e) =>
+                            setAddFormData({
+                              ...addFormData,
+                              validFrom: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="col-6">
+                        <label className="mt-3">Total Usage</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          onChange={(e) =>
+                            setAddFormData({
+                              ...addFormData,
+                              validTo: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"
@@ -489,20 +595,7 @@ function CouponList() {
                       <option value={true}>Active</option>
                       <option value={false}>Inactive</option>
                     </select>
-                    <label className="mt-3">Special Apperence</label>
-                    <select
-                      className="form-control"
-                      onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          specialApperence: e.target.value,
-                        })
-                      }
-                      value={addFormData?.specialApperence}
-                    >
-                      <option value="">Select Status</option>
-                      <option value="Home">Home</option>
-                    </select>
+
                     <button
                       className="btn btn-success w-100 mt-4"
                       onClick={

@@ -8,31 +8,36 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProductDetailsServ } from "../../services/product.services";
+import { getProductDetailsServ, getProductRatingServ } from "../../services/product.services";
 function ProductDetails() {
   const navigate = useNavigate();
   const params = useParams();
   const [details, setDetails] = useState(null);
-  const productGallery = [
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSc2ZYz-Ex6-uW56DspVg-pPdU4-C95Y7wF4w&s",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw1qc37vUQZ3yUBIcoQh86OKVfGqhGhkvJgg&s",
-
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaK2vLdSpxI607xNAQaGYe0qF8T8uquagZYA&s",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx9lZUG3HbgkHqyZWQeQUdN0yExbEI9-IQAA&s",
-    // "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNZYBrAjCMWz1jxnOGYEcSH1CthVy1XMEg_Q&s"
-  ];
+  const [ratingList, setRatingList]=useState([])
+  
 
   const getProductDetails = async () => {
     try {
       let response = await getProductDetailsServ(params?.id);
       if (response?.data?.statusCode == "200") {
         setDetails(response?.data?.data);
-        const data = response?.data?.data;
+       
       }
     } catch (error) {}
   };
+  const getProductRatingListFunc =async ()=>{
+    try {
+      let response = await getProductRatingServ(params?.id);
+      if(response?.data?.statusCode=="200"){
+        setRatingList(response?.data?.data)
+      }
+    } catch (error) {
+      
+    }
+  }
   useEffect(() => {
     getProductDetails();
+    getProductRatingListFunc();
   }, []);
   const [selectedTab, setSelectedTab] = useState("Product Details");
   const groupedVariants = [];
@@ -293,6 +298,16 @@ function ProductDetails() {
                   >
                     Reviews
                   </p>
+                   <p
+                    onClick={() => setSelectedTab("FAQ")}
+                    className={
+                      selectedTab == "FAQ"
+                        ? " bg-secondary text-light "
+                        : " "
+                    }
+                  >
+                    FAQ
+                  </p>
                   <p
                     onClick={() => setSelectedTab("Vendor Details")}
                     className={
@@ -380,6 +395,48 @@ function ProductDetails() {
                     <p className="mb-0">
                       {details?.isProductCancelable ? "Yes" : "No"}
                     </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {selectedTab == "Reviews" && (
+              <div className="productDetailsDiv mt-3 row">
+                <div className="col-12 border">
+                  <div className="  p-2">
+                    <h3 className="mb-0">Peopls Thought's</h3>
+
+                    <div className="row">
+                      {ratingList?.map((v, i) => {
+                        return (
+                          <div className="col-6">
+                            <div className="reviewBox p-2 py-3 shadow-sm mb-3 mt-2">
+                              <div className="d-flex align-items-center">
+                                <div>
+                                  <img src={v?.userId?.profilePic ? v?.userId?.profilePic: "https://cdn-icons-png.flaticon.com/128/1077/1077114.png"} />
+                                </div>
+                                <div className="ms-3">
+                                  <h5>{v?.userId?.firstName +" "+ v?.userId?.lastName}</h5>
+                                  <div className="d-flex starGroup">
+                                    {[...Array(Math.round(Number(v?.rating) || 0))].map(
+                      (_, i) => (
+                        <img
+                          key={i}
+                          src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png"
+                          style={{ height: "20px", marginRight: "4px" }}
+                        />
+                      )
+                    )}
+                                  </div>
+                                  <p className="mb-0">
+                                   {v?.review}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
