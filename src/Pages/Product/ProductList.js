@@ -191,6 +191,7 @@ function ProductList() {
                       <th className="text-center py-3">Name</th>
                       <th className="text-center py-3">Hero Image</th>
                       <th className="text-center py-3">Category</th>
+                      <th className="text-center py-3">Appernce</th>
 
                       <th className="text-center py-3">Price</th>
                       <th className="text-center py-3">Venor Name</th>
@@ -231,6 +232,16 @@ function ProductList() {
                                 <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
+                                <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                                <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                                <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                                
                               </tr>
                               <div className="py-2"></div>
                             </>
@@ -252,6 +263,9 @@ function ProductList() {
                                 </td>
                                 <td className="text-center">
                                   {v?.categoryId?.name}
+                                </td>
+                                <td className="text-center">
+                                  {v?.specialApperence || "None"}
                                 </td>
                                 <td className="text-center">{v?.price}</td>
                                 <td className="text-center">Vendor</td>
