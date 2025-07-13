@@ -7,7 +7,12 @@ import {
   deleteCategoryServ,
   updateCategoryServ,
 } from "../../services/category.service";
-import { getCouponServ, deleteCouponServ } from "../../services/coupon.service";
+import {
+  getCouponServ,
+  deleteCouponServ,
+  addCouponServ,
+  updateCouponServ,
+} from "../../services/coupon.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
@@ -39,7 +44,7 @@ function CouponList() {
   const staticsArr = [
     {
       title: "Total Coupon",
-      count: statics?.totalCount,
+      count: statics?.usageLimit,
       bgColor: "#6777EF",
     },
     {
@@ -63,30 +68,52 @@ function CouponList() {
   }, [payload]);
   const [isLoading, setIsLoading] = useState(false);
   const [addFormData, setAddFormData] = useState({
-    name: "",
-    image: "",
-    status: "",
     show: false,
+    image: "",
     imgPrev: "",
-    specialApperence: "",
+    code: "",
+    minimumOrderAmount: "",
+    message: "",
+    validFrom: "",
+    validTo: "",
+    discountValue: "",
+    discountType: "",
+    usedCount: 0,
+    usageLimit: "",
+    status: "",
   });
-  const handleAddCategoryFunc = async () => {
+  const handleAddCouponFunc = async () => {
     setIsLoading(true);
     const formData = new FormData();
-    formData.append("name", addFormData?.name);
     formData.append("image", addFormData?.image);
+    formData.append("code", addFormData?.code);
+    formData.append("minimumOrderAmount", addFormData?.minimumOrderAmount);
+    formData.append("message", addFormData?.message);
+    formData.append("validFrom", addFormData?.validFrom);
+    formData.append("validTo", addFormData?.validTo);
+    formData.append("discountValue", addFormData?.discountValue);
+    formData.append("discountType", addFormData?.discountType);
+    formData.append("usedCount", addFormData?.usedCount);
+    formData.append("usageLimit", addFormData?.usageLimit);
     formData.append("status", addFormData?.status);
-    formData.append("specialApperence", addFormData?.specialApperence);
     try {
-      let response = await addCategoryServ(formData);
+      let response = await addCouponServ(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setAddFormData({
-          name: "",
-          image: "",
-          status: "",
           show: false,
+          image: "",
           imgPrev: "",
+          code: "",
+          minimumOrderAmount: "",
+          message: "",
+          validFrom: "",
+          validTo: "",
+          discountValue: "",
+          discountType: "",
+          usedCount: "",
+          usageLimit: "",
+          status: "",
         });
         handleGetCouponFunc();
       }
@@ -120,32 +147,52 @@ function CouponList() {
     }
   };
   const [editFormData, setEditFormData] = useState({
-    name: "",
-    image: "",
-    status: "",
     _id: "",
+    image: "",
     imgPrev: "",
-    specialApperence: "",
+    code: "",
+    minimumOrderAmount: "",
+    message: "",
+    validFrom: "",
+    validTo: "",
+    discountValue: "",
+    discountType: "",
+    usageLimit: "",
+    status: "",
   });
-  const handleUpdateCategoryFunc = async () => {
+  const handleUpdateCouponFunc = async () => {
     setIsLoading(true);
     const formData = new FormData();
     if (editFormData?.image) {
       formData?.append("image", editFormData?.image);
     }
-    formData?.append("name", editFormData?.name);
-    formData?.append("status", editFormData?.status);
-    formData?.append("_id", editFormData?._id);
-    formData?.append("specialApperence", editFormData?.specialApperence);
+    formData.append("code", editFormData?.code);
+    formData.append("minimumOrderAmount", editFormData?.minimumOrderAmount);
+    formData.append("message", editFormData?.message);
+    formData.append("validFrom", editFormData?.validFrom);
+    formData.append("validTo", editFormData?.validTo);
+    formData.append("discountValue", editFormData?.discountValue);
+    formData.append("discountType", editFormData?.discountType);
+    formData.append("usageLimit", editFormData?.usageLimit);
+    formData.append("status", editFormData?.status);
+    formData.append("_id", editFormData?._id);
     try {
-      let response = await updateCategoryServ(formData);
+      let response = await updateCouponServ(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setEditFormData({
-          name: "",
-          image: "",
-          status: "",
           _id: "",
+          image: "",
+          imgPrev: "",
+          code: "",
+          minimumOrderAmount: "",
+          message: "",
+          validFrom: "",
+          validTo: "",
+          discountValue: "",
+          discountType: "",
+          usageLimit: "",
+          status: "",
         });
         handleGetCouponFunc();
       }
@@ -371,12 +418,20 @@ function CouponList() {
                                   <a
                                     onClick={() => {
                                       setEditFormData({
-                                        name: v?.name,
+                                        _id: v?._id,
                                         image: "",
                                         imgPrev: v?.image,
+                                        code: v?.code,
+                                        minimumOrderAmount:
+                                          v?.minimumOrderAmount,
+                                        message: v?.message,
+                                        validFrom: v?.validFrom,
+                                        validTo: v?.validTo,
+                                        discountValue: v?.discountValue,
+                                        discountType: v?.discountType,
+                                        usedCount: v?.usedCount,
+                                        usageLimit: v?.usageLimit,
                                         status: v?.status,
-                                        _id: v?._id,
-                                        specialApperence: v?.specialApperence,
                                       });
                                     }}
                                     className="btn btn-info mx-2 text-light shadow-sm"
@@ -444,182 +499,225 @@ function CouponList() {
                   className="d-flex justify-content-center w-100"
                 >
                   <div className="w-100 px-2">
-                    <h5 className="mb-4">Add Coupon</h5>
-                    <div className="p-3 border rounded mb-2">
-                      {addFormData?.imgPrev ? (
-                        <img
-                          src={addFormData?.imgPrev}
-                          className="img-fluid w-100 shadow rounded"
-                        />
-                      ) : (
-                        <p className="mb-0 text-center">No Item Selected !</p>
-                      )}
-                    </div>
-                    <label className="">Upload Image</label>
-                    <input
-                      className="form-control"
-                      type="file"
-                      onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          image: e.target.files[0],
-                          imgPrev: URL.createObjectURL(e.target.files[0]),
-                        })
-                      }
-                    />
-                    <div className="row">
-                      <div className="col-6">
-                        <label className="mt-3">Code</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setAddFormData({ ...addFormData, code: e.target.value })
-                      }
-                    />
-                      </div>
-                      <div className="col-6">
-                        <label className="mt-3">Minimum Order Amount</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setAddFormData({ ...addFormData, code: e.target.value })
-                      }
-                    />
-                      </div>
-                    </div>
-                    <label className="mt-3">Message</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          message: e.target.value,
-                        })
-                      }
-                    />
-                    <div className="row">
-                      <div className="col-6">
-                        <label className="mt-3">Start Date</label>
-                        <input
-                          className="form-control"
-                          type="text"
-                          onChange={(e) =>
-                            setAddFormData({
-                              ...addFormData,
-                              validFrom: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="col-6">
-                        <label className="mt-3">End Date</label>
-                        <input
-                          className="form-control"
-                          type="text"
-                          onChange={(e) =>
-                            setAddFormData({
-                              ...addFormData,
-                              validTo: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div className="col-8 pe-0">
-                        <label className="mt-3">Discount</label>
-                        <input
-                          className="form-control"
-                          type="text"
-                          onChange={(e) =>
-                            setAddFormData({
-                              ...addFormData,
-                              validFrom: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="col-4 ps-0">
-                        <label className="mt-3">Type</label>
-                        <select className="form-control py-1" style={{height:"37px"}}>
-                          <option>Select</option>
-                          <option>Flat</option>
-                          <option>Percentage</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                     <div className="row">
-                      <div className="col-6">
-                        <label className="mt-3">Used</label>
-                        <input
-                          className="form-control"
-                          type="text"
-                          readOnly
-                          onChange={(e) =>
-                            setAddFormData({
-                              ...addFormData,
-                              validFrom: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="col-6">
-                        <label className="mt-3">Total Usage</label>
-                        <input
-                          className="form-control"
-                          type="text"
-                          onChange={(e) =>
-                            setAddFormData({
-                              ...addFormData,
-                              validTo: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-                    <label className="mt-3">Status</label>
-                    <select
-                      className="form-control"
-                      onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          status: e.target.value,
-                        })
-                      }
+                    <div
+                      className="p-2 w-100"
+                      style={{ height: "500px", overflowY: "scroll" }}
                     >
-                      <option value="">Select Status</option>
-                      <option value={true}>Active</option>
-                      <option value={false}>Inactive</option>
-                    </select>
+                      <h5 className="mb-4">Add Coupon</h5>
+                      <div className="p-3 border rounded mb-2">
+                        {addFormData?.imgPrev ? (
+                          <img
+                            src={addFormData?.imgPrev}
+                            className="img-fluid w-100 shadow rounded"
+                          />
+                        ) : (
+                          <p className="mb-0 text-center">No Item Selected !</p>
+                        )}
+                      </div>
+                      <label className="">Upload Image</label>
+                      <input
+                        className="form-control"
+                        type="file"
+                        onChange={(e) =>
+                          setAddFormData({
+                            ...addFormData,
+                            image: e.target.files[0],
+                            imgPrev: URL.createObjectURL(e.target.files[0]),
+                          })
+                        }
+                      />
+                      <div className="row">
+                        <div className="col-6">
+                          <label className="mt-3">Code</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                code: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-6">
+                          <label className="mt-3">Minimum Order Amount</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                minimumOrderAmount: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <label className="mt-3">Message</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        onChange={(e) =>
+                          setAddFormData({
+                            ...addFormData,
+                            message: e.target.value,
+                          })
+                        }
+                      />
+                      <div className="row">
+                        <div className="col-6">
+                          <label className="mt-3">Start Date</label>
+                          <input
+                            className="form-control"
+                            type="date"
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                validFrom: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-6">
+                          <label className="mt-3">End Date</label>
+                          <input
+                            className="form-control"
+                            type="date"
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                validTo: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-8 pe-0">
+                          <label className="mt-3">Discount</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                discountValue: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-4 ps-0">
+                          <label className="mt-3">Type</label>
+                          <select
+                            className="form-control py-1"
+                            style={{ height: "37px" }}
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                discountType: e.target.value, // <-- correct key
+                              })
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="flat">Flat</option>
+                            <option value="percentage">Percentage</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-6">
+                          <label className="mt-3">Used</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            value={addFormData?.usedCount}
+                            readOnly
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                usedCount: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-6">
+                          <label className="mt-3">Total Usage</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            onChange={(e) =>
+                              setAddFormData({
+                                ...addFormData,
+                                usageLimit: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <label className="mt-3">Status</label>
+                      <select
+                        className="form-control"
+                        onChange={(e) =>
+                          setAddFormData({
+                            ...addFormData,
+                            status: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="expired">Expired</option>
+                      </select>
+                    </div>
 
                     <button
                       className="btn btn-success w-100 mt-4"
                       onClick={
-                        addFormData?.name &&
-                        addFormData?.status &&
                         addFormData?.image &&
+                        addFormData?.code &&
+                        addFormData?.message &&
+                        addFormData?.minimumOrderAmount &&
+                        addFormData?.validFrom &&
+                        addFormData?.validTo &&
+                        addFormData?.discountValue &&
+                        addFormData?.discountType &&
+                        addFormData?.usageLimit &&
+                        addFormData?.status &&
                         !isLoading
-                          ? handleAddCategoryFunc
-                          : undefined
+                          ? handleAddCouponFunc
+                          : console.log(addFormData)
                       }
                       disabled={
-                        !addFormData?.name ||
-                        !addFormData?.status ||
                         !addFormData?.image ||
+                        !addFormData?.code ||
+                        !addFormData?.message ||
+                        !addFormData?.minimumOrderAmount ||
+                        !addFormData?.validFrom ||
+                        !addFormData?.validTo ||
+                        !addFormData?.discountValue ||
+                        !addFormData?.discountType ||
+                        !addFormData?.usageLimit ||
+                        !addFormData?.status ||
                         isLoading
                       }
                       style={{
                         opacity:
-                          !addFormData?.name ||
-                          !addFormData?.status ||
-                          !addFormData?.image ||
-                          isLoading
-                            ? "0.5"
-                            : "1",
+                          addFormData?.image &&
+                          addFormData?.code &&
+                          addFormData?.message &&
+                          addFormData?.minimumOrderAmount &&
+                          addFormData?.validFrom &&
+                          addFormData?.validTo &&
+                          addFormData?.discountValue &&
+                          addFormData?.discountType &&
+                          addFormData?.usageLimit &&
+                          addFormData?.status &&
+                          !isLoading
+                            ? "1"
+                            : "0.5",
                       }}
                     >
                       {isLoading ? "Saving..." : "Submit"}
@@ -644,7 +742,7 @@ function CouponList() {
               style={{
                 borderRadius: "16px",
                 background: "#f7f7f5",
-                width: "364px",
+                width: "600px",
               }}
             >
               <div className="d-flex justify-content-end pt-4 pb-0 px-4">
@@ -653,11 +751,19 @@ function CouponList() {
                   style={{ height: "20px" }}
                   onClick={() =>
                     setEditFormData({
-                      name: "",
-                      image: "",
-                      status: "",
-                      specialApperence: "",
                       _id: "",
+                      image: "",
+                      imgPrev: "",
+                      code: "",
+                      minimumOrderAmount: "",
+                      message: "",
+                      validFrom: "",
+                      validTo: "",
+                      discountValue: "",
+                      discountType: "",
+                      usedCount: "",
+                      usageLimit: "",
+                      status: "",
                     })
                   }
                 />
@@ -672,81 +778,245 @@ function CouponList() {
                   className="d-flex justify-content-center w-100"
                 >
                   <div className="w-100 px-2">
-                    <h5 className="mb-4">Update Category</h5>
-                    <div className="p-3 border rounded mb-2">
-                      <img
-                        src={editFormData?.imgPrev}
-                        className="img-fluid w-100 shadow rounded"
+                    <div
+                      className="p-2 w-100"
+                      style={{ height: "500px", overflowY: "scroll" }}
+                    >
+                      <h5 className="mb-4">Update Coupon</h5>
+                      <div className="p-3 border rounded mb-2">
+                        {editFormData?.imgPrev ? (
+                          <img
+                            src={editFormData?.imgPrev}
+                            className="img-fluid w-100 shadow rounded"
+                          />
+                        ) : (
+                          <p className="mb-0 text-center">No Item Selected !</p>
+                        )}
+                      </div>
+                      <label className="">Upload Image</label>
+                      <input
+                        className="form-control"
+                        type="file"
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            image: e.target.files[0],
+                            imgPrev: URL.createObjectURL(e.target.files[0]),
+                          })
+                        }
                       />
+                      <div className="row">
+                        <div className="col-6">
+                          <label className="mt-3">Code</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            value={editFormData?.code}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                code: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-6">
+                          <label className="mt-3">Minimum Order Amount</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            value={editFormData?.minimumOrderAmount}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                minimumOrderAmount: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <label className="mt-3">Message</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        value={editFormData?.message}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            message: e.target.value,
+                          })
+                        }
+                      />
+                      <div className="row">
+                        <div className="col-6">
+                          <label className="mt-3">
+                            Start Date :{" "}
+                            {moment(editFormData?.validFrom).format(
+                              "DD MMM YYYY"
+                            )}{" "}
+                          </label>
+                          <input
+                            className="form-control"
+                            type="date"
+                            value={editFormData?.validFrom}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                validFrom: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-6">
+                          <label className="mt-3">
+                            End Date :{" "}
+                            {moment(editFormData?.validTo).format(
+                              "DD MMM YYYY"
+                            )}{" "}
+                          </label>
+                          <input
+                            className="form-control"
+                            type="date"
+                            value={editFormData?.validTo}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                validTo: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-8 pe-0">
+                          <label className="mt-3">Discount</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            value={editFormData?.discountValue}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                discountValue: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-4 ps-0">
+                          <label className="mt-3">Type</label>
+                          <select
+                            className="form-control py-1"
+                            style={{ height: "37px" }}
+                            value={editFormData?.discountType}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                discountType: e.target.value, // <-- correct key
+                              })
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="flat">Flat</option>
+                            <option value="percentage">Percentage</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-6">
+                          <label className="mt-3">Used</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            value={editFormData?.usedCount}
+                            readOnly
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                usedCount: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-6">
+                          <label className="mt-3">Total Usage</label>
+                          <input
+                            className="form-control"
+                            type="text"
+                            value={editFormData?.usageLimit}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                usageLimit: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <label className="mt-3">Status</label>
+                      <select
+                        className="form-control"
+                        value={editFormData?.status}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            status: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="expired">Expired</option>
+                      </select>
                     </div>
-                    <label className="">Upload Image</label>
-                    <input
-                      className="form-control"
-                      type="file"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          image: e.target.files[0],
-                          imgPrev: URL.createObjectURL(e.target.files[0]),
-                        })
+
+                    <button
+                      className="btn btn-success w-100 mt-4"
+                      onClick={
+                        editFormData?.code &&
+                        editFormData?.message &&
+                        editFormData?.minimumOrderAmount &&
+                        editFormData?.validFrom &&
+                        editFormData?.validTo &&
+                        editFormData?.discountValue &&
+                        editFormData?.discountType &&
+                        editFormData?.usageLimit &&
+                        editFormData?.status &&
+                        !isLoading
+                          ? handleUpdateCouponFunc
+                          : console.log(editFormData)
                       }
-                    />
-                    <label className="mt-3">Name</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          name: e.target.value,
-                        })
+                      disabled={
+                        !editFormData?.code ||
+                        !editFormData?.message ||
+                        !editFormData?.minimumOrderAmount ||
+                        !editFormData?.validFrom ||
+                        !editFormData?.validTo ||
+                        !editFormData?.discountValue ||
+                        !editFormData?.discountType ||
+                        !editFormData?.usageLimit ||
+                        !editFormData?.status ||
+                        isLoading
                       }
-                      value={editFormData?.name}
-                    />
-                    <label className="mt-3">Status</label>
-                    <select
-                      className="form-control"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          status: e.target.value,
-                        })
-                      }
-                      value={editFormData?.status}
+                      style={{
+                        opacity:
+                          editFormData?.code &&
+                          editFormData?.message &&
+                          editFormData?.minimumOrderAmount &&
+                          editFormData?.validFrom &&
+                          editFormData?.validTo &&
+                          editFormData?.discountValue &&
+                          editFormData?.discountType &&
+                          editFormData?.usageLimit &&
+                          editFormData?.status &&
+                          !isLoading
+                            ? "1"
+                            : "0.5",
+                      }}
                     >
-                      <option value="">Select Status</option>
-                      <option value={true}>Active</option>
-                      <option value={false}>Inactive</option>
-                    </select>
-                    <label className="mt-3">Special Apperence</label>
-                    <select
-                      className="form-control"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          specialApperence: e.target.value,
-                        })
-                      }
-                      value={editFormData?.specialApperence}
-                    >
-                      <option value="">Select Status</option>
-                      <option value="Home">Home</option>
-                    </select>
-                    {editFormData?.name && editFormData?.status ? (
-                      <button
-                        className="btn btn-success w-100 mt-4"
-                        onClick={!isLoading && handleUpdateCategoryFunc}
-                      >
-                        {isLoading ? "Saving..." : "Submit"}
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-success w-100 mt-4"
-                        style={{ opacity: "0.5" }}
-                      >
-                        Submit
-                      </button>
-                    )}
+                      {isLoading ? "Saving..." : "Submit"}
+                    </button>
                   </div>
                 </div>
                 <div className="d-flex justify-content-center"></div>

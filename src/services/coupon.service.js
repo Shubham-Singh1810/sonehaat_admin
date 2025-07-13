@@ -34,9 +34,9 @@ export const getCategoryDetailsServ = async (id) => {
   }
 };
 
-export const addCategoryServ = async (formData) => {
+export const addCouponServ = async (formData) => {
   try {
-    const response = await axios.post(BASE_URL + "category/create", formData, getConfig());
+    const response = await axios.post(BASE_URL + "coupon/create", formData, getConfig());
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
@@ -45,9 +45,9 @@ export const addCategoryServ = async (formData) => {
   }
 };
 
-export const updateCategoryServ = async (formData) => {
+export const updateCouponServ = async (formData) => {
   try {
-    const response = await axios.put(BASE_URL + "category/update", formData, getConfig());
+    const response = await axios.put(BASE_URL + "coupon/update", formData, getConfig());
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
