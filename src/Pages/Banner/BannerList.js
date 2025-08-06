@@ -57,7 +57,7 @@ function BannerList() {
   }, [payload]);
   const [isLoading, setIsLoading] = useState(false);
   const [addFormData, setAddFormData] = useState({
-    name: "",
+    category: "",
     image: "",
     status: "",
     show: false,
@@ -66,7 +66,7 @@ function BannerList() {
   const handleAddCategoryFunc = async () => {
     setIsLoading(true);
     const formData = new FormData();
-    formData?.append("name", addFormData?.name);
+    formData?.append("category", addFormData?.category);
     formData?.append("image", addFormData?.image);
     formData?.append("status", addFormData?.status);
     try {
@@ -74,7 +74,7 @@ function BannerList() {
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setAddFormData({
-          name: "",
+          category: "",
           image: "",
           status: "",
           show: false,
@@ -112,7 +112,7 @@ function BannerList() {
     }
   };
   const [editFormData, setEditFormData] = useState({
-    name: "",
+    category: "",
     image: "",
     status: "",
     _id: "",
@@ -124,7 +124,7 @@ function BannerList() {
     if (editFormData?.image) {
       formData?.append("image", editFormData?.image);
     }
-    formData?.append("name", editFormData?.name);
+    formData?.append("category", editFormData?.category);
     formData?.append("status", editFormData?.status);
     formData?.append("_id", editFormData?._id);
     try {
@@ -132,7 +132,7 @@ function BannerList() {
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setEditFormData({
-          name: "",
+          category: "",
           image: "",
           status: "",
           _id: "",
@@ -285,7 +285,7 @@ function BannerList() {
                                   />
                                 </td>
                                 <td className="font-weight-600 text-center">
-                                  {v?.name}
+                                  {v?.category}
                                 </td>
                                 <td className="text-center">
                                   {v?.status ? (
@@ -305,7 +305,7 @@ function BannerList() {
                                   <a
                                     onClick={() => {
                                       setEditFormData({
-                                        name: v?.name,
+                                        category: v?.category,
                                         image: "",
                                         imgPrev: v?.image,
                                         status: v?.status,
@@ -366,7 +366,7 @@ function BannerList() {
                   className="d-flex justify-content-center w-100"
                 >
                   <div className="w-100 px-2">
-                    <h5 className="mb-4">Add Category</h5>
+                    <h5 className="mb-4">Add Banner</h5>
                     <div className="p-3 border rounded mb-2">
                       {addFormData?.imgPrev ? <img src={addFormData?.imgPrev} className="img-fluid w-100 shadow rounded" />:<p className="mb-0 text-center">No Item Selected !</p>}
                       
@@ -377,12 +377,15 @@ function BannerList() {
                       type="file"
                       onChange={(e) => setAddFormData({ ...addFormData, image: e.target.files[0], imgPrev: URL.createObjectURL(e.target.files[0])})}
                     />
-                    <label className="mt-3">Name</label>
-                    <input
+                    <label className="mt-3">Category</label>
+                   <select
                       className="form-control"
-                      type="text"
-                      onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
-                    />
+                      onChange={(e) => setAddFormData({ ...addFormData, category: e.target.value })}
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Home">Home</option>
+                      
+                    </select>
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"
@@ -392,7 +395,7 @@ function BannerList() {
                       <option value={true}>Active</option>
                       <option value={false}>Inactive</option>
                     </select>
-                    {addFormData?.name && addFormData?.status && addFormData?.image ? (
+                    {addFormData?.category && addFormData?.status && addFormData?.image ? (
                       <button className="btn btn-success w-100 mt-4" onClick={!isLoading && handleAddCategoryFunc}>
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
@@ -448,13 +451,16 @@ function BannerList() {
                       type="file"
                       onChange={(e) => setEditFormData({ ...editFormData, image: e.target.files[0], imgPrev: URL.createObjectURL(e.target.files[0])})}
                     />
-                    <label className="mt-3">Name</label>
-                    <input
+                    <label className="mt-3">Category</label>
+                   <select
                       className="form-control"
-                      type="text"
-                      onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                      value={editFormData?.name}
-                    />
+                      onChange={(e) => setAddFormData({ ...editFormData, category: e.target.value })}
+                      value={editFormData?.category}
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Home">Home</option>
+                      
+                    </select>
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"

@@ -23,16 +23,7 @@ export const getCouponServ = async (formData) => {
     throw error;
   }
 };
-export const getCategoryDetailsServ = async (id) => {
-  try {
-    const response = await axios.get(BASE_URL + "category/details/"+id);
-    return response;
-  } catch (error) {
-    // Handle error (e.g., log or throw an error)
-    console.error("Error fetching data:", error);
-    throw error;
-  }
-};
+
 
 export const addCouponServ = async (formData) => {
   try {

@@ -5,7 +5,10 @@ import {
   addCategoryServ,
   updateCategoryServ,
 } from "../../services/category.service";
-import { getNotifyServ, deleteNotifyServ } from "../../services/notification.service";
+import {
+  getNotifyServ,
+  deleteNotifyServ,
+} from "../../services/notification.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
@@ -158,8 +161,7 @@ function NotifyList() {
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">
-          
-          <div className="row m-0 p-0 d-flex align-items-center my-4 topActionForm" >
+          <div className="row m-0 p-0 d-flex align-items-center my-4 topActionForm">
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <h3 className="mb-0 text-bold text-secondary">Notice</h3>
             </div>
@@ -256,10 +258,18 @@ function NotifyList() {
                                     style={{ height: "30px" }}
                                   />
                                 </td>
-                                <td className="font-weight-600 text-center" style={{width:"200px"}}>
+                                <td
+                                  className="font-weight-600 text-center"
+                                  style={{ width: "200px" }}
+                                >
                                   {v?.title}
                                 </td>
-                                <td className="text-center" style={{width:"200px"}}>{v?.subTitle}</td>
+                                <td
+                                  className="text-center"
+                                  style={{ width: "200px" }}
+                                >
+                                  {v?.subTitle}
+                                </td>
 
                                 <td className="text-center">
                                   {moment(v?.createdAt).format("DD-MM-YY")}
@@ -280,9 +290,8 @@ function NotifyList() {
                                         title: v?.title,
                                         subTitle: v?.subTitle,
                                         imgPrev: v?.icon,
-                                        
+
                                         _id: v?._id,
-                                        
                                       });
                                     }}
                                     className="btn btn-info mx-2 text-light shadow-sm"
@@ -350,7 +359,7 @@ function NotifyList() {
                   className="d-flex justify-content-center w-100"
                 >
                   <div className="w-100 px-2">
-                    <h5 className="mb-4">Add Category</h5>
+                    <h5 className="mb-4">Add Notify</h5>
                     <div className="p-3 border rounded mb-2">
                       {addFormData?.imgPrev ? (
                         <img
@@ -470,7 +479,7 @@ function NotifyList() {
                       icon: "",
                       subTitle: "",
                       notifyUserIds: [],
-                      notifyUserToken:[],
+                      notifyUserToken: [],
                       _id: "",
                     })
                   }
@@ -517,7 +526,7 @@ function NotifyList() {
                       }
                       value={editFormData?.title}
                     />
-                     <label className="mt-3">Sub Title</label>
+                    <label className="mt-3">Sub Title</label>
                     <textarea
                       className="form-control"
                       type="text"
@@ -529,9 +538,11 @@ function NotifyList() {
                       }
                       value={editFormData?.subTitle}
                     />
-                   
-                    
-                    {editFormData?.title && editFormData?.subTitle && editFormData?.icon && editFormData?.notifyUserIds.length>0 ? (
+
+                    {editFormData?.title &&
+                    editFormData?.subTitle &&
+                    editFormData?.icon &&
+                    editFormData?.notifyUserIds.length > 0 ? (
                       <button
                         className="btn btn-success w-100 mt-4"
                         onClick={!isLoading && handleUpdateCategoryFunc}

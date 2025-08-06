@@ -147,7 +147,7 @@ function AuthenticatedRoutes() {
 
         {/* promo code */}
         <Route path="/coupon-list" element={<CouponList/>}/>
-        <Route path="/add-coupon" element={<CouponList/>}/>
+        
     </Routes>
   )
 }
