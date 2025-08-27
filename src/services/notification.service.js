@@ -54,3 +54,13 @@ export const deleteNotifyServ = async (id) => {
     throw error;
   }
 };
+export const addNotifyServ = async (formData) => {
+  try {
+    const response = await axios.post(BASE_URL + "notify/create" , formData);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};

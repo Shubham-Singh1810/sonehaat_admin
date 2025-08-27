@@ -88,10 +88,7 @@ function Sidebar({ selectedMenu, selectedItem }) {
           name: "Tags",
           path: "/tag-list",
         },
-        {
-          name: "Product Review",
-          path: "/product-review-list",
-        },
+        
       ],
     },
     {

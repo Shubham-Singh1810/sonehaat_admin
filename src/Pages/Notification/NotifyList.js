@@ -8,6 +8,7 @@ import {
 import {
   getNotifyServ,
   deleteNotifyServ,
+  addNotifyServ
 } from "../../services/notification.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -15,6 +16,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import {getUserListServ} from "../../services/user.service";
+import { MultiSelect } from "react-multi-select-component";
 function NotifyList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -37,50 +40,34 @@ function NotifyList() {
     } catch (error) {}
     setShowSkelton(false);
   };
-  const staticsArr = [
-    {
-      title: "Total Category",
-      count: statics?.totalCount,
-      bgColor: "#6777EF",
-    },
-    {
-      title: "Active Category",
-      count: statics?.activeCount,
-      bgColor: "#63ED7A",
-    },
-    {
-      title: "Inactive Category",
-      count: statics?.inactiveCount,
-      bgColor: "#FFA426",
-    },
-  ];
   useEffect(() => {
     handleGetNotifyFunc();
   }, [payload]);
   const [isLoading, setIsLoading] = useState(false);
   const [addFormData, setAddFormData] = useState({
-    name: "",
+    title: "",
     image: "",
-    status: "",
+    subTitle: "",
     show: false,
     imgPrev: "",
-    specialApperence: "",
+    notifyUserIds: "",
   });
-  const handleAddCategoryFunc = async () => {
+  const handleAddNotifyFunc = async () => {
     setIsLoading(true);
     const formData = new FormData();
-    formData.append("name", addFormData?.name);
-    formData.append("image", addFormData?.image);
-    formData.append("status", addFormData?.status);
-    formData.append("specialApperence", addFormData?.specialApperence);
+    formData.append("icon", addFormData?.image);
+    formData.append("title", addFormData?.title);
+    formData.append("subTitle", addFormData?.subTitle);
+    selectedUsers.forEach((user) => formData.append("notifyUserIds[]", user?.value));
     try {
-      let response = await addCategoryServ(formData);
+      let response = await addNotifyServ(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setAddFormData({
-          name: "",
+          title: "",
+          subTitle: "",
           image: "",
-          status: "",
+          notifyUserIds: [],
           show: false,
           imgPrev: "",
         });
@@ -115,46 +102,29 @@ function NotifyList() {
       }
     }
   };
-  const [editFormData, setEditFormData] = useState({
-    name: "",
-    image: "",
-    status: "",
-    _id: "",
-    imgPrev: "",
-    specialApperence: "",
-  });
-  const handleUpdateCategoryFunc = async () => {
-    setIsLoading(true);
-    const formData = new FormData();
-    if (editFormData?.image) {
-      formData?.append("image", editFormData?.image);
-    }
-    formData?.append("name", editFormData?.name);
-    formData?.append("status", editFormData?.status);
-    formData?.append("_id", editFormData?._id);
-    formData?.append("specialApperence", editFormData?.specialApperence);
-    try {
-      let response = await updateCategoryServ(formData);
-      if (response?.data?.statusCode == "200") {
-        toast.success(response?.data?.message);
-        setEditFormData({
-          name: "",
-          image: "",
-          status: "",
-          _id: "",
-        });
-        handleGetNotifyFunc();
-      }
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message
-          ? error?.response?.data?.message
-          : "Internal Server Error"
-      );
-    }
-    setIsLoading(false);
-  };
+ 
+  
   const [showNotifyDivPopup, setShowNotifyDivPopup] = useState(null);
+  const [userList, setUserList]=useState([])
+  const handleGetUserFunc = async () => {
+      if (list.length == 0) {
+        setShowSkelton(true);
+      }
+      try {
+        let response = await getUserListServ({pageCount:200});
+        const userOptions = response?.data?.data?.map((v) => ({
+          value: v?.androidDeviceId,
+          label: `${v?.firstName} ${v?.lastName}`,
+        }));
+        setUserList(userOptions);
+        
+      } catch (error) {}
+      setShowSkelton(false);
+    };
+    useEffect(()=>{
+      handleGetUserFunc()
+    },[])
+    const [selectedUsers, setSelectedUsers]=useState([])
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Broadcaster" selectedItem="Notify" />
@@ -284,20 +254,7 @@ function NotifyList() {
                                   </div>
                                 </td>
                                 <td className="text-center">
-                                  <a
-                                    onClick={() => {
-                                      setEditFormData({
-                                        title: v?.title,
-                                        subTitle: v?.subTitle,
-                                        imgPrev: v?.icon,
-
-                                        _id: v?._id,
-                                      });
-                                    }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
+                                 
                                   <a
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
@@ -382,63 +339,55 @@ function NotifyList() {
                         })
                       }
                     />
-                    <label className="mt-3">Name</label>
+                    <label className="mt-3">Title</label>
                     <input
                       className="form-control"
                       type="text"
                       onChange={(e) =>
-                        setAddFormData({ ...addFormData, name: e.target.value })
+                        setAddFormData({ ...addFormData, title: e.target.value })
                       }
                     />
-                    <label className="mt-3">Status</label>
-                    <select
+                    <label className="mt-3">Sub Title</label>
+                    <input
                       className="form-control"
+                      type="text"
                       onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          status: e.target.value,
-                        })
+                        setAddFormData({ ...addFormData, subTitle: e.target.value })
                       }
-                    >
-                      <option value="">Select Status</option>
-                      <option value={true}>Active</option>
-                      <option value={false}>Inactive</option>
-                    </select>
-                    <label className="mt-3">Special Apperence</label>
-                    <select
-                      className="form-control"
-                      onChange={(e) =>
-                        setAddFormData({
-                          ...addFormData,
-                          specialApperence: e.target.value,
-                        })
-                      }
-                      value={addFormData?.specialApperence}
-                    >
-                      <option value="">Select Status</option>
-                      <option value="Home">Home</option>
-                    </select>
+                    />
+                    <label className="mt-3">Users</label>
+                    <MultiSelect
+                        options={userList}
+                        value={selectedUsers}
+                        onChange={setSelectedUsers}
+                        labelledBy="Select Users"
+                        hasSelectAll={true} 
+                        overrideStrings={{
+                          selectSomeItems: "Select Users", 
+                          allItemsAreSelected: "All Users Selected",
+                          selectAll: "Select All",
+                          search: "Search Users...",
+                        }}
+                      />
+                   
                     <button
                       className="btn btn-success w-100 mt-4"
                       onClick={
-                        addFormData?.name &&
-                        addFormData?.status &&
+                        selectedUsers?.length>0 &&
+                        addFormData?.title &&
                         addFormData?.image &&
+                        addFormData?.subTitle &&
                         !isLoading
-                          ? handleAddCategoryFunc
+                          ? handleAddNotifyFunc
                           : undefined
                       }
-                      disabled={
-                        !addFormData?.name ||
-                        !addFormData?.status ||
-                        !addFormData?.image ||
-                        isLoading
-                      }
+                      
                       style={{
                         opacity:
-                          !addFormData?.name ||
-                          !addFormData?.status ||
+                          !addFormData?.title ||
+                          !addFormData?.subTitle ||
                           !addFormData?.image ||
+                          !selectedUsers?.length>0 ||
                           isLoading
                             ? "0.5"
                             : "1",
@@ -455,117 +404,7 @@ function NotifyList() {
         </div>
       )}
       {addFormData?.show && <div className="modal-backdrop fade show"></div>}
-      {editFormData?._id && (
-        <div
-          className="modal fade show d-flex align-items-center  justify-content-center "
-          tabIndex="-1"
-        >
-          <div className="modal-dialog">
-            <div
-              className="modal-content"
-              style={{
-                borderRadius: "16px",
-                background: "#f7f7f5",
-                width: "364px",
-              }}
-            >
-              <div className="d-flex justify-content-end pt-4 pb-0 px-4">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
-                  style={{ height: "20px" }}
-                  onClick={() =>
-                    setEditFormData({
-                      title: "",
-                      icon: "",
-                      subTitle: "",
-                      notifyUserIds: [],
-                      notifyUserToken: [],
-                      _id: "",
-                    })
-                  }
-                />
-              </div>
-
-              <div className="modal-body">
-                <div
-                  style={{
-                    wordWrap: "break-word",
-                    whiteSpace: "pre-wrap",
-                  }}
-                  className="d-flex justify-content-center w-100"
-                >
-                  <div className="w-100 px-2">
-                    <h5 className="mb-4">Update Notice</h5>
-                    <div className="p-3 border rounded mb-2">
-                      <img
-                        src={editFormData?.imgPrev}
-                        className="img-fluid w-100 shadow rounded"
-                      />
-                    </div>
-                    <label className="">Upload Icon</label>
-                    <input
-                      className="form-control"
-                      type="file"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          icon: e.target.files[0],
-                          imgPrev: URL.createObjectURL(e.target.files[0]),
-                        })
-                      }
-                    />
-                    <label className="mt-3">Title</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          title: e.target.value,
-                        })
-                      }
-                      value={editFormData?.title}
-                    />
-                    <label className="mt-3">Sub Title</label>
-                    <textarea
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          subTitle: e.target.value,
-                        })
-                      }
-                      value={editFormData?.subTitle}
-                    />
-
-                    {editFormData?.title &&
-                    editFormData?.subTitle &&
-                    editFormData?.icon &&
-                    editFormData?.notifyUserIds.length > 0 ? (
-                      <button
-                        className="btn btn-success w-100 mt-4"
-                        onClick={!isLoading && handleUpdateCategoryFunc}
-                      >
-                        {isLoading ? "Saving..." : "Submit"}
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-success w-100 mt-4"
-                        style={{ opacity: "0.5" }}
-                      >
-                        Submit
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="d-flex justify-content-center"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {editFormData?._id && <div className="modal-backdrop fade show"></div>}
+      
 
       {showNotifyDivPopup && (
         <div
