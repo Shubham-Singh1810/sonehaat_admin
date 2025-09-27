@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
+import Pagination from "../../Components/Pagination";
 function BrandsList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -190,7 +192,7 @@ function BrandsList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -201,7 +203,7 @@ function BrandsList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -215,7 +217,7 @@ function BrandsList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -315,7 +317,11 @@ function BrandsList() {
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
                                 <td className="text-center">
-                                  <a
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
                                     onClick={() => {
                                       setEditFormData({
                                         name: v?.name,
@@ -325,18 +331,17 @@ function BrandsList() {
                                         _id: v?._id,
                                       });
                                     }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -346,6 +351,15 @@ function BrandsList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>

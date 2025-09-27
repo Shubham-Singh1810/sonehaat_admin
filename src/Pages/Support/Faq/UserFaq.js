@@ -12,6 +12,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
+import { BsPencil, BsTrash } from "react-icons/bs";
 import NoRecordFound from "../../../Components/NoRecordFound";
 function UserFaq() {
   const [list, setList] = useState([]);
@@ -110,15 +111,15 @@ function UserFaq() {
     _id: "",
   });
   const handleUpdateFaqFunc = async () => {
-    setIsLoading(true); 
+    setIsLoading(true);
     try {
       let response = await updateFaqServ(editFormData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
         setEditFormData({
-          question:"",
-          answer:"",
-          category:"",
+          question: "",
+          answer: "",
+          category: "",
           _id: "",
         });
         handleGetFaqFunc();
@@ -137,7 +138,7 @@ function UserFaq() {
       return (
         <button
           className="badge"
-          style={{ height: "30px", background: "#6777EF", border:"none" }}
+          style={{ height: "30px", background: "#6777EF", border: "none" }}
         >
           User
         </button>
@@ -147,7 +148,7 @@ function UserFaq() {
       return (
         <button
           className="badge"
-          style={{ height: "30px", background: "#63ED7A", border:"none"}}
+          style={{ height: "30px", background: "#63ED7A", border: "none" }}
         >
           Driver
         </button>
@@ -157,7 +158,7 @@ function UserFaq() {
       return (
         <button
           className="badge"
-          style={{ height: "30px", background: "#FFA426", border:"none" }}
+          style={{ height: "30px", background: "#FFA426", border: "none" }}
         >
           Vendor
         </button>
@@ -166,7 +167,7 @@ function UserFaq() {
   };
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Support" selectedItem="FAQs" />
+      <Sidebar selectedMenu="System Support" selectedItem="FAQs" />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">
@@ -206,7 +207,7 @@ function UserFaq() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -217,7 +218,7 @@ function UserFaq() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, category: e.target.value })
                   }
@@ -232,7 +233,7 @@ function UserFaq() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -311,27 +312,28 @@ function UserFaq() {
                                 </td>
 
                                 <td className="text-center">
-                                  <a
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
                                     onClick={() => {
                                       setEditFormData({
-                                        question:v?.question,
-                                        answer:v?.answer,
-                                        category:v?.category,
+                                        question: v?.question,
+                                        answer: v?.answer,
+                                        category: v?.category,
                                         _id: v?._id,
                                       });
                                     }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
-                                    onClick={() =>
-                                        handleDeleteFaqFunc(v?._id)
-                                    }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
+                                    onClick={() => handleDeleteFaqFunc(v?._id)}
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -469,9 +471,9 @@ function UserFaq() {
                   style={{ height: "20px" }}
                   onClick={() =>
                     setEditFormData({
-                      question:"",
-                      answer:"",
-                      category:"",
+                      question: "",
+                      answer: "",
+                      category: "",
                       _id: "",
                     })
                   }
@@ -488,8 +490,7 @@ function UserFaq() {
                 >
                   <div className="w-100 px-2">
                     <h5 className="mb-4">Update Faq</h5>
-                    
-                    
+
                     <label className="mt-3">Question</label>
                     <input
                       className="form-control"
@@ -514,7 +515,7 @@ function UserFaq() {
                       }
                       value={editFormData?.answer}
                     />
-                  <label className="mt-3">Category</label>
+                    <label className="mt-3">Category</label>
                     <select
                       className="form-control"
                       onChange={(e) =>
@@ -530,7 +531,9 @@ function UserFaq() {
                       <option value="vendor">Vendor</option>
                       <option value="driver">Driver</option>
                     </select>
-                    {editFormData?.question && editFormData?.answer && editFormData?.category ? (
+                    {editFormData?.question &&
+                    editFormData?.answer &&
+                    editFormData?.category ? (
                       <button
                         className="btn btn-success w-100 mt-4"
                         onClick={!isLoading && handleUpdateFaqFunc}

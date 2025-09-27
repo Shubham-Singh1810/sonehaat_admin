@@ -65,3 +65,14 @@ export const deleteCategoryServ = async (id) => {
     throw error;
   }
 };
+
+export const getOrderDetailsServ = async (orderId) => {
+  try {
+    // Backend: bookingController.get("/order-details/:orderId", ...)
+    const response = await axios.get(BASE_URL + "booking/order-details/" + orderId);
+    return response;
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    throw error;
+  }
+};

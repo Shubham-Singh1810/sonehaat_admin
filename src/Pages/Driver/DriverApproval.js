@@ -33,7 +33,7 @@ function DriverApproval() {
     phoneRejectReason: "",
     addressRejectReason: "",
     pincodeRejectReason: "",
-    isIfscCodeRejectReason: "",
+    ifscCodeRejectReason: "",
     upiIdRejectReason: "",
     isUpiIdApproved: "",
   });
@@ -89,7 +89,6 @@ function DriverApproval() {
           signatureRejectReason: response?.data?.data?.signatureRejectReason,
           isAdharCardApproved: response?.data?.data?.isAdharCardApproved,
           adharCardRejectReason: response?.data?.data?.adharCardRejectReason,
-          isUpiIdApproved: response?.data?.data?.isUpiIdApproved,
         });
       }
     } catch (error) {
@@ -136,11 +135,9 @@ function DriverApproval() {
         phoneRejectReason: "",
         addressRejectReason: "",
         pincodeRejectReason: "",
-        addressRejectReason: "",
         signatureRejectReason: "",
-        addressRejectReason: "",
         accountHolderNameRejectReason: "",
-        isIfscCodeRejectReason: "",
+        ifscCodeRejectReason: "",
         accountNumberRejectReason: "",
         bankBranchCodeRejectReason: "",
         bankNameRejectReason: "",

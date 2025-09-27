@@ -87,7 +87,8 @@ function ProductUpdateAttribute() {
             <div className="card-body px-2">
               <div className="table-responsive table-invoice">
                 <div className="d-flex">
-                  <h4 className="p-2 text-dark shadow rounded mb-4" style={{ background: "#05E2B5" }}>
+                  <h4 className="p-2 text-dark shadow rounded mb-4"
+                  style={{ background: "#e6f2ff" }}>
                     Update Product Attributes : Step 4/4
                   </h4>
                 </div>
@@ -126,7 +127,11 @@ function ProductUpdateAttribute() {
                   );
                 })}
               </div>
-              <button className="btn btn-primary w-100" style={{ borderRadius: "30px" }} onClick={handleSubmit}>
+              <button className="btn btn-primary w-100" style={{  color: "#fff",
+                        border: "none",
+                        borderRadius: "24px",
+                        background: "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }} onClick={handleSubmit}>
                 Submit
               </button>
             </div>

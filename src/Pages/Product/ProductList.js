@@ -4,7 +4,7 @@ import TopNav from "../../Components/TopNav";
 import {
   getProductServ,
   updateProductServ,
-  deleteProductServ
+  deleteProductServ,
 } from "../../services/product.services";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -13,15 +13,18 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import { useNavigate } from "react-router-dom";
+import { BsEye, BsPencil, BsTrash } from "react-icons/bs";
+import Pagination from "../../Components/Pagination";
+
 function ProductList() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
   const [payload, setPayload] = useState({
     searchKey: "",
     status: "",
     pageNo: 1,
-    pageCount: 100,
+    pageCount: 10,
     sortByField: "",
   });
   const [showSkelton, setShowSkelton] = useState(false);
@@ -77,29 +80,28 @@ function ProductList() {
           status: "",
           _id: "",
         });
-        handleGetProductFunc()
+        handleGetProductFunc();
       }
     } catch (error) {
       toast.error("Internal Server Error");
     }
   };
-  const handleDeleteProductFunc =  async (id)=>{
+  const handleDeleteProductFunc = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
     );
     if (confirmed) {
       try {
         let response = await deleteProductServ(id);
-        if(response?.data?.statusCode=="200"){
+        if (response?.data?.statusCode == "200") {
           toast.success(response?.data?.message);
-          handleGetProductFunc()
+          handleGetProductFunc();
         }
       } catch (error) {
-        toast.error("Internal Server Error")
+        toast.error("Internal Server Error");
       }
     }
-    
-  }
+  };
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Product Management" selectedItem="Products" />
@@ -142,7 +144,7 @@ function ProductList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -153,7 +155,7 @@ function ProductList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -167,9 +169,16 @@ function ProductList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
-                  style={{ background: "#6777EF" }}
-                  onClick={()=>navigate("/add-product")}
+                  className="btn btn-primary w-100"
+                  style={{
+                    color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
+                  onClick={() => navigate("/add-product")}
                 >
                   Add Product
                 </button>
@@ -241,7 +250,6 @@ function ProductList() {
                                 <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
-                                
                               </tr>
                               <div className="py-2"></div>
                             </>
@@ -268,7 +276,12 @@ function ProductList() {
                                   {v?.specialApperence || "None"}
                                 </td>
                                 <td className="text-center">{v?.price}</td>
-                                <td className="text-center">Vendor</td>
+                                <td className="text-center">
+                                  {v?.createdBy
+                                    ? `${v.createdBy.firstName} ${v.createdBy.lastName}`
+                                    : "N/A"}
+                                </td>
+
                                 <td className="text-center">
                                   {v?.status ? (
                                     <div
@@ -278,12 +291,7 @@ function ProductList() {
                                         cursor: "pointer",
                                       }}
                                       onClick={() =>
-                                        setEditFormData({
-                                          name: v?.name,
-                                          productHeroImage: v?.productHeroImage,
-                                          status: true,
-                                          _id: v?._id,
-                                        })
+                                        navigate("/product-approval/" + v?._id)
                                       }
                                     >
                                       Active
@@ -296,12 +304,7 @@ function ProductList() {
                                         cursor: "pointer",
                                       }}
                                       onClick={() =>
-                                        setEditFormData({
-                                          name: v?.name,
-                                          productHeroImage: v?.productHeroImage,
-                                          status: false,
-                                          _id: v?._id,
-                                        })
+                                        navigate("/product-approval/" + v?._id)
                                       }
                                     >
                                       Inactive
@@ -310,15 +313,35 @@ function ProductList() {
                                 </td>
 
                                 <td className="text-center">
-                                  <a className="btn btn-info mx-2 text-light shadow-sm" onClick={()=>navigate("/product-details/"+v?._id)}>
-                                    View
-                                  </a>
-                                  <a className="btn btn-primary mx-2 text-light shadow-sm" onClick={()=>navigate("/product-approval/"+v?._id)}>
-                                    Edit
-                                  </a>
-                                  <a className="btn btn-warning mx-2 text-light shadow-sm" onClick={()=>handleDeleteProductFunc(v?._id)}>
-                                    Delete
-                                  </a>
+                                  <BsEye
+                                    size={15}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      navigate("/product-details/" + v?._id)
+                                    }
+                                    title="View"
+                                  />
+                                  <BsPencil
+                                    size={14}
+                                    className="mx-1 text-primary"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      navigate(
+                                        "/update-product-step1/" + v?._id
+                                      )
+                                    }
+                                    title="Edit"
+                                  />
+                                  <BsTrash
+                                    size={15}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      handleDeleteProductFunc(v?._id)
+                                    }
+                                    title="Delete"
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -328,6 +351,15 @@ function ProductList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>

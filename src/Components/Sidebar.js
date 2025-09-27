@@ -176,6 +176,10 @@ function Sidebar({ selectedMenu, selectedItem }) {
           name: "Deliverable Pincodes",
           path: "/zipcode-list",
         },
+        {
+          name: "Operational City",
+          path: "/operational-city-list",
+        },
       ],
     },
     {

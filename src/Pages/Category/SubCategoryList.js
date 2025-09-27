@@ -2,173 +2,214 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
 import {
-    getSubCategoryServ,
-    addSubCategoryServ,
-    deleteSubCategoryServ,
-    updateSubCategoryServ,
-    updateBannerServ,
-  } from "../../services/subCategory.service";
-  import { getCategoryServ } from "../../services/category.service";
+  getSubCategoryServ,
+  addSubCategoryServ,
+  deleteSubCategoryServ,
+  updateSubCategoryServ,
+  updateBannerServ,
+  getSubCategoryDetailsServ,
+} from "../../services/subCategory.service";
+import { getCategoryServ } from "../../services/category.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
-import NoRecordFound from "../../Components/NoRecordFound"
+import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash, BsEye } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
+import Pagination from "../../Components/Pagination";
+
 function SubCategoriesList() {
-    const [list, setList] = useState([]);
-    const [statics, setStatics] = useState(null);
-    const [payload, setPayload] = useState({
-      searchKey: "",
-      status: "",
-      pageNo: 1,
-      pageCount: 10,
-      sortByField: "",
-    });
-    const [showSkelton, setShowSkelton] = useState(false);
-    const handleGetCategoryFunc = async () => {
-      if (list.length == 0) {
-        setShowSkelton(true);
+  const [list, setList] = useState([]);
+  const [statics, setStatics] = useState(null);
+  const [payload, setPayload] = useState({
+    searchKey: "",
+    status: "",
+    pageNo: 1,
+    pageCount: 10,
+    sortByField: "",
+  });
+  const [showSkelton, setShowSkelton] = useState(false);
+  const handleGetCategoryFunc = async () => {
+    if (list.length == 0) {
+      setShowSkelton(true);
+    }
+    try {
+      let response = await getSubCategoryServ(payload);
+      setList(response?.data?.data);
+      setStatics(response?.data?.documentCount);
+    } catch (error) {}
+    setShowSkelton(false);
+  };
+  const staticsArr = [
+    {
+      title: "Total Sub Category",
+      count: statics?.totalCount,
+      bgColor: "#6777EF",
+    },
+    {
+      title: "Active Sub Category",
+      count: statics?.activeCount,
+      bgColor: "#63ED7A",
+    },
+    {
+      title: "Inactive Sub Category",
+      count: statics?.inactiveCount,
+      bgColor: "#FFA426",
+    },
+  ];
+  useEffect(() => {
+    handleGetCategoryFunc();
+  }, [payload]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    name: "",
+    image: "",
+    status: "",
+    show: false,
+    imgPrev: "",
+    categoryId: "",
+  });
+  const handleAddCategoryFunc = async () => {
+    setIsLoading(true);
+    const formData = new FormData();
+    formData?.append("name", addFormData?.name);
+    formData?.append("image", addFormData?.image);
+    formData?.append("status", addFormData?.status);
+    formData?.append("categoryId", addFormData?.categoryId);
+    try {
+      let response = await addSubCategoryServ(formData);
+      if (response?.data?.statusCode == "200") {
+        toast.success(response?.data?.message);
+        setAddFormData({
+          name: "",
+          image: "",
+          status: "",
+          show: false,
+          imgPrev: "",
+          categoryId: "",
+        });
+        handleGetCategoryFunc();
       }
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message
+          ? error?.response?.data?.message
+          : "Internal Server Error"
+      );
+    }
+    setIsLoading(false);
+  };
+  const handleDeleteSubCategoryFunc = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this category?"
+    );
+    if (confirmed) {
       try {
-        let response = await getSubCategoryServ(payload);
-        setList(response?.data?.data);
-        setStatics(response?.data?.documentCount);
-      } catch (error) {}
-      setShowSkelton(false);
-    };
-    const staticsArr = [
-      {
-        title: "Total Sub Category",
-        count: statics?.totalCount,
-        bgColor: "#6777EF",
-      },
-      {
-        title: "Active Sub Category",
-        count: statics?.activeCount,
-        bgColor: "#63ED7A",
-      },
-      {
-        title: "Inactive Sub Category",
-        count: statics?.inactiveCount,
-        bgColor: "#FFA426",
-      },
-    ];
-    useEffect(() => {
-      handleGetCategoryFunc();
-    }, [payload]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [addFormData, setAddFormData] = useState({
-      name: "",
-      image: "",
-      status: "",
-      show: false,
-      imgPrev: "",
-      categoryId: "",
-    });
-    const handleAddCategoryFunc = async () => {
-      setIsLoading(true);
-      const formData = new FormData();
-      formData?.append("name", addFormData?.name);
-      formData?.append("image", addFormData?.image);
-      formData?.append("status", addFormData?.status);
-      formData?.append("categoryId", addFormData?.categoryId);
-      try {
-        let response = await addSubCategoryServ(formData);
+        let response = await deleteSubCategoryServ(id);
         if (response?.data?.statusCode == "200") {
-          toast.success(response?.data?.message);
-          setAddFormData({
-            name: "",
-            image: "",
-            status: "",
-            show: false,
-            imgPrev: "",
-            categoryId: "",
-          });
+          toast?.success(response?.data?.message);
           handleGetCategoryFunc();
         }
       } catch (error) {
-        toast.error(error?.response?.data?.message ? error?.response?.data?.message : "Internal Server Error");
+        toast.error(
+          error?.response?.data?.message
+            ? error?.response?.data?.message
+            : "Internal Server Error"
+        );
       }
-      setIsLoading(false);
-    };
-    const handleDeleteSubCategoryFunc = async (id) => {
-      const confirmed = window.confirm("Are you sure you want to delete this category?");
-      if (confirmed) {
-        try {
-          let response = await deleteSubCategoryServ(id);
-          if (response?.data?.statusCode == "200") {
-            toast?.success(response?.data?.message);
-            handleGetCategoryFunc();
-          }
-        } catch (error) {
-          toast.error(error?.response?.data?.message ? error?.response?.data?.message : "Internal Server Error");
-        }
+    }
+  };
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    image: "",
+    status: "",
+    _id: "",
+    imgPrev: "",
+  });
+  const handleUpdateSubCategoryFunc = async () => {
+    setIsLoading(true);
+    const formData = new FormData();
+    if (editFormData?.image) {
+      formData?.append("image", editFormData?.image);
+    }
+    formData?.append("name", editFormData?.name);
+    formData?.append("status", editFormData?.status);
+    formData?.append("_id", editFormData?._id);
+    formData?.append("categoryId", editFormData?.categoryId);
+    try {
+      let response = await updateSubCategoryServ(formData);
+      if (response?.data?.statusCode == "200") {
+        toast.success(response?.data?.message);
+        setEditFormData({
+          name: "",
+          image: "",
+          status: "",
+          _id: "",
+        });
+        handleGetCategoryFunc();
       }
-    };
-    const [editFormData, setEditFormData] = useState({
-      name: "",
-      image: "",
-      status: "",
-      _id: "",
-      imgPrev: "",
-    });
-    const handleUpdateSubCategoryFunc = async () => {
-      setIsLoading(true);
-      const formData = new FormData();
-      if (editFormData?.image) {
-        formData?.append("image", editFormData?.image);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message
+          ? error?.response?.data?.message
+          : "Internal Server Error"
+      );
+    }
+    setIsLoading(false);
+  };
+  const [mainCategoryList, setMainCategoryList] = useState([]);
+  const handleGetMainCategoryFunc = async () => {
+    try {
+      let response = await getCategoryServ({ status: true });
+      setMainCategoryList(response?.data?.data);
+    } catch (error) {}
+  };
+  useEffect(() => {
+    handleGetMainCategoryFunc();
+  }, []);
+  const [bannerLoader, setBannerLoader] = useState(false);
+  const addBannerFunc = async (file, id) => {
+    setBannerLoader(id);
+    const formData = new FormData();
+    formData.append("banner", file);
+    formData.append("_id", id);
+    try {
+      let response = await updateBannerServ(formData);
+      if (response?.data?.statusCode == "200") {
+        toast.success(response?.data?.message);
+        handleGetCategoryFunc();
+      } else {
+        toast.error("Something went wrong");
       }
-      formData?.append("name", editFormData?.name);
-      formData?.append("status", editFormData?.status);
-      formData?.append("_id", editFormData?._id);
-      formData?.append("categoryId", editFormData?.categoryId);
-      try {
-        let response = await updateSubCategoryServ(formData);
-        if (response?.data?.statusCode == "200") {
-          toast.success(response?.data?.message);
-          setEditFormData({
-            name: "",
-            image: "",
-            status: "",
-            _id: "",
-          });
-          handleGetCategoryFunc();
-        }
-      } catch (error) {
-        toast.error(error?.response?.data?.message ? error?.response?.data?.message : "Internal Server Error");
-      }
-      setIsLoading(false);
-    };
-    const [mainCategoryList, setMainCategoryList] = useState([]);
-    const handleGetMainCategoryFunc = async () => {
-      try {
-        let response = await getCategoryServ({ status: true });
-        setMainCategoryList(response?.data?.data);
-      } catch (error) {}
-    };
-    useEffect(() => {
-      handleGetMainCategoryFunc();
-    }, []);
-    const [bannerLoader, setBannerLoader]=useState(false)
-    const addBannerFunc = async (file, id) => {
-      setBannerLoader(id)
-      const formData = new FormData();
-      formData.append("banner", file);
-      formData.append("_id", id);
-      try {
-        let response = await updateBannerServ(formData);
-        if (response?.data?.statusCode == "200") {
-          toast.success(response?.data?.message);
-          handleGetCategoryFunc()
-        } else {
-          toast.error("Something went wrong");
-        }
-      } catch (error) {
-        toast.error(error?.response?.data?.message ? error?.response?.data?.message : "Internal Server Error");
-      }
-      setBannerLoader(false)
-    };
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message
+          ? error?.response?.data?.message
+          : "Internal Server Error"
+      );
+    }
+    setBannerLoader(false);
+  };
+
+  const navigate = useNavigate();
+
+  const handleViewDetails = async (id) => {
+    try {
+      const res = await getSubCategoryDetailsServ(id);
+      const details = res?.data?.data;
+
+      console.log("Sub-category details:", details);
+
+      navigate(`/n-level-categories/${id}`, { state: { details } });
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Unable to fetch details right now"
+      );
+    }
+  };
+
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Categories" selectedItem="Sub Categories" />
@@ -211,26 +252,38 @@ function SubCategoriesList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
-                  onChange={(e) => setPayload({ ...payload, searchKey: e.target.value })}
+                  onChange={(e) =>
+                    setPayload({ ...payload, searchKey: e.target.value })
+                  }
                 />
               </div>
             </div>
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
-                <select className="form-control borderRadius24" onChange={(e) => setPayload({ ...payload, status: e.target.value })}>
-                <option value="">Select Status</option>
-                      <option value={true}>Active</option>
-                      <option value={false}>Inactive</option>
+                <select
+                  className="form-control"
+                  onChange={(e) =>
+                    setPayload({ ...payload, status: e.target.value })
+                  }
+                >
+                  <option value="">Select Status</option>
+                  <option value={true}>Active</option>
+                  <option value={false}>Inactive</option>
                 </select>
               </div>
             </div>
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
-                  style={{ background: "#6777EF" }}
+                  className="btn btn-primary w-100"
+                  style={{ color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Sub Category
@@ -309,14 +362,22 @@ function SubCategoriesList() {
                                 <td className="font-weight-600 text-center">
                                   {v?.name}
                                 </td>
-                                <td className="text-center">{v?.categoryId?.name}</td>
+                                <td className="text-center">
+                                  {v?.categoryId?.name}
+                                </td>
                                 <td className="text-center">
                                   {v?.status ? (
-                                    <div className="badge py-2" style={{background:"#63ED7A"}}>
+                                    <div
+                                      className="badge py-2"
+                                      style={{ background: "#63ED7A" }}
+                                    >
                                       Active
                                     </div>
                                   ) : (
-                                    <div className="badge py-2 " style={{background:"#FFA426"}}>
+                                    <div
+                                      className="badge py-2 "
+                                      style={{ background: "#FFA426" }}
+                                    >
                                       Inactive
                                     </div>
                                   )}
@@ -325,27 +386,40 @@ function SubCategoriesList() {
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
                                 <td className="text-center">
-                                  <a
+                                  {/* <BsEye
+                                    size={16}
+                                    className="mx-1 text-primary"
+                                    style={{ cursor: "pointer" }}
+                                    title="View Categories"
+                                    onClick={() => handleViewDetails(v?._id)}
+                                  /> */}
+
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
                                     onClick={() => {
-                                        setEditFormData({
-                                          name: v?.name,
-                                          image: "",
-                                          imgPrev: v?.image,
-                                          status: v?.status,
-                                          _id: v?._id,
-                                          categoryId: v?.categoryId?._id,
-                                        });
-                                      }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
-                                    onClick={() => handleDeleteSubCategoryFunc(v?._id)}
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                      setEditFormData({
+                                        name: v?.name,
+                                        image: "",
+                                        imgPrev: v?.image,
+                                        status: v?.status,
+                                        _id: v?._id,
+                                        categoryId: v?.categoryId?._id,
+                                      });
+                                    }}
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
+                                    onClick={() =>
+                                      handleDeleteSubCategoryFunc(v?._id)
+                                    }
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -355,15 +429,34 @@ function SubCategoriesList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>
         </div>
       </div>
       {addFormData?.show && (
-        <div className="modal fade show d-flex align-items-center  justify-content-center " tabIndex="-1">
+        <div
+          className="modal fade show d-flex align-items-center  justify-content-center "
+          tabIndex="-1"
+        >
           <div className="modal-dialog">
-            <div className="modal-content" style={{ borderRadius: "16px", background: "#f7f7f5", width: "364px" }}>
+            <div
+              className="modal-content"
+              style={{
+                borderRadius: "16px",
+                background: "#f7f7f5",
+                width: "364px",
+              }}
+            >
               <div className="d-flex justify-content-end pt-4 pb-0 px-4">
                 <img
                   src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
@@ -392,7 +485,10 @@ function SubCategoriesList() {
                     <h5 className="mb-4">Add Sub Category</h5>
                     <div className="p-1 border rounded mb-2">
                       {addFormData?.imgPrev ? (
-                        <img src={addFormData?.imgPrev} className="img-fluid w-100 shadow rounded" />
+                        <img
+                          src={addFormData?.imgPrev}
+                          className="img-fluid w-100 shadow rounded"
+                        />
                       ) : (
                         <p className="mb-0 text-center">No Item Selected !</p>
                       )}
@@ -412,7 +508,12 @@ function SubCategoriesList() {
                     <label className="mt-3">Category</label>
                     <select
                       className="form-control"
-                      onChange={(e) => setAddFormData({ ...addFormData, categoryId: e.target.value })}
+                      onChange={(e) =>
+                        setAddFormData({
+                          ...addFormData,
+                          categoryId: e.target.value,
+                        })
+                      }
                     >
                       <option value="">Select Category</option>
                       {mainCategoryList?.map((v, i) => {
@@ -423,23 +524,39 @@ function SubCategoriesList() {
                     <input
                       className="form-control"
                       type="text"
-                      onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
+                      onChange={(e) =>
+                        setAddFormData({ ...addFormData, name: e.target.value })
+                      }
                     />
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"
-                      onChange={(e) => setAddFormData({ ...addFormData, status: e.target.value })}
+                      onChange={(e) =>
+                        setAddFormData({
+                          ...addFormData,
+                          status: e.target.value,
+                        })
+                      }
                     >
                       <option value="">Select Status</option>
                       <option value={true}>Active</option>
                       <option value={false}>Inactive</option>
                     </select>
-                    {addFormData?.name && addFormData?.status && addFormData?.image && addFormData?.categoryId ? (
-                      <button className="btn btn-success w-100 mt-4" onClick={!isLoading && handleAddCategoryFunc}>
+                    {addFormData?.name &&
+                    addFormData?.status &&
+                    addFormData?.image &&
+                    addFormData?.categoryId ? (
+                      <button
+                        className="btn btn-success w-100 mt-4"
+                        onClick={!isLoading && handleAddCategoryFunc}
+                      >
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
                     ) : (
-                      <button className="btn btn-success w-100 mt-4" style={{ opacity: "0.5" }}>
+                      <button
+                        className="btn btn-success w-100 mt-4"
+                        style={{ opacity: "0.5" }}
+                      >
                         Submit
                       </button>
                     )}
@@ -453,9 +570,19 @@ function SubCategoriesList() {
       )}
       {addFormData?.show && <div className="modal-backdrop fade show"></div>}
       {editFormData?._id && (
-        <div className="modal fade show d-flex align-items-center  justify-content-center " tabIndex="-1">
+        <div
+          className="modal fade show d-flex align-items-center  justify-content-center "
+          tabIndex="-1"
+        >
           <div className="modal-dialog">
-            <div className="modal-content" style={{ borderRadius: "16px", background: "#f7f7f5", width: "364px" }}>
+            <div
+              className="modal-content"
+              style={{
+                borderRadius: "16px",
+                background: "#f7f7f5",
+                width: "364px",
+              }}
+            >
               <div className="d-flex justify-content-end pt-4 pb-0 px-4">
                 <img
                   src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
@@ -504,7 +631,12 @@ function SubCategoriesList() {
                     <label className="mt-3">Category</label>
                     <select
                       className="form-control"
-                      onChange={(e) => setEditFormData({ ...editFormData, categoryId: e.target.value })}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          categoryId: e.target.value,
+                        })
+                      }
                       value={editFormData?.categoryId || ""}
                     >
                       <option value="">Select Category</option>
@@ -520,13 +652,23 @@ function SubCategoriesList() {
                     <input
                       className="form-control"
                       type="text"
-                      onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          name: e.target.value,
+                        })
+                      }
                       value={editFormData?.name}
                     />
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"
-                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          status: e.target.value,
+                        })
+                      }
                       value={editFormData?.status}
                     >
                       <option value="">Select Status</option>
@@ -541,7 +683,10 @@ function SubCategoriesList() {
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
                     ) : (
-                      <button className="btn btn-success w-100 mt-4" style={{ opacity: "0.5" }}>
+                      <button
+                        className="btn btn-success w-100 mt-4"
+                        style={{ opacity: "0.5" }}
+                      >
                         Submit
                       </button>
                     )}

@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
 function TaxList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -59,7 +60,7 @@ function TaxList() {
   const [addFormData, setAddFormData] = useState({
     name: "",
     status: "",
-    percentage:"",
+    percentage: "",
     show: false,
   });
   const handleAddCategoryFunc = async () => {
@@ -107,12 +108,12 @@ function TaxList() {
   const [editFormData, setEditFormData] = useState({
     name: "",
     status: "",
-    percentage:"",
+    percentage: "",
     _id: "",
   });
   const handleUpdateCategoryFunc = async () => {
     setIsLoading(true);
-   
+
     try {
       let response = await updateTaxServ(editFormData);
       if (response?.data?.statusCode == "200") {
@@ -176,7 +177,7 @@ function TaxList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -187,7 +188,7 @@ function TaxList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -201,7 +202,7 @@ function TaxList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -296,8 +297,13 @@ function TaxList() {
                                 <td className="text-center">
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
+
                                 <td className="text-center">
-                                  <a
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
                                     onClick={() => {
                                       setEditFormData({
                                         name: v?.name,
@@ -306,18 +312,17 @@ function TaxList() {
                                         _id: v?._id,
                                       });
                                     }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -385,7 +390,10 @@ function TaxList() {
                       className="form-control"
                       type="number"
                       onChange={(e) =>
-                        setAddFormData({ ...addFormData, percentage: e.target.value })
+                        setAddFormData({
+                          ...addFormData,
+                          percentage: e.target.value,
+                        })
                       }
                     />
                     <label className="mt-3">Status</label>
@@ -471,7 +479,7 @@ function TaxList() {
                 >
                   <div className="w-100 px-2">
                     <h5 className="mb-4">Update Tax</h5>
-                    
+
                     <label className="mt-3">Name</label>
                     <input
                       className="form-control"

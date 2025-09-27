@@ -7,13 +7,19 @@ import {
   updateTaxServ,
   deleteTaxServ,
 } from "../../services/tax.service";
-import { getTicketCategoryListServ, ticketAddServ , ticketUpdateServ, ticketDeleteServ} from "../../services/ticker.service";
+import {
+  getTicketCategoryListServ,
+  ticketAddServ,
+  ticketUpdateServ,
+  ticketDeleteServ,
+} from "../../services/ticker.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
 function TicketCategoryList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -107,7 +113,7 @@ function TicketCategoryList() {
   const [editFormData, setEditFormData] = useState({
     name: "",
     status: "",
-    
+
     _id: "",
   });
   const handleUpdateCategoryFunc = async () => {
@@ -119,7 +125,7 @@ function TicketCategoryList() {
         toast.success(response?.data?.message);
         setEditFormData({
           name: "",
-         
+
           status: "",
           _id: "",
         });
@@ -179,7 +185,7 @@ function TicketCategoryList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -190,7 +196,7 @@ function TicketCategoryList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -204,7 +210,7 @@ function TicketCategoryList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -295,8 +301,13 @@ function TicketCategoryList() {
                                 <td className="text-center">
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
+
                                 <td className="text-center">
-                                  <a
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
                                     onClick={() => {
                                       setEditFormData({
                                         name: v?.name,
@@ -305,18 +316,17 @@ function TicketCategoryList() {
                                         _id: v?._id,
                                       });
                                     }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -379,7 +389,7 @@ function TicketCategoryList() {
                         setAddFormData({ ...addFormData, name: e.target.value })
                       }
                     />
-                   
+
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"
@@ -476,7 +486,7 @@ function TicketCategoryList() {
                       }
                       value={editFormData?.name}
                     />
-                    
+
                     <label className="mt-3">Status</label>
                     <select
                       className="form-control"

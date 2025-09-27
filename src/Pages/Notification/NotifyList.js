@@ -8,7 +8,7 @@ import {
 import {
   getNotifyServ,
   deleteNotifyServ,
-  addNotifyServ
+  addNotifyServ,
 } from "../../services/notification.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -16,8 +16,12 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
-import {getUserListServ} from "../../services/user.service";
+import { getUserListServ } from "../../services/user.service";
 import { MultiSelect } from "react-multi-select-component";
+import { getDriverListServ } from "../../services/driver.service";
+import { getVenderListServ } from "../../services/vender.services";
+import { BsTrash } from "react-icons/bs";
+import Pagination from "../../Components/Pagination";
 function NotifyList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -58,7 +62,15 @@ function NotifyList() {
     formData.append("icon", addFormData?.image);
     formData.append("title", addFormData?.title);
     formData.append("subTitle", addFormData?.subTitle);
-    selectedUsers.forEach((user) => formData.append("notifyUserIds[]", user?.value));
+    selectedUsers.forEach((user) =>
+      formData.append("notifyUserIds[]", user?.value)
+    );
+    selectedVenders.forEach((v) =>
+      formData.append("notifyVenderIds[]", v?.value)
+    );
+    selectedDrivers.forEach((d) =>
+      formData.append("notifyDriverIds[]", d?.value)
+    );
     try {
       let response = await addNotifyServ(formData);
       if (response?.data?.statusCode == "200") {
@@ -102,29 +114,64 @@ function NotifyList() {
       }
     }
   };
- 
-  
+
   const [showNotifyDivPopup, setShowNotifyDivPopup] = useState(null);
-  const [userList, setUserList]=useState([])
+  const [userList, setUserList] = useState([]);
   const handleGetUserFunc = async () => {
-      if (list.length == 0) {
-        setShowSkelton(true);
-      }
-      try {
-        let response = await getUserListServ({pageCount:200});
-        const userOptions = response?.data?.data?.map((v) => ({
-          value: v?.androidDeviceId,
-          label: `${v?.firstName} ${v?.lastName}`,
-        }));
-        setUserList(userOptions);
-        
-      } catch (error) {}
-      setShowSkelton(false);
-    };
-    useEffect(()=>{
-      handleGetUserFunc()
-    },[])
-    const [selectedUsers, setSelectedUsers]=useState([])
+    if (list.length == 0) {
+      setShowSkelton(true);
+    }
+    try {
+      let response = await getUserListServ({ pageCount: 200 });
+      const userOptions = response?.data?.data?.map((v) => ({
+        value: v?.androidDeviceId,
+        label: `${v?.firstName} ${v?.lastName}`,
+      }));
+      setUserList(userOptions);
+    } catch (error) {}
+    setShowSkelton(false);
+  };
+
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const [venderList, setVenderList] = useState([]);
+  const [selectedVenders, setSelectedVenders] = useState([]);
+
+  const [driverList, setDriverList] = useState([]);
+  const [selectedDrivers, setSelectedDrivers] = useState([]);
+
+  const handleGetVenderFunc = async () => {
+    try {
+      const res = await getVenderListServ({ pageCount: 200 });
+      const venderOptions = res?.data?.data?.map((v) => ({
+        value: v?.androidDeviceId,
+        label: `${v?.firstName} ${v?.lastName}`,
+      }));
+      setVenderList(venderOptions);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // NEW: fetch drivers
+  const handleGetDriverFunc = async () => {
+    try {
+      const res = await getDriverListServ({ pageCount: 200 });
+      const driverOptions = res?.data?.data?.map((v) => ({
+        value: v?.androidDeviceId,
+        label: `${v?.firstName} ${v?.lastName}`,
+      }));
+      setDriverList(driverOptions);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    handleGetUserFunc();
+    handleGetVenderFunc();
+    handleGetDriverFunc();
+  }, []);
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Broadcaster" selectedItem="Notify" />
@@ -138,7 +185,7 @@ function NotifyList() {
             <div className="col-lg-5 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -150,7 +197,7 @@ function NotifyList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -254,15 +301,15 @@ function NotifyList() {
                                   </div>
                                 </td>
                                 <td className="text-center">
-                                 
-                                  <a
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -272,6 +319,15 @@ function NotifyList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>
@@ -288,7 +344,9 @@ function NotifyList() {
               style={{
                 borderRadius: "16px",
                 background: "#f7f7f5",
-                width: "364px",
+                width: "564px",
+                maxHeight: "95vh",
+                overflowY: "auto",
               }}
             >
               <div className="d-flex justify-content-end pt-4 pb-0 px-4">
@@ -339,41 +397,95 @@ function NotifyList() {
                         })
                       }
                     />
-                    <label className="mt-3">Title</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setAddFormData({ ...addFormData, title: e.target.value })
-                      }
-                    />
-                    <label className="mt-3">Sub Title</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      onChange={(e) =>
-                        setAddFormData({ ...addFormData, subTitle: e.target.value })
-                      }
-                    />
-                    <label className="mt-3">Users</label>
-                    <MultiSelect
-                        options={userList}
-                        value={selectedUsers}
-                        onChange={setSelectedUsers}
-                        labelledBy="Select Users"
-                        hasSelectAll={true} 
-                        overrideStrings={{
-                          selectSomeItems: "Select Users", 
-                          allItemsAreSelected: "All Users Selected",
-                          selectAll: "Select All",
-                          search: "Search Users...",
-                        }}
-                      />
-                   
+                    <div className="row mt-3">
+                      <div className="col-md-6">
+                        <label className="mt-3">Title</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          onChange={(e) =>
+                            setAddFormData({
+                              ...addFormData,
+                              title: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="mt-3">Sub Title</label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          onChange={(e) =>
+                            setAddFormData({
+                              ...addFormData,
+                              subTitle: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="row">
+                      {/* Users */}
+                      <div className="col-md-4 mb-3">
+                        <label className="mt-3 d-block">Users</label>
+                        <MultiSelect
+                          options={userList}
+                          value={selectedUsers}
+                          onChange={setSelectedUsers}
+                          labelledBy="Select Users"
+                          hasSelectAll={true}
+                          overrideStrings={{
+                            selectSomeItems: "Select Users",
+                            allItemsAreSelected: "All Users Selected",
+                            selectAll: "Select All",
+                            search: "Search Users...",
+                          }}
+                        />
+                      </div>
+
+                      {/* Vendors */}
+                      <div className="col-md-4 mb-3">
+                        <label className="mt-3 d-block">Vendors</label>
+                        <MultiSelect
+                          options={venderList}
+                          value={selectedVenders}
+                          onChange={setSelectedVenders}
+                          labelledBy="Select Vendors"
+                          hasSelectAll={true}
+                          overrideStrings={{
+                            selectSomeItems: "Select Vendors",
+                            allItemsAreSelected: "All Vendors Selected",
+                            selectAll: "Select All",
+                            search: "Search Vendors...",
+                          }}
+                        />
+                      </div>
+
+                      {/* Drivers */}
+                      <div className="col-md-4 mb-3">
+                        <label className="mt-3 d-block">Drivers</label>
+                        <MultiSelect
+                          options={driverList}
+                          value={selectedDrivers}
+                          onChange={setSelectedDrivers}
+                          labelledBy="Select Drivers"
+                          hasSelectAll={true}
+                          overrideStrings={{
+                            selectSomeItems: "Select Drivers",
+                            allItemsAreSelected: "All Drivers Selected",
+                            selectAll: "Select All",
+                            search: "Search Drivers...",
+                          }}
+                        />
+                      </div>
+                    </div>
+
                     <button
                       className="btn btn-success w-100 mt-4"
                       onClick={
-                        selectedUsers?.length>0 &&
+                        selectedUsers?.length > 0 &&
                         addFormData?.title &&
                         addFormData?.image &&
                         addFormData?.subTitle &&
@@ -381,13 +493,12 @@ function NotifyList() {
                           ? handleAddNotifyFunc
                           : undefined
                       }
-                      
                       style={{
                         opacity:
                           !addFormData?.title ||
                           !addFormData?.subTitle ||
                           !addFormData?.image ||
-                          !selectedUsers?.length>0 ||
+                          !selectedUsers?.length > 0 ||
                           isLoading
                             ? "0.5"
                             : "1",
@@ -404,7 +515,6 @@ function NotifyList() {
         </div>
       )}
       {addFormData?.show && <div className="modal-backdrop fade show"></div>}
-      
 
       {showNotifyDivPopup && (
         <div

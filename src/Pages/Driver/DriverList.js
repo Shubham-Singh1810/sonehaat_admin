@@ -13,6 +13,8 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import { useNavigate } from "react-router-dom";
+import { BsEye, BsTrash, BsPencil } from "react-icons/bs";
+import Pagination from "../../Components/Pagination";
 function DriverList() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -57,20 +59,20 @@ function DriverList() {
     handleGetDriverFunc();
   }, [payload]);
   useEffect(() => {
-      // Event listener jab new user register hoga
-      socket.on("new-driver-registered", (data) => {
-        handleGetDriverFunc(); // user list ko dubara fetch karo
-      });
-       socket.on("driver-updated", (data) => {
-        handleGetDriverFunc(); // user list ko dubara fetch karo
-      });
-  
-      // Clean up karna jaruri hai warna multiple listener lag jayenge
-      return () => {
-        socket.off("new-driver-registered");
-        socket.off("driver-updated");
-      };
-    }, []);
+    // Event listener jab new user register hoga
+    socket.on("new-driver-registered", (data) => {
+      handleGetDriverFunc(); // user list ko dubara fetch karo
+    });
+    socket.on("driver-updated", (data) => {
+      handleGetDriverFunc(); // user list ko dubara fetch karo
+    });
+
+    // Clean up karna jaruri hai warna multiple listener lag jayenge
+    return () => {
+      socket.off("new-driver-registered");
+      socket.off("driver-updated");
+    };
+  }, []);
   const [isLoading, setIsLoading] = useState(false);
 
   const renderStatus = (profileStatus) => {
@@ -178,7 +180,7 @@ function DriverList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control "
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -189,7 +191,7 @@ function DriverList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control "
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -198,7 +200,9 @@ function DriverList() {
                   <option value="approved">Active</option>
                   <option value="incompleted">Profile Incomplete</option>
                   <option value="completed">Profile Completed</option>
-                  <option value="accountDetailsCompleted">Account Details Uploaded</option>
+                  <option value="accountDetailsCompleted">
+                    Account Details Uploaded
+                  </option>
                   <option value="rejected">Rejected</option>
                   <option value="reUploaded">Reuploaded</option>
                 </select>
@@ -207,9 +211,16 @@ function DriverList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
-                  style={{ background: "#6777EF" }}
-                  onClick={()=>alert("Work in progress")}
+                  className="btn btn-primary w-100"
+                  style={{
+                    color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
+                  onClick={() => navigate("/add-driver")}
                 >
                   Add Driver
                 </button>
@@ -228,115 +239,136 @@ function DriverList() {
                       >
                         Sr. No
                       </th>
-                      <th className="text-center py-3">Profile Picture</th>
-                      <th className="text-center py-3">First Name</th>
-                      <th className="text-center py-3">Last Name</th>
+                      <th className="text-center py-3">Profile</th>
                       <th className="text-center py-3">Email</th>
                       <th className="text-center py-3">Phone</th>
+                      <th className="text-center py-3">Operational City</th>
                       <th className="text-center py-3">Status</th>
-
                       <th
-                        className="text-center py-3 "
+                        className="text-center py-3"
                         style={{ borderRadius: "0px 30px 30px 0px" }}
                       >
                         Action
                       </th>
                     </tr>
-                    <div className="py-2"></div>
-                    {showSkelton
-                      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]?.map((v, i) => {
-                          return (
-                            <>
-                              <tr key={i}>
-                                <td className="text-center">
-                                  <Skeleton width={50} height={50} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton
-                                    width={50}
-                                    height={50}
-                                    borderRadius={25}
-                                  />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                              </tr>
-                              <div className="py-2"></div>
-                            </>
-                          );
-                        })
-                      : list?.map((v, i) => {
-                          return (
-                            <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
-                                <td className="text-center">
-                                  <img
-                                    src={v?.profilePic}
-                                    style={{
-                                      height: "30px",
-                                      width: "30px",
-                                      borderRadius: "50%",
-                                    }}
-                                    className="border"
-                                  />
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {v?.firstName}
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {v?.lastName}
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {v?.email}
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {"+" + v?.countryCode + " " + v?.phone}
-                                </td>
-                                <td className="text-center">
-                                  {renderStatus(v?.profileStatus)}
-                                </td>
 
-                                <td className="text-center">
-                                  <a
-                                    onClick={() => {
-                                      navigate(`/driver-approval/${v?._id}`);
-                                    }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    View
-                                  </a>
-                                  <a
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                    onClick={() => deleteDriverFunc(v?._id)}
-                                  >
-                                    Delete
-                                  </a>
-                                </td>
-                              </tr>
-                              <div className="py-2"></div>
-                            </>
-                          );
-                        })}
+                    {showSkelton
+                      ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((v, i) => (
+                          <tr key={i}>
+                            <td className="text-center">
+                              <Skeleton width={50} height={50} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton
+                                width={50}
+                                height={50}
+                                borderRadius={25}
+                              />
+                              <Skeleton
+                                width={80}
+                                height={15}
+                                style={{ marginTop: 4 }}
+                              />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                          </tr>
+                        ))
+                      : list?.map((v, i) => (
+                          <tr key={v._id}>
+                            <td className="text-center">{i + 1}</td>
+                            <td className="text-center">
+                              <img
+                                src={v?.profilePic}
+                                alt="profile"
+                                style={{
+                                  height: "50px",
+                                  width: "50px",
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                  border: "2px solid #eee",
+                                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                                  display: "block",
+                                  margin: "0 auto",
+                                }}
+                              />
+                              <div
+                                style={{
+                                  fontSize: "0.8rem",
+                                  color: "#6c757d",
+                                  fontWeight: 500,
+                                  marginTop: 4,
+                                  lineHeight: 1.2,
+                                }}
+                              >
+                                {v?.firstName} {v?.lastName}
+                              </div>
+                            </td>
+                            <td className="text-center">{v?.email}</td>
+                            <td className="text-center">
+                              {v?.countryCode ? `+${v.countryCode} ` : ""}
+                              {v?.phone}
+                            </td>
+                            <td className="text-center">
+                              {v?.operationalCity || "N/A"}
+                            </td>
+                            <td className="text-center">
+                              {renderStatus(v?.profileStatus)}
+                            </td>
+                            <td className="text-center">
+                              <BsEye
+                                size={16}
+                                className="mx-1 text-info"
+                                style={{ cursor: "pointer" }}
+                                title="View"
+                                onClick={() =>
+                                  navigate(`/driver-approval/${v?._id}`)
+                                }
+                              />
+                              <BsPencil
+                                size={16}
+                                className="mx-1 text-primary"
+                                style={{ cursor: "pointer" }}
+                                title="Edit"
+                                onClick={() =>
+                                  navigate(`/edit-driver/${v?._id}`)
+                                }
+                              />
+                              <BsTrash
+                                size={16}
+                                className="mx-1 text-danger"
+                                style={{ cursor: "pointer" }}
+                                title="Delete"
+                                onClick={() => deleteDriverFunc(v?._id)}
+                              />
+                            </td>
+                          </tr>
+                        ))}
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                  <div className="d-flex justify-content-center my-3">
+                    <Pagination
+                      payload={payload}
+                      setPayload={setPayload}
+                      totalCount={statics?.totalCount || 0}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

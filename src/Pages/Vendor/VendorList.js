@@ -13,6 +13,8 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import { useNavigate } from "react-router-dom";
+import { BsEye, BsTrash, BsPencil } from "react-icons/bs";
+import Pagination from "../../Components/Pagination";
 function VendorList() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -56,21 +58,21 @@ function VendorList() {
   useEffect(() => {
     handleGetVenderFunc();
   }, [payload]);
-   useEffect(() => {
-      // Event listener jab new user register hoga
-      socket.on("new-vendor-registered", (data) => {
-        handleGetVenderFunc(); // user list ko dubara fetch karo
-      });
-       socket.on("vendor-updated", (data) => {
-        handleGetVenderFunc(); // user list ko dubara fetch karo
-      });
-  
-      // Clean up karna jaruri hai warna multiple listener lag jayenge
-      return () => {
-        socket.off("new-vendor-registered");
-        socket.off("vendor-updated");
-      };
-    }, []);
+  useEffect(() => {
+    // Event listener jab new user register hoga
+    socket.on("new-vendor-registered", (data) => {
+      handleGetVenderFunc(); // user list ko dubara fetch karo
+    });
+    socket.on("vendor-updated", (data) => {
+      handleGetVenderFunc(); // user list ko dubara fetch karo
+    });
+
+    // Clean up karna jaruri hai warna multiple listener lag jayenge
+    return () => {
+      socket.off("new-vendor-registered");
+      socket.off("vendor-updated");
+    };
+  }, []);
   const renderStatus = (profileStatus) => {
     if (profileStatus == "incompleted") {
       return (
@@ -180,7 +182,7 @@ function VendorList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -191,7 +193,7 @@ function VendorList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -199,21 +201,29 @@ function VendorList() {
                   <option value="">Select Status</option>
                   <option value="incompleted">Profile Incomplete</option>
                   <option value="otpVerified">OTP Verified</option>
-                  <option value="storeDetailsCompleted">Store Details Completed</option>
+                  <option value="storeDetailsCompleted">
+                    Store Details Completed
+                  </option>
                   <option value="completed">Profile Completed</option>
                   <option value="approved">Active</option>
                   <option value="rejected">Rejected</option>
                   <option value="reUploaded">Reuploaded</option>
-                  
                 </select>
               </div>
             </div>
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
-                  style={{ background: "#6777EF" }}
-                  onClick={()=>alert("Work in progress")}
+                  className="btn btn-primary w-100"
+                  style={{
+                    color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
+                  onClick={() => navigate("/add-vendor")}
                 >
                   Add Vendor
                 </button>
@@ -232,111 +242,133 @@ function VendorList() {
                       >
                         Sr. No
                       </th>
-                      <th className="text-center py-3">Profile Picture</th>
-                      <th className="text-center py-3">First Name</th>
-                      <th className="text-center py-3">Last Name</th>
+                      <th className="text-center py-3">Vendor</th>
                       <th className="text-center py-3">Email</th>
                       <th className="text-center py-3">Phone</th>
                       <th className="text-center py-3">Status</th>
+                      <th className="text-center py-3">Commission</th>
                       <th
-                        className="text-center py-3 "
+                        className="text-center py-3"
                         style={{ borderRadius: "0px 30px 30px 0px" }}
                       >
                         Action
                       </th>
                     </tr>
-                    <div className="py-2"></div>
-                    {showSkelton
-                      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]?.map((v, i) => {
-                          return (
-                            <>
-                              <tr key={i}>
-                                <td className="text-center">
-                                  <Skeleton width={50} height={50} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton
-                                    width={50}
-                                    height={50}
-                                    borderRadius={25}
-                                  />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                                <td className="text-center">
-                                  <Skeleton width={100} height={25} />
-                                </td>
-                              </tr>
-                              <div className="py-2"></div>
-                            </>
-                          );
-                        })
-                      : list?.map((v, i) => {
-                          return (
-                            <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
-                                <td className="text-center">
-                                  <img
-                                    src={v?.profilePic}
-                                    style={{ height: "30px" }}
-                                  />
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {v?.firstName}
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {v?.lastName}
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {v?.email}
-                                </td>
-                                <td className="font-weight-600 text-center">
-                                  {v?.phone}
-                                </td>
-                                <td className="text-center">
-                                  {renderStatus(v?.profileStatus)}
-                                </td>
 
-                                <td className="text-center">
-                                  <a
-                                    className="btn btn-info  mx-2 text-light shadow-sm"
-                                    onClick={() => {
-                                      navigate(`/vendor-approval/${v?._id}`);
-                                    }}
-                                  >
-                                    View
-                                  </a>
-                                  <a
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                    onClick={() =>
-                                      handleDeleteVenderFunc(v?._id)
-                                    }
-                                  >
-                                    Delete
-                                  </a>
-                                </td>
-                              </tr>
-                              <div className="py-2"></div>
-                            </>
-                          );
-                        })}
+                    {showSkelton
+                      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]?.map((v, i) => (
+                          <tr key={i}>
+                            <td className="text-center">
+                              <Skeleton width={50} height={50} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton
+                                width={50}
+                                height={50}
+                                borderRadius={25}
+                              />
+                              <div className="mt-1">
+                                <Skeleton width={80} height={20} />
+                              </div>
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                            <td className="text-center">
+                              <Skeleton width={100} height={25} />
+                            </td>
+                          </tr>
+                        ))
+                      : list?.map((v, i) => (
+                          <tr key={v?._id}>
+                            <td className="text-center">{i + 1}</td>
+                            <td className="text-center">
+                              <img
+                                src={v?.profilePic}
+                                alt="profile"
+                                style={{
+                                  height: "50px",
+                                  width: "50px",
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                  border: "2px solid #eee", // subtle border for better look
+                                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)", // soft shadow
+                                }}
+                              />
+                              <div
+                                className="mt-1"
+                                style={{
+                                  fontSize: "0.85rem",
+                                  color: "#6c757d", // gray color
+                                  fontWeight: "500",
+                                  lineHeight: "1.2",
+                                }}
+                              >
+                                {v?.firstName} {v?.lastName}
+                              </div>
+                            </td>
+
+                            <td className="text-center">{v?.email}</td>
+                            <td className="text-center">{v?.phone}</td>
+                            <td className="text-center">
+                              {renderStatus(v?.profileStatus)}
+                            </td>
+                            <td className="text-center">
+                              {v?.venderCommision
+                                ? `${v.venderCommision}%`
+                                : "N/A"}
+                            </td>
+
+                            <td className="text-center">
+                              <BsEye
+                                size={16}
+                                className="mx-1 text-info"
+                                style={{ cursor: "pointer" }}
+                                title="View"
+                                onClick={() =>
+                                  navigate(`/vendor-approval/${v?._id}`)
+                                }
+                              />
+                              <BsPencil
+                                size={14}
+                                className="mx-1 text-primary"
+                                style={{ cursor: "pointer" }}
+                                onClick={() =>
+                                  navigate(`/edit-vendor/${v?._id}`)
+                                }
+                                title="Edit"
+                              />
+                              <BsTrash
+                                size={16}
+                                className="mx-1 text-danger"
+                                style={{ cursor: "pointer" }}
+                                title="Delete"
+                                onClick={() => handleDeleteVenderFunc(v?._id)}
+                              />
+                            </td>
+                          </tr>
+                        ))}
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                  <div className="d-flex justify-content-center my-3">
+                    <Pagination
+                      payload={payload}
+                      setPayload={setPayload}
+                      totalCount={statics?.totalCount || 0}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

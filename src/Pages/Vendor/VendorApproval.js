@@ -21,7 +21,7 @@ const VendorApproval = () => {
     lastNameRejectReason: "",
     isEmailApproved: "",
     emailRejectReason: "",
-    phoneRejectReason: "",
+    isPhoneApproved: "",
     phoneRejectReason: "",
     isStoreLogoApproved: "",
     storeLogoRejectReason: "",
@@ -37,8 +37,6 @@ const VendorApproval = () => {
     storeDescriptionRejectReason: "",
     isPincodeApproved: "",
     pincodeRejectReason: "",
-    isStoreAddressApproved: "",
-    storeAddressRejectReason: "",
     isStoreAddressApproved: "",
     storeAddressRejectReason: "",
 
@@ -62,6 +60,7 @@ const VendorApproval = () => {
     upiIdRejectReason: "",
     isPanNumberApproved: "",
     panNumberRejectReason: "",
+    profileStatus: "",
   });
 
   const getVendorDetailsFunc = async () => {
@@ -220,7 +219,7 @@ const VendorApproval = () => {
     try {
       let response = await updateVendorProfile({ ...formData, id: params?.id });
       console.log(response?.data?.statusCode);
-      if (response?.data?.statusCode == "200") {
+      if (response?.data?.statusCode == 200) {
         toast.success(response?.data?.message);
         navigate("/vendor-list");
       }
@@ -1031,7 +1030,7 @@ const VendorApproval = () => {
                       {!formData.isAccountHolderNameApproved && (
                         <input
                           className="form-control mt-2"
-                          value={formData.accountNumberRejectReason}
+                          value={formData.accountHolderNameRejectReason}
                           onChange={(e) =>
                             setFormData({
                               ...formData,

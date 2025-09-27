@@ -1,132 +1,436 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
-
-import { updateProductServ } from "../../services/product.services";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useParams, useNavigate } from "react-router-dom";
-import { getProductDetailsServ } from "../../services/product.services";
+import {
+  getProductDetailsServ,
+  updateProductServ,
+} from "../../services/product.services";
+
 function ProductApproval() {
   const params = useParams();
-  const [details, setDetails] = useState(null);
-  const [formData, setFormData] = useState({
-    isNameApproved: "",
-    isTagsApproved: false,
-    isProductTypeApproved: false,
-    isTaxApproved: false,
-    isMadeInApproved: false,
-    isHsnCodeApproved: false,
-    isShortDescriptionApproved: false,
-    isStatusApproved: false,
-    isMinOrderQuantityApproved: false,
-    isMaxOrderQuantityApproved: false,
-    isWarrantyPeriodApproved: false,
-    isGuaranteePeriodApproved: false,
-    isCategoryIdApproved: false,
-    isSubCategoryIdApproved: false,
-    isStockQuantityApproved: false,
-    isBrandIdApproved: false,
-    isZipcodeIdApproved: false,
-    isProductVideoUrlApproved: false,
-    isDescriptionApproved: false,
-    isPriceApproved: false,
-    isDiscountedPriceApproved: false,
-    isProductHeroImageApproved: false,
-    isProductGalleryApproved: false,
-    isProductVideoApproved: false,
+  const navigate = useNavigate();
 
-    // reject reasons
+  const [details, setDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Approval booleans + reject reasons (initialize defaults; set from API)
+  const [formData, setFormData] = useState({
+    // Step 1 basics
+    isNameApproved: false,
     nameRejectReason: "waiting for approval",
+    isTagsApproved: false,
     tagsRejectReason: "waiting for approval",
+    isProductTypeApproved: false,
     productTypeRejectReason: "waiting for approval",
+    isTaxApproved: false,
     taxRejectReason: "waiting for approval",
+    isMadeInApproved: false,
     madeInRejectReason: "waiting for approval",
+    isHsnCodeApproved: false,
     hsnCodeRejectReason: "waiting for approval",
+    isShortDescriptionApproved: false,
     shortDescriptionRejectReason: "waiting for approval",
+
+    // Step 2 quantities and category tree
+    isStatusApproved: false,
     statusRejectReason: "waiting for approval",
+    isMinOrderQuantityApproved: false,
     minOrderQuantityRejectReason: "waiting for approval",
+    isMaxOrderQuantityApproved: false,
     maxOrderQuantityRejectReason: "waiting for approval",
+    isWarrantyPeriodApproved: false,
     warrantyPeriodRejectReason: "waiting for approval",
+    isGuaranteePeriodApproved: false,
     guaranteePeriodRejectReason: "waiting for approval",
+    isCategoryIdApproved: false,
     categoryIdRejectReason: "waiting for approval",
+    isSubCategoryIdApproved: false,
     subCategoryIdRejectReason: "waiting for approval",
+    // NEW: N-Level category approval fields
+    isNLevelCategoryIdApproved: false,
+    nLevelCategoryIdRejectReason: "waiting for approval",
+    isStockQuantityApproved: false,
     stockQuantityRejectReason: "waiting for approval",
+    isBrandIdApproved: false,
     brandIdRejectReason: "waiting for approval",
+    isZipcodeIdApproved: false,
     zipcodeIdRejectReason: "waiting for approval",
+
+    // Media and descriptions
+    isProductVideoUrlApproved: false,
     productVideoUrlRejectReason: "waiting for approval",
+    isDescriptionApproved: false,
     descriptionRejectReason: "waiting for approval",
+    isPriceApproved: false,
     priceRejectReason: "waiting for approval",
+    isDiscountedPriceApproved: false,
     discountedPriceRejectReason: "waiting for approval",
+    isProductHeroImageApproved: false,
     productHeroImageRejectReason: "waiting for approval",
+    isProductGalleryApproved: false,
     productGalleryRejectReason: "waiting for approval",
+    isProductVideoApproved: false,
     productVideoRejectReason: "waiting for approval",
+    variantsApproval: [],
+
+    // Misc product flags often shown in approval panels
+    // These may be displayed read-only with their own approval if desired
+    // isProductReturnable, isCodAllowed, isProductTaxIncluded, isProductCancelable handled in UI only
+
+    // Overall status
+    profileStatus: "",
   });
 
   const getProductDetails = async () => {
     try {
-      let response = await getProductDetailsServ(params?.id);
-      if (response?.data?.statusCode == "200") {
-        setDetails(response?.data?.data);
+      const response = await getProductDetailsServ(params?.id);
+      if (response?.data?.statusCode === 200) {
         const data = response?.data?.data;
-        setFormData({
-          isNameApproved: data?.isNameApproved,
-          isTagsApproved: data?.isTagsApproved,
-          isProductTypeApproved: data?.isProductTypeApproved,
-          isTaxApproved: data?.isTaxApproved,
-          isMadeInApproved: data?.isMadeInApproved,
-          isHsnCodeApproved: data?.isHsnCodeApproved,
-          isShortDescriptionApproved: data?.isShortDescriptionApproved,
-          isStatusApproved: data?.isStatusApproved,
-          isMinOrderQuantityApproved: data?.isMinOrderQuantityApproved,
-          isMaxOrderQuantityApproved: data?.isMaxOrderQuantityApproved,
-          isWarrantyPeriodApproved: data?.isWarrantyPeriodApproved,
-          isGuaranteePeriodApproved: data?.isGuaranteePeriodApproved,
-          isCategoryIdApproved: data?.isCategoryIdApproved,
-          isSubCategoryIdApproved: data?.isSubCategoryIdApproved,
-          isStockQuantityApproved: data?.isStockQuantityApproved,
-          isBrandIdApproved: data?.isBrandIdApproved,
-          isZipcodeIdApproved: data?.isZipcodeIdApproved,
-          isProductVideoUrlApproved: data?.isProductVideoUrlApproved,
-          isDescriptionApproved: data?.isDescriptionApproved,
-          isPriceApproved: data?.isPriceApproved,
-          isDiscountedPriceApproved: data?.isDiscountedPriceApproved,
-          isProductHeroImageApproved: data?.isProductHeroImageApproved,
-          isProductGalleryApproved: data?.isProductGalleryApproved,
-          isProductVideoApproved: data?.isProductVideoApproved,
-          nameRejectReason: data?.nameRejectReason,
-          tagsRejectReason: data?.tagsRejectReason,
-          productTypeRejectReason: data?.productTypeRejectReason,
-          taxRejectReason: data?.taxRejectReason,
-          madeInRejectReason: data?.madeInRejectReason,
-          hsnCodeRejectReason: data?.hsnCodeRejectReason,
-          shortDescriptionRejectReason: data?.shortDescriptionRejectReason,
-          statusRejectReason: data?.statusRejectReason,
-          minOrderQuantityRejectReason: data?.minOrderQuantityRejectReason,
-          maxOrderQuantityRejectReason: data?.maxOrderQuantityRejectReason,
-          warrantyPeriodRejectReason: data?.warrantyPeriodRejectReason,
-          guaranteePeriodRejectReason: data?.guaranteePeriodRejectReason,
-          categoryIdRejectReason: data?.categoryIdRejectReason,
-          subCategoryIdRejectReason: data?.subCategoryIdRejectReason,
-          stockQuantityRejectReason: data?.stockQuantityRejectReason,
-          brandIdRejectReason: data?.brandIdRejectReason,
-          zipcodeIdRejectReason: data?.zipcodeIdRejectReason,
-          productVideoUrlRejectReason: data?.productVideoUrlRejectReason,
-          descriptionRejectReason: data?.descriptionRejectReason,
-          priceRejectReason: data?.priceRejectReason,
-          discountedPriceRejectReason: data?.discountedPriceRejectReason,
-          productHeroImageRejectReason: data?.productHeroImageRejectReason,
-          productGalleryRejectReason: data?.productGalleryRejectReason,
-          productVideoRejectReason: data?.productVideoRejectReason,
-        });
+        setDetails(data);
+
+        setFormData((prev) => ({
+          ...prev,
+          // Booleans from API (fallback to prev value if absent)
+          isNameApproved: data?.isNameApproved ?? prev.isNameApproved,
+          isTagsApproved: data?.isTagsApproved ?? prev.isTagsApproved,
+          isProductTypeApproved:
+            data?.isProductTypeApproved ?? prev.isProductTypeApproved,
+          isTaxApproved: data?.isTaxApproved ?? prev.isTaxApproved,
+          isMadeInApproved: data?.isMadeInApproved ?? prev.isMadeInApproved,
+          isHsnCodeApproved: data?.isHsnCodeApproved ?? prev.isHsnCodeApproved,
+          isShortDescriptionApproved:
+            data?.isShortDescriptionApproved ?? prev.isShortDescriptionApproved,
+
+          isStatusApproved: data?.isStatusApproved ?? prev.isStatusApproved,
+          isMinOrderQuantityApproved:
+            data?.isMinOrderQuantityApproved ?? prev.isMinOrderQuantityApproved,
+          isMaxOrderQuantityApproved:
+            data?.isMaxOrderQuantityApproved ?? prev.isMaxOrderQuantityApproved,
+          isWarrantyPeriodApproved:
+            data?.isWarrantyPeriodApproved ?? prev.isWarrantyPeriodApproved,
+          isGuaranteePeriodApproved:
+            data?.isGuaranteePeriodApproved ?? prev.isGuaranteePeriodApproved,
+          isCategoryIdApproved:
+            data?.isCategoryIdApproved ?? prev.isCategoryIdApproved,
+          isSubCategoryIdApproved:
+            data?.isSubCategoryIdApproved ?? prev.isSubCategoryIdApproved,
+          // NEW fields from API
+          isNLevelCategoryIdApproved:
+            data?.isNLevelCategoryIdApproved ?? prev.isNLevelCategoryIdApproved,
+
+          isStockQuantityApproved:
+            data?.isStockQuantityApproved ?? prev.isStockQuantityApproved,
+          isBrandIdApproved: data?.isBrandIdApproved ?? prev.isBrandIdApproved,
+          isZipcodeIdApproved:
+            data?.isZipcodeIdApproved ?? prev.isZipcodeIdApproved,
+
+          isProductVideoUrlApproved:
+            data?.isProductVideoUrlApproved ?? prev.isProductVideoUrlApproved,
+          isDescriptionApproved:
+            data?.isDescriptionApproved ?? prev.isDescriptionApproved,
+          isPriceApproved: data?.isPriceApproved ?? prev.isPriceApproved,
+          isDiscountedPriceApproved:
+            data?.isDiscountedPriceApproved ?? prev.isDiscountedPriceApproved,
+          isProductHeroImageApproved:
+            data?.isProductHeroImageApproved ?? prev.isProductHeroImageApproved,
+          isProductGalleryApproved:
+            data?.isProductGalleryApproved ?? prev.isProductGalleryApproved,
+          isProductVideoApproved:
+            data?.isProductVideoApproved ?? prev.isProductVideoApproved,
+          isProductVariantsApproved: data?.isProductVariantsApproved ?? false,
+
+          // Reject reasons from API (fallback to previous state)
+          nameRejectReason: data?.nameRejectReason ?? prev.nameRejectReason,
+          tagsRejectReason: data?.tagsRejectReason ?? prev.tagsRejectReason,
+          productTypeRejectReason:
+            data?.productTypeRejectReason ?? prev.productTypeRejectReason,
+          taxRejectReason: data?.taxRejectReason ?? prev.taxRejectReason,
+          madeInRejectReason:
+            data?.madeInRejectReason ?? prev.madeInRejectReason,
+          hsnCodeRejectReason:
+            data?.hsnCodeRejectReason ?? prev.hsnCodeRejectReason,
+          shortDescriptionRejectReason:
+            data?.shortDescriptionRejectReason ??
+            prev.shortDescriptionRejectReason,
+
+          statusRejectReason:
+            data?.statusRejectReason ?? prev.statusRejectReason,
+          minOrderQuantityRejectReason:
+            data?.minOrderQuantityRejectReason ??
+            prev.minOrderQuantityRejectReason,
+          maxOrderQuantityRejectReason:
+            data?.maxOrderQuantityRejectReason ??
+            prev.maxOrderQuantityRejectReason,
+          warrantyPeriodRejectReason:
+            data?.warrantyPeriodRejectReason ?? prev.warrantyPeriodRejectReason,
+          guaranteePeriodRejectReason:
+            data?.guaranteePeriodRejectReason ??
+            prev.guaranteePeriodRejectReason,
+          categoryIdRejectReason:
+            data?.categoryIdRejectReason ?? prev.categoryIdRejectReason,
+          subCategoryIdRejectReason:
+            data?.subCategoryIdRejectReason ?? prev.subCategoryIdRejectReason,
+          // NEW: n-level reject reason
+          nLevelCategoryIdRejectReason:
+            data?.nLevelCategoryIdRejectReason ??
+            prev.nLevelCategoryIdRejectReason,
+
+          stockQuantityRejectReason:
+            data?.stockQuantityRejectReason ?? prev.stockQuantityRejectReason,
+          brandIdRejectReason:
+            data?.brandIdRejectReason ?? prev.brandIdRejectReason,
+          zipcodeIdRejectReason:
+            data?.zipcodeIdRejectReason ?? prev.zipcodeIdRejectReason,
+
+          productVideoUrlRejectReason:
+            data?.productVideoUrlRejectReason ??
+            prev.productVideoUrlRejectReason,
+          descriptionRejectReason:
+            data?.descriptionRejectReason ?? prev.descriptionRejectReason,
+          priceRejectReason: data?.priceRejectReason ?? prev.priceRejectReason,
+          discountedPriceRejectReason:
+            data?.discountedPriceRejectReason ??
+            prev.discountedPriceRejectReason,
+          productHeroImageRejectReason:
+            data?.productHeroImageRejectReason ??
+            prev.productHeroImageRejectReason,
+          productGalleryRejectReason:
+            data?.productGalleryRejectReason ?? prev.productGalleryRejectReason,
+          productVideoRejectReason:
+            data?.productVideoRejectReason ?? prev.productVideoRejectReason,
+
+          profileStatus: data?.profileStatus ?? prev.profileStatus,
+          productVariantsRejectReason: data?.productVariantsRejectReason ?? "",
+        }));
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load product details");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (Array.isArray(details?.productVariants)) {
+      setFormData((prev) => ({
+        ...prev,
+        variantsApproval: details.productVariants.map((v) => ({
+          isApproved: v?.isApproved ?? false,
+          rejectReason: v?.rejectReason ?? "waiting for approval",
+        })),
+      }));
+    }
+  }, [details?.productVariants]);
+  
+  
+
   useEffect(() => {
     getProductDetails();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params?.id]);
+
+  // Approve-all behavior when profileStatus is set to "approved"
+  useEffect(() => {
+    if (!Array.isArray(details?.productVariants)) return;
+    if (formData?.profileStatus === "approved") {
+      setFormData((prev) => ({
+        ...prev,
+        variantsApproval: details.productVariants.map(() => ({
+          isApproved: true,
+          rejectReason: "",
+        })),
+        // Set all approvals true and clear reasons
+        isNameApproved: true,
+        nameRejectReason: "",
+        isTagsApproved: true,
+        tagsRejectReason: "",
+        isProductTypeApproved: true,
+        productTypeRejectReason: "",
+        isTaxApproved: true,
+        taxRejectReason: "",
+        isMadeInApproved: true,
+        madeInRejectReason: "",
+        isHsnCodeApproved: true,
+        hsnCodeRejectReason: "",
+        isShortDescriptionApproved: true,
+        shortDescriptionRejectReason: "",
+
+        isStatusApproved: true,
+        statusRejectReason: "",
+        isMinOrderQuantityApproved: true,
+        minOrderQuantityRejectReason: "",
+        isMaxOrderQuantityApproved: true,
+        maxOrderQuantityRejectReason: "",
+        isWarrantyPeriodApproved: true,
+        warrantyPeriodRejectReason: "",
+        isGuaranteePeriodApproved: true,
+        guaranteePeriodRejectReason: "",
+        isCategoryIdApproved: true,
+        categoryIdRejectReason: "",
+        isSubCategoryIdApproved: true,
+        subCategoryIdRejectReason: "",
+        // NEW fields included in approve-all
+        isNLevelCategoryIdApproved: true,
+        nLevelCategoryIdRejectReason: "",
+        isStockQuantityApproved: true,
+        stockQuantityRejectReason: "",
+        isBrandIdApproved: true,
+        brandIdRejectReason: "",
+        isZipcodeIdApproved: true,
+        zipcodeIdRejectReason: "",
+
+        isProductVideoUrlApproved: true,
+        productVideoUrlRejectReason: "",
+        isDescriptionApproved: true,
+        descriptionRejectReason: "",
+        isPriceApproved: true,
+        priceRejectReason: "",
+        isDiscountedPriceApproved: true,
+        discountedPriceRejectReason: "",
+        isProductHeroImageApproved: true,
+        productHeroImageRejectReason: "",
+        isProductGalleryApproved: true,
+        productGalleryRejectReason: "",
+        isProductVideoApproved: true,
+        productVideoRejectReason: "",
+        isProductVariantsApproved: true,
+        productVariantsRejectReason: "",
+      }));
+    }
+  }, [formData?.profileStatus, details?.productVariants]);
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    try {
+      const mergedVariants = Array.isArray(details?.productVariants)
+        ? details.productVariants.map((v, i) => ({
+            ...v,
+            isApproved: formData.variantsApproval?.[i]?.isApproved ?? false,
+            rejectReason:
+              formData.variantsApproval?.[i]?.rejectReason ??
+              "waiting for approval",
+          }))
+        : [];
+
+      const payload = {
+        ...formData,
+        _id: params?.id,
+        productVariants: mergedVariants,
+      };
+      const response = await updateProductServ(payload);
+      if (response?.data?.statusCode === 200) {
+        toast.success("Product approval updated successfully!");
+        navigate("/product-list");
+      } else {
+        toast.error(
+          response?.data?.message || "Failed to update product approval."
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const CheckRow = ({ approvedKey, reasonKey, label, value }) => (
+    <div className="col-6 mb-3">
+      <input
+        type="checkbox"
+        className="me-2"
+        checked={formData[approvedKey] === true}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            [approvedKey]: e.target.checked,
+            [reasonKey]: e.target.checked ? "" : "waiting for approval",
+          })
+        }
+      />
+      <label>{label}</label>
+      <input
+        className="form-control"
+        value={value ?? ""}
+        readOnly
+        style={{ height: "45px" }}
+      />
+      {!formData[approvedKey] && (
+        <input
+          className="form-control mt-2"
+          value={formData[reasonKey] ?? ""}
+          onChange={(e) =>
+            setFormData({ ...formData, [reasonKey]: e.target.value })
+          }
+        />
+      )}
+    </div>
+  );
+
+  const CheckTextArea = ({ approvedKey, reasonKey, label, value }) => (
+    <div className="col-12 mb-3">
+      <input
+        type="checkbox"
+        className="me-2"
+        checked={formData[approvedKey] === true}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            [approvedKey]: e.target.checked,
+            [reasonKey]: e.target.checked ? "" : "waiting for approval",
+          })
+        }
+      />
+      <label>{label}</label>
+      <textarea
+        className="form-control"
+        value={value ?? ""}
+        readOnly
+        rows={3}
+      />
+      {!formData[approvedKey] && (
+        <input
+          className="form-control mt-2"
+          value={formData[reasonKey] ?? ""}
+          onChange={(e) =>
+            setFormData({ ...formData, [reasonKey]: e.target.value })
+          }
+        />
+      )}
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="bodyContainer">
+        <Sidebar selectedMenu="Product Management" selectedItem="Add Product" />
+        <div className="mainContainer">
+          <TopNav />
+          <div className="p-lg-4 p-md-3 p-2">
+            <div
+              className="row mx-0 p-0"
+              style={{
+                position: "relative",
+                top: "-75px",
+                marginBottom: "-75px",
+              }}
+            >
+              <Skeleton height={40} width={220} />
+              <div className="mt-3">
+                <Skeleton count={8} height={24} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bodyContainer">
@@ -141,921 +445,313 @@ function ProductApproval() {
               top: "-75px",
               marginBottom: "-75px",
             }}
-          ></div>
-
-          <div className="mt-3">
-            <div className="card-body px-2">
-              <div className="table-responsive table-invoice">
-                <div className="d-flex">
-                  <h4
-                    className="p-2 text-dark shadow rounded mb-4 "
-                    style={{ background: "#05E2B5" }}
-                  >
-                    Approve Product
-                  </h4>
+          >
+            <div className="mt-3">
+              <div className="card-body px-2">
+                <div className="table-responsive table-invoice">
+                  <div className="d-flex">
+                    <h4
+                      className="p-2 text-dark shadow rounded mb-4"
+                      style={{ background: "#05E2B5" }}
+                    >
+                      Approve Product
+                    </h4>
+                  </div>
                 </div>
-              </div>
-              <div
-                className="p-3 shadow rounded mb-3"
-                style={{ background: "#E6DFCF" }}
-              >
-                <h3>
-                  <u>Step 1</u>
-                </h3>
-                <div className="row">
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isNameApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isNameApproved: e.target.checked,
-                          nameRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product Name*</label>
-                    <input
-                      className="form-control"
-                      readOnly
+
+                {/* Step 1 */}
+                <div
+                  className="p-3 shadow rounded mb-3"
+                  style={{ background: "#E6DFCF" }}
+                >
+                  <h3>
+                    <u>Step 1</u>
+                  </h3>
+                  <div className="row">
+                    <CheckRow
+                      approvedKey="isNameApproved"
+                      reasonKey="nameRejectReason"
+                      label="Product Name"
                       value={details?.name}
-                      style={{ height: "45px" }}
                     />
-                    {!formData.isNameApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.nameRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            nameRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-
-                  {/* Tags */}
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isTagsApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isTagsApproved: e.target.checked,
-                          tagsRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
+                    <CheckRow
+                      approvedKey="isTagsApproved"
+                      reasonKey="tagsRejectReason"
+                      label="Tags"
+                      value={
+                        Array.isArray(details?.tags)
+                          ? details?.tags?.join(", ")
+                          : details?.tags
                       }
                     />
-                    <label>Tags*</label>
-                    <input
-                      className="form-control"
-                      readOnly
-                      value={details?.tags}
-                      style={{ height: "45px" }}
-                    />
-                    {!formData.isTagsApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.tagsRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            tagsRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-
-                  {/* Product Type */}
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isProductTypeApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isProductTypeApproved: e.target.checked,
-                          productTypeRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product Type*</label>
-                    <input
-                      className="form-control"
-                      readOnly
+                    <CheckRow
+                      approvedKey="isProductTypeApproved"
+                      reasonKey="productTypeRejectReason"
+                      label="Product Type"
                       value={details?.productType}
-                      style={{ height: "45px" }}
                     />
-                    {!formData.isProductTypeApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.productTypeRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            productTypeRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-
-                  {/* Tax */}
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isTaxApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isTaxApproved: e.target.checked,
-                          taxRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Tax*</label>
-                    <input
-                      className="form-control"
-                      readOnly
+                    <CheckRow
+                      approvedKey="isTaxApproved"
+                      reasonKey="taxRejectReason"
+                      label="Tax"
                       value={details?.tax}
-                      style={{ height: "45px" }}
                     />
-                    {!formData.isTaxApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.taxRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            taxRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-
-                  {/* Made In */}
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isMadeInApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isMadeInApproved: e.target.checked,
-                          madeInRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Made In*</label>
-                    <input
-                      className="form-control"
-                      readOnly
+                    <CheckRow
+                      approvedKey="isMadeInApproved"
+                      reasonKey="madeInRejectReason"
+                      label="Made In"
                       value={details?.madeIn}
-                      style={{ height: "45px" }}
                     />
-                    {!formData.isMadeInApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.madeInRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            madeInRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-
-                  {/* HSN Code */}
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isHsnCodeApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isHsnCodeApproved: e.target.checked,
-                          hsnCodeRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>HSN Code*</label>
-                    <input
-                      className="form-control"
-                      readOnly
+                    <CheckRow
+                      approvedKey="isHsnCodeApproved"
+                      reasonKey="hsnCodeRejectReason"
+                      label="HSN Code"
                       value={details?.hsnCode}
-                      style={{ height: "45px" }}
                     />
-                    {!formData.isHsnCodeApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.hsnCodeRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            hsnCodeRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
+                    <CheckTextArea
+                      approvedKey="isShortDescriptionApproved"
+                      reasonKey="shortDescriptionRejectReason"
+                      label="Short Description"
+                      value={details?.shortDescription}
+                    />
                   </div>
+                </div>
 
-                  {/* Short Description */}
-                  <div className="col-12 mb-3">
+                {/* Step 2 */}
+                <div
+                  className="p-3 shadow rounded mb-3"
+                  style={{ background: "#DAF0D5" }}
+                >
+                  <h3>
+                    <u>Step 2</u>
+                  </h3>
+                  <div className="row">
+                    <CheckRow
+                      approvedKey="isMinOrderQuantityApproved"
+                      reasonKey="minOrderQuantityRejectReason"
+                      label="Min Order Quantity"
+                      value={details?.minOrderQuantity}
+                    />
+                    <CheckRow
+                      approvedKey="isMaxOrderQuantityApproved"
+                      reasonKey="maxOrderQuantityRejectReason"
+                      label="Max Order Quantity"
+                      value={details?.maxOrderQuantity}
+                    />
+                    <CheckRow
+                      approvedKey="isWarrantyPeriodApproved"
+                      reasonKey="warrantyPeriodRejectReason"
+                      label="Warranty Period"
+                      value={details?.warrantyPeriod}
+                    />
+                    <CheckRow
+                      approvedKey="isGuaranteePeriodApproved"
+                      reasonKey="guaranteePeriodRejectReason"
+                      label="Guarantee Period"
+                      value={details?.guaranteePeriod}
+                    />
+                    <CheckRow
+                      approvedKey="isStockQuantityApproved"
+                      reasonKey="stockQuantityRejectReason"
+                      label="Stock Quantity"
+                      value={details?.stockQuantity}
+                    />
+
+                    <CheckRow
+                      approvedKey="isBrandIdApproved"
+                      reasonKey="brandIdRejectReason"
+                      label="Brand"
+                      value={details?.brandId?.name}
+                    />
+                    <CheckRow
+                      approvedKey="isCategoryIdApproved"
+                      reasonKey="categoryIdRejectReason"
+                      label="Category"
+                      value={details?.categoryId?.name}
+                    />
+                    <CheckRow
+                      approvedKey="isSubCategoryIdApproved"
+                      reasonKey="subCategoryIdRejectReason"
+                      label="Sub Category"
+                      value={details?.subCategoryId?.name}
+                    />
+
+                    {/* NEW: N-Level Category approval */}
+                    <CheckRow
+                      approvedKey="isNLevelCategoryIdApproved"
+                      reasonKey="nLevelCategoryIdRejectReason"
+                      label="N-Level Category"
+                      value={
+                        details?.nLevelCategoryId?.name ||
+                        details?.nLevelCategoryName
+                      }
+                    />
+
+                    <CheckRow
+                      approvedKey="isZipcodeIdApproved"
+                      reasonKey="zipcodeIdRejectReason"
+                      label="Deliverable Zipcodes"
+                      value={
+                        Array.isArray(details?.zipcodeId)
+                          ? details?.zipcodeId
+                              ?.map((z) => z?.zipcode)
+                              ?.join(", ")
+                          : details?.zipcodeId
+                      }
+                    />
+
+                    <CheckRow
+                      approvedKey="isPriceApproved"
+                      reasonKey="priceRejectReason"
+                      label="Product Price"
+                      value={details?.price}
+                    />
+                    <CheckRow
+                      approvedKey="isDiscountedPriceApproved"
+                      reasonKey="discountedPriceRejectReason"
+                      label="Discounted Price"
+                      value={details?.discountedPrice}
+                    />
+
+                    {/* Some commonly toggled product policy flags (read-only display) */}
+                    <div className="col-6 mb-3">
+                      <label>Product Returnable</label>
+                      <input
+                        className="form-control"
+                        value={details?.isProductReturnable ? "Yes" : "No"}
+                        readOnly
+                        style={{ height: "45px" }}
+                      />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label>COD Allowed</label>
+                      <input
+                        className="form-control"
+                        value={details?.isCodAllowed ? "Yes" : "No"}
+                        readOnly
+                        style={{ height: "45px" }}
+                      />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label>Tax Included</label>
+                      <input
+                        className="form-control"
+                        value={details?.isProductTaxIncluded ? "Yes" : "No"}
+                        readOnly
+                        style={{ height: "45px" }}
+                      />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label>Cancelable</label>
+                      <input
+                        className="form-control"
+                        value={details?.isProductCancelable ? "Yes" : "No"}
+                        readOnly
+                        style={{ height: "45px" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description & Video URL */}
+                <div className="col-12 mb-3 row">
+                  <div className="col-6">
+                    <CheckTextArea
+                      approvedKey="isDescriptionApproved"
+                      reasonKey="descriptionRejectReason"
+                      label="Product Description"
+                      value={details?.description}
+                    />
+                  </div>
+                  <div className="col-6">
                     <input
                       type="checkbox"
                       className="me-2"
-                      checked={formData.isShortDescriptionApproved}
+                      checked={formData.isProductVideoUrlApproved === true}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          isShortDescriptionApproved: e.target.checked,
-                          shortDescriptionRejectReason: e.target.checked
+                          isProductVideoUrlApproved: e.target.checked,
+                          productVideoUrlRejectReason: e.target.checked
                             ? ""
                             : "waiting for approval",
                         })
                       }
                     />
-                    <label>Short Description*</label>
-                    <textarea
-                      className="form-control"
-                      readOnly
-                      value={details?.shortDescription}
-                      rows={3}
-                    />
-                    {!formData.isShortDescriptionApproved && (
+                    <label>Video URL</label>
+                    <div>
+                      {details?.productVideoUrl ? (
+                        <iframe
+                          width="100%"
+                          height="315"
+                          src={
+                            details.productVideoUrl.includes("youtu.be")
+                              ? `https://www.youtube.com/embed/${details.productVideoUrl
+                                  .split("/")
+                                  .pop()}`
+                              : details.productVideoUrl
+                          }
+                          title="Product Video"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <input className="form-control" value="" readOnly />
+                      )}
+                    </div>
+                    {!formData.isProductVideoUrlApproved && (
                       <input
                         className="form-control mt-2"
-                        value={formData.shortDescriptionRejectReason}
+                        value={formData.productVideoUrlRejectReason}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            shortDescriptionRejectReason: e.target.value,
+                            productVideoUrlRejectReason: e.target.value,
                           })
                         }
                       />
                     )}
                   </div>
                 </div>
-              </div>
 
-              <div
-                className="p-3 shadow rounded mb-3"
-                style={{ background: "#DAF0D5" }}
-              >
-                <h3>
-                  <u>Step 2</u>
-                </h3>
-                <div className="row">
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isMinOrderQuantityApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isMinOrderQuantityApproved: e.target.checked,
-                          minOrderQuantityRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Min Order Quantity</label>
-                    <input
-                      value={details?.minOrderQuantity}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isMinOrderQuantityApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.minOrderQuantityRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            minOrderQuantityRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isMaxOrderQuantityApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isMaxOrderQuantityApproved: e.target.checked,
-                          maxOrderQuantityRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Max Order Quantity</label>
-                    <input
-                      value={details?.maxOrderQuantity}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isMaxOrderQuantityApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.maxOrderQuantityRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            maxOrderQuantityRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isWarrantyPeriodApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isWarrantyPeriodApproved: e.target.checked,
-                          warrantyPeriodRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Warranty Period</label>
-                    <input
-                      value={details?.warrantyPeriod}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isWarrantyPeriodApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.warrantyPeriodRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            warrantyPeriodRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isGuaranteePeriodApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isGuaranteePeriodApproved: e.target.checked,
-                          guaranteePeriodRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Guarantee Period</label>
-                    <input
-                      value={details?.guaranteePeriod}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isGuaranteePeriodApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.guaranteePeriodRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            guaranteePeriodRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isStockQuantityApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isStockQuantityApproved: e.target.checked,
-                          stockQuantityRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Stock Quantity</label>
-                    <input
-                      value={details?.stockQuantity}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isStockQuantityApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.stockQuantityRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            stockQuantityRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isBrandIdApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isBrandIdApproved: e.target.checked,
-                          brandIdRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Brand</label>
-                    <input
-                      className="form-control"
-                      value={details?.brandId?.name}
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isBrandIdApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.brandIdRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            brandIdRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isCategoryIdApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isCategoryIdApproved: e.target.checked,
-                          categoryIdRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Category</label>
-                    <input
-                      className="form-control"
-                      value={details?.categoryId?.name}
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isCategoryIdApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.categoryIdRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            categoryIdRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isSubCategoryIdApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isSubCategoryIdApproved: e.target.checked,
-                          subCategoryIdRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Sub Category</label>
-                    <input
-                      className="form-control"
-                      value={details?.subCategoryId?.name}
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isSubCategoryIdApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.subCategoryIdRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            subCategoryIdRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isZipcodeIdApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isZipcodeIdApproved: e.target.checked,
-                          zipcodeIdRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Select Deliverable Zipcodes</label>
-                    <input
-                      className="form-control"
-                      value={details?.zipcodeId?.map((v, i) => {
-                        return v?.zipcode;
-                      })}
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isZipcodeIdApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.zipcodeIdRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            zipcodeIdRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isPriceApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isPriceApproved: e.target.checked,
-                          priceRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product Price</label>
-                    <input
-                      value={details?.price}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isPriceApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.priceRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            priceRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isDiscountedPriceApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isDiscountedPriceApproved: e.target.checked,
-                          descriptionRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product Discounted Price</label>
-                    <input
-                      value={details?.discountedPrice}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isDiscountedPriceApproved && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.discountedPriceRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            discountedPriceRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isWarrantyPeriodApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isWarrantyPeriodApproved: e.target.checked,
-                          warrantyPeriodRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product Returnable</label>
-                    <input
-                      className="form-control"
-                      value={details?.isProductReturnable ? "Yes" : "No"}
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isProductReturnable && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.subCategoryIdRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            subCategoryIdRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isWarrantyPeriodApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isWarrantyPeriodApproved: e.target.checked,
-                          warrantyPeriodRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product COD Allowed</label>
-                    <input
-                      value={details?.isCodAllowed ? "Yes" : "No"}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    {!formData.isCodAllowed && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.discountedPriceRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            discountedPriceRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isWarrantyPeriodApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isWarrantyPeriodApproved: e.target.checked,
-                          warrantyPeriodRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product Tax Included</label>
-                    <input
-                      value={details?.isProductTaxIncluded ? "Yes" : "No"}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    <input className="form-control mt-2" />
-                  </div>
-                  <div className="col-6 mb-3">
-                    <input
-                      type="checkbox"
-                      className="me-2"
-                      checked={formData.isWarrantyPeriodApproved}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isWarrantyPeriodApproved: e.target.checked,
-                          warrantyPeriodRejectReason: e.target.checked
-                            ? ""
-                            : "waiting for approval",
-                        })
-                      }
-                    />
-                    <label>Product Cancelable</label>
-                    <input
-                      value={details?.isProductCancelable ? "Yes" : "No"}
-                      className="form-control"
-                      style={{ height: "45px" }}
-                      readOnly
-                    />
-                    <input className="form-control mt-2" />
-                  </div>
-                  <div className="col-12 mb-3 row">
-                    <div className="col-6">
-                      <input
-                        type="checkbox"
-                        className="me-2"
-                        checked={formData.isDescriptionApproved}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isDescriptionApproved: e.target.checked,
-                            descriptionRejectReason: e.target.checked
-                              ? ""
-                              : "waiting for approval",
-                          })
-                        }
-                      />
-                      <label>Product Description</label>
-                      <textarea
-                        value={details?.description}
-                        className="form-control"
-                        readOnly
-                        style={{ height: "315px" }}
-                      />
-                      {!formData.isDescriptionApproved && (
+                {/* Gallery */}
+                <div
+                  className="p-3 shadow rounded mb-3"
+                  style={{ background: "#F6F0D6" }}
+                >
+                  <h3>
+                    <u>Product Gallery</u>
+                  </h3>
+                  <div className="row">
+                    {/* Hero image */}
+                    <div className="col-4 mb-3">
+                      <div className="border p-2">
+                        <div className="d-flex justify-content-center">
+                          {details?.productHeroImage && (
+                            <img
+                              src={details.productHeroImage}
+                              className="img-fluid mb-2"
+                              style={{ height: "150px" }}
+                              alt="hero"
+                            />
+                          )}
+                        </div>
                         <input
-                          className="form-control mt-2"
-                          value={formData.descriptionRejectReason}
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isProductHeroImageApproved === true}
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              descriptionRejectReason: e.target.value,
+                              isProductHeroImageApproved: e.target.checked,
+                              productHeroImageRejectReason: e.target.checked
+                                ? ""
+                                : "waiting for approval",
                             })
                           }
                         />
-                      )}
-                    </div>
-                    <div className="col-6">
-                      <input
-                        type="checkbox"
-                        className="me-2"
-                        checked={formData.isProductVideoUrlApproved}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isProductVideoUrlApproved: e.target.checked,
-                            productVideoUrlRejectReason: e.target.checked
-                              ? ""
-                              : "waiting for approval",
-                          })
-                        }
-                      />
-                      <label>Video URL</label>
-                      {details?.productVideoUrl && (
-                        <>
-                          <iframe
-                            width="100%"
-                            height="315"
-                            src={`https://www.youtube.com/embed/${
-                              details.productVideoUrl
-                                .split("youtu.be/")[1]
-                                ?.split("?")[0]
-                            }`}
-                            title="Product Video"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
-                          {!formData.isProductVideoUrlApproved && (
-                            <input
-                              className="form-control mt-2"
-                              value={formData.productVideoUrlRejectReason}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  productVideoUrlRejectReason: e.target.value,
-                                })
-                              }
-                            />
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="p-3 shadow rounded mb-3"
-                style={{ background: "#F6F0D6" }}
-              >
-                <h3>
-                  <u>Product Gallery</u>
-                </h3>
-                <div className="row">
-                  <div className="col-4 mb-3">
-                    <div className="border p-2">
-                      <div className="d-flex justify-content-center">
-                        <img
-                          src={details?.productHeroImage}
-                          className="img-fluid mb-2"
-                          style={{ height: "150px" }}
-                        />
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="me-2"
-                        checked={formData.isProductHeroImageApproved}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            isProductHeroImageApproved: e.target.checked,
-                            productHeroImageRejectReason: e.target.checked
-                              ? ""
-                              : "waiting for approval",
-                          })
-                        }
-                      />
-                      <label>Product Hero Image</label>
-                      {!formData.isProductHeroImageApproved && (
+                        <label>Product Hero Image</label>
+                        {!formData.isProductHeroImageApproved && (
                           <input
                             className="form-control mt-2"
                             value={formData.productHeroImageRejectReason}
@@ -1067,20 +763,36 @@ function ProductApproval() {
                             }
                           />
                         )}
+                      </div>
                     </div>
-                  </div>
-                  {details?.productVideo && (
+
+                    {/* Product video file (if present) */}
                     <div className="col-4 mb-3">
                       <div className="border p-2">
                         <div className="d-flex justify-content-center">
-                          <video
-                            className="mb-2"
-                            style={{ height: "150px" }}
-                            src={details.productVideo}
-                            controls
-                          />
+                          {details?.productVideo && (
+                            <video
+                              className="mb-2"
+                              style={{ height: "150px" }}
+                              src={details.productVideo}
+                              controls
+                            />
+                          )}
                         </div>
-                        <input type="checkbox" className="me-2" />
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isProductVideoApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isProductVideoApproved: e.target.checked,
+                              productVideoRejectReason: e.target.checked
+                                ? ""
+                                : "waiting for approval",
+                            })
+                          }
+                        />
                         <label>Product Video</label>
                         {!formData.isProductVideoApproved && (
                           <input
@@ -1096,96 +808,239 @@ function ProductApproval() {
                         )}
                       </div>
                     </div>
-                  )}
 
-                  <div className="col-12 mb-3">
-                    <label>Product Gallery</label>
-                    <div className="p-2 border d-flex">
-                      {details?.productGallery?.map((v, i) => {
-                        return (
-                          <div className="p-2 border mx-2">
-                            <img
-                              className="img-fluid"
-                              style={{ height: "150px" }}
-                              src={v}
-                            />
-                          </div>
-                        );
-                      })}
+                    {/* Gallery list */}
+                    <div className="col-12 mb-3">
+                      <label>Product Gallery</label>
+                      <div className="p-2 border d-flex flex-wrap">
+                        {Array.isArray(details?.productGallery) &&
+                          details.productGallery.map((g, i) => (
+                            <div key={i} className="p-2 border mx-2">
+                              <img
+                                className="img-fluid"
+                                style={{ height: "150px" }}
+                                src={g}
+                                alt={`gallery-${i}`}
+                              />
+                            </div>
+                          ))}
+                      </div>
+                      <div className="mt-2">
+                        <input
+                          type="checkbox"
+                          className="me-2"
+                          checked={formData.isProductGalleryApproved === true}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              isProductGalleryApproved: e.target.checked,
+                              productGalleryRejectReason: e.target.checked
+                                ? ""
+                                : "waiting for approval",
+                            })
+                          }
+                        />
+                        <label>Product Gallery</label>
+                        {!formData.isProductGalleryApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.productGalleryRejectReason}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                productGalleryRejectReason: e.target.value,
+                              })
+                            }
+                          />
+                        )}
+                      </div>
                     </div>
-                    <input type="checkbox" className="me-2" />
-                    <label>Product Gallery</label>
-                    {!formData.isCodAllowed && (
-                      <input
-                        className="form-control mt-2"
-                        value={formData.productGalleryRejectReason}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            productGalleryRejectReason: e.target.value,
-                          })
-                        }
-                      />
-                    )}
                   </div>
                 </div>
-              </div>
-              <div
-                className="p-3 shadow rounded mb-3"
-                style={{ background: "#D1DBD5" }}
-              >
-                <h3>
-                  <u>Product Attributes</u>
-                </h3>
+
+                {/* Attributes */}
+                <div
+                  className="p-3 shadow rounded mb-3"
+                  style={{ background: "#D1DBD5" }}
+                >
+                  <h3>
+                    <u>Product Attributes</u>
+                  </h3>
+                  <div className="row">
+                    {Array.isArray(details?.productOtherDetails) &&
+                      details.productOtherDetails.map((att, i) => (
+                        <div className="col-4 mb-3" key={i}>
+                          <div className="border p-2">
+                            <label>{att?.key}</label>
+                            <input
+                              className="form-control"
+                              value={
+                                Array.isArray(att?.value)
+                                  ? att.value.join(", ")
+                                  : att?.value ?? ""
+                              }
+                              readOnly
+                            />
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Variants */}
                 <div className="row">
-                  {details?.productOtherDetails?.map((v, i) => {
-                    return (
-                      <div className="col-4 mb-3">
+                  {Array.isArray(details?.productVariants) &&
+                    details.productVariants.map((v, i) => (
+                      <div className="col-4 mb-3" key={i}>
                         <div className="border p-2">
-                          <label>{v?.key}</label>
+                          {/* Per-variant approval */}
+                          <div className="mb-2">
+                            <input
+                              type="checkbox"
+                              className="me-2"
+                              checked={
+                                formData.variantsApproval?.[i]?.isApproved ===
+                                true
+                              }
+                              onChange={(e) => {
+                                const next = [
+                                  ...(formData.variantsApproval || []),
+                                ];
+                                next[i] = {
+                                  ...(next[i] || {}),
+                                  isApproved: e.target.checked,
+                                  rejectReason: e.target.checked
+                                    ? ""
+                                    : next[i]?.rejectReason ||
+                                      "waiting for approval",
+                                };
+                                setFormData({
+                                  ...formData,
+                                  variantsApproval: next,
+                                });
+                              }}
+                            />
+                            <label>Approve this variant</label>
+                            {!formData.variantsApproval?.[i]?.isApproved && (
+                              <input
+                                className="form-control mt-2"
+                                placeholder="Reject reason"
+                                value={
+                                  formData.variantsApproval?.[i]
+                                    ?.rejectReason || ""
+                                }
+                                onChange={(e) => {
+                                  const next = [
+                                    ...(formData.variantsApproval || []),
+                                  ];
+                                  next[i] = {
+                                    ...(next[i] || {}),
+                                    isApproved: next[i]?.isApproved || false,
+                                    rejectReason: e.target.value,
+                                  };
+                                  setFormData({
+                                    ...formData,
+                                    variantsApproval: next,
+                                  });
+                                }}
+                              />
+                            )}
+                          </div>
+
+                          {Array.isArray(v?.variantImage) &&
+                          v.variantImage.length > 0 ? (
+                            <img
+                              className="img-fluid mb-2"
+                              src={v.variantImage[0]}
+                              alt="variant"
+                            />
+                          ) : null}
+                          <label>Key</label>
                           <input
                             className="form-control"
-                            value={v?.value?.map((v, i) => {
-                              return v;
-                            })}
+                            value={v?.variantKey ?? ""}
+                            readOnly
+                          />
+                          <label>Value</label>
+                          <input
+                            className="form-control"
+                            value={v?.variantValue ?? ""}
+                            readOnly
+                          />
+                          {v?.variantSecondaryKey ? (
+                            <>
+                              <label>Secondary Key</label>
+                              <input
+                                className="form-control"
+                                value={v?.variantSecondaryKey ?? ""}
+                                readOnly
+                              />
+                            </>
+                          ) : null}
+                          {v?.variantSecondaryValue ? (
+                            <>
+                              <label>Secondary Value</label>
+                              <input
+                                className="form-control"
+                                value={v?.variantSecondaryValue ?? ""}
+                                readOnly
+                              />
+                            </>
+                          ) : null}
+                          <label>Price</label>
+                          <input
+                            className="form-control"
+                            value={v?.variantPrice ?? ""}
+                            readOnly
+                          />
+                          <label>Discounted Price</label>
+                          <input
+                            className="form-control"
+                            value={v?.variantDiscountedPrice ?? ""}
+                            readOnly
+                          />
+                          <label>Stock Quantity</label>
+                          <input
+                            className="form-control"
+                            value={v?.stockQuantity ?? ""}
+                            readOnly
                           />
                         </div>
                       </div>
-                    );
-                  })}
-                  <div className="ms-2">
-                    <input type="checkbox" className="me-2" />
-                    <label>Product Attribute</label>
-                    <input className="form-control mt-2" />
+                    ))}
+                </div>
+
+                {/* Footer actions */}
+                <div className="col-12">
+                  <div className="shadow-sm p-3 mb-3">
+                    <div className="d-flex mb-2">
+                      <label>Profile Status</label>
+                    </div>
+                    <select
+                      className="form-control"
+                      value={formData.profileStatus}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          profileStatus: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">Select</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
                   </div>
                 </div>
-              </div>
-              <div
-                className="p-3 shadow rounded mb-3"
-                style={{ background: "#E9ECEF" }}
-              >
-                <h3>
-                  <u>Product Variants</u>
-                </h3>
-                <div className="row">
-                  {details?.productVariants?.map((v, i) => {
-                    return (
-                      <div className="col-4 mb-3">
-                        <div className="border p-2">
-                          <img className="img-fluid" src={v?.variantImage} />
-                          <label>{v?.variantKey}</label>
-                          <label>{v?.variantValue}</label>
-                          <label>{v?.variantPrice}</label>
-                          <label>{v?.variantDiscountedPrice}</label>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div className="ms-2">
-                    <input type="checkbox" className="me-2" />
-                    <label>Product Variant</label>
-                    <input className="form-control mt-2" />
-                  </div>
+
+                <div className="text-end mt-3">
+                  <button
+                    className="btn btn-success"
+                    onClick={handleSubmit}
+                    disabled={saving}
+                  >
+                    {saving ? "Submitting..." : "Submit Approval"}
+                  </button>
                 </div>
               </div>
             </div>

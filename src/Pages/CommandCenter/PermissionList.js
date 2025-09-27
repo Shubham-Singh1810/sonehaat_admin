@@ -2,13 +2,20 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
 
-import { getPermissionListServ , addPermissionServ, deletePermissionServ, updatePermissionServ} from "../../services/commandCenter.services"
+import {
+  getPermissionListServ,
+  addPermissionServ,
+  deletePermissionServ,
+  updatePermissionServ,
+} from "../../services/commandCenter.services";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
+import Pagination from "../../Components/Pagination";
 function PermissionList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -27,7 +34,7 @@ function PermissionList() {
       let response = await getPermissionListServ(payload);
       setList(response?.data?.data);
       setStatics(response?.data?.documentCount);
-    } catch (error) { }
+    } catch (error) {}
     setShowSkelton(false);
   };
   const staticsArr = [
@@ -36,7 +43,6 @@ function PermissionList() {
       count: statics?.totalCount,
       bgColor: "#6777EF",
     },
-
   ];
   useEffect(() => {
     handleGetPermissionFunc();
@@ -157,7 +163,7 @@ function PermissionList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -169,7 +175,7 @@ function PermissionList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -193,7 +199,6 @@ function PermissionList() {
 
                       <th className="text-center py-3">Name</th>
 
-
                       <th
                         className="text-center py-3 "
                         style={{ borderRadius: "0px 30px 30px 0px" }}
@@ -204,66 +209,78 @@ function PermissionList() {
                     <div className="py-2"></div>
                     {showSkelton
                       ? [1, 2, 3, 4, 5, 6, 7, 8, 9]?.map((v, i) => {
-                        return (
-                          <>
-                            <tr key={i}>
-                              <td className="text-center">
-                                <Skeleton width={50} height={50} />
-                              </td>
+                          return (
+                            <>
+                              <tr key={i}>
+                                <td className="text-center">
+                                  <Skeleton width={50} height={50} />
+                                </td>
 
-
-                              <td className="text-center">
-                                <Skeleton width={100} height={25} />
-                              </td>
-                              <td className="text-center">
-                                <Skeleton width={100} height={25} />
-                              </td>
-                            </tr>
-                            <div className="py-2"></div>
-                          </>
-                        );
-                      })
+                                <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                                <td className="text-center">
+                                  <Skeleton width={100} height={25} />
+                                </td>
+                              </tr>
+                              <div className="py-2"></div>
+                            </>
+                          );
+                        })
                       : list?.map((v, i) => {
-                        return (
-                          <>
-                            <tr>
-                              <td className="text-center">{i + 1}</td>
-                              <td className="font-weight-600 text-center">
-                                {v?.name}
-                              </td>
-                              <td className="text-center">
-                                <a
-                                  onClick={() => {
-                                    setEditFormData({
-                                      name: v?.name,
-                                      image: "",
-                                      imgPrev: v?.image,
-                                      status: v?.status,
-                                      _id: v?._id,
-                                      specialApperence: v?.specialApperence,
-                                    });
-                                  }}
-                                  className="btn btn-info mx-2 text-light shadow-sm"
-                                >
-                                  Edit
-                                </a>
-                                <a
-                                  onClick={() =>
-                                    handleDeletePermissionFunc(v?._id)
-                                  }
-                                  className="btn btn-warning mx-2 text-light shadow-sm"
-                                >
-                                  Delete
-                                </a>
-                              </td>
-                            </tr>
-                            <div className="py-2"></div>
-                          </>
-                        );
-                      })}
+                          return (
+                            <>
+                              <tr>
+                                <td className="text-center">{i + 1}</td>
+                                <td className="font-weight-600 text-center">
+                                  {v?.name}
+                                </td>
+
+                                <td className="text-center">
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
+                                    onClick={() => {
+                                      setEditFormData({
+                                        name: v?.name,
+                                        image: "",
+                                        imgPrev: v?.image,
+                                        status: v?.status,
+                                        _id: v?._id,
+                                        specialApperence: v?.specialApperence,
+                                      });
+                                    }}
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
+                                    onClick={() =>
+                                      handleDeletePermissionFunc(v?._id)
+                                    }
+                                  />
+                                </td>
+                              </tr>
+                              <div className="py-2"></div>
+                            </>
+                          );
+                        })}
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>
@@ -314,28 +331,17 @@ function PermissionList() {
                         setAddFormData({ ...addFormData, name: e.target.value })
                       }
                     />
-                   
+
                     <button
                       className="btn btn-success w-100 mt-4"
                       onClick={
-                        addFormData?.name &&
-                          
-                          !isLoading
+                        addFormData?.name && !isLoading
                           ? handleAddPermissionFunc
                           : undefined
                       }
-                      disabled={
-                        !addFormData?.name ||
-                       
-                        isLoading
-                      }
+                      disabled={!addFormData?.name || isLoading}
                       style={{
-                        opacity:
-                          !addFormData?.name ||
-                           
-                            isLoading
-                            ? "0.5"
-                            : "1",
+                        opacity: !addFormData?.name || isLoading ? "0.5" : "1",
                       }}
                     >
                       {isLoading ? "Saving..." : "Submit"}
@@ -389,8 +395,7 @@ function PermissionList() {
                 >
                   <div className="w-100 px-2">
                     <h5 className="mb-4">Update Permission</h5>
-                    
-                   
+
                     <label className="mt-3">Name</label>
                     <input
                       className="form-control"
@@ -403,9 +408,8 @@ function PermissionList() {
                       }
                       value={editFormData?.name}
                     />
-                    
-                    
-                    {editFormData?.name  ? (
+
+                    {editFormData?.name ? (
                       <button
                         className="btn btn-success w-100 mt-4"
                         onClick={!isLoading && handleUpdatePermissionFunc}

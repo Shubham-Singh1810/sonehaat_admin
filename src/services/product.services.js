@@ -55,7 +55,7 @@ export const addProductServ = async (formData) => {
 };
 export const updateProductServ = async (formData) => {
   try {
-    const response = await axios.put(BASE_URL + "product/update", formData);
+    const response = await axios.put(BASE_URL + "product/update", formData,);
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)

@@ -91,7 +91,7 @@ function VendorTermsAndCondition() {
   };
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Support" selectedItem="Terms & Condition" />
+      <Sidebar selectedMenu="System Support" selectedItem="Terms & Condition" />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">

@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
 function AttributeList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -58,7 +59,7 @@ function AttributeList() {
   const [addFormData, setAddFormData] = useState({
     name: "",
     status: "",
-    value:"",
+    value: "",
     show: false,
     attributeSetId: "",
   });
@@ -71,9 +72,9 @@ function AttributeList() {
         value: addFormData.value
           .split(",")
           .map((item) => item.trim())
-          .filter((item) => item !== ""), 
+          .filter((item) => item !== ""),
       };
-  
+
       let response = await addAttributeServ(updatedFormData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
@@ -95,7 +96,7 @@ function AttributeList() {
     }
     setIsLoading(false);
   };
-  
+
   const handleDeleteAttributeFunc = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this attribute?"
@@ -121,7 +122,7 @@ function AttributeList() {
     attributeSetId: "",
     status: "",
     _id: "",
-    value:""
+    value: "",
   });
   const handleUpdateAttributeFunc = async () => {
     setIsLoading(true);
@@ -164,7 +165,7 @@ function AttributeList() {
     handleGetAttributeFunc();
     handleGetAttributeSetFunc();
   }, [payload]);
-  
+
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Product Management" selectedItem="Attributes" />
@@ -207,7 +208,7 @@ function AttributeList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -218,7 +219,7 @@ function AttributeList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -232,7 +233,7 @@ function AttributeList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -303,12 +304,14 @@ function AttributeList() {
                                 <td className="font-weight-600 text-center">
                                   {v?.name}
                                 </td>
-                                <td className="font-weight-600 text-center" style={{width:"150px"}}>
-                                  {v?.value?.map((v, i)=>{
-                                    return(
-
+                                <td
+                                  className="font-weight-600 text-center"
+                                  style={{ width: "150px" }}
+                                >
+                                  {v?.value?.map((v, i) => {
+                                    return (
                                       <p className="badge bg-dark mx-1">{v}</p>
-                                    )
+                                    );
                                   })}
                                 </td>
                                 <td className="font-weight-600 text-center">
@@ -334,30 +337,33 @@ function AttributeList() {
                                 <td className="text-center">
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
+
                                 <td className="text-center">
-                                  <a
-                                   onClick={() => {
-                                    setEditFormData({
-                                      name: v?.name,
-                                      attributeSetId: v?.attributeSetId?._id,
-                                      status: v?.status,
-                                      _id: v?._id,
-                                      value: v?.value?.join(", "), // convert array to comma-separated string
-                                    });
-                                  }}
-                                
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
+                                    onClick={() => {
+                                      setEditFormData({
+                                        name: v?.name,
+                                        attributeSetId: v?.attributeSetId?._id,
+                                        status: v?.status,
+                                        _id: v?._id,
+                                        value: v?.value?.join(", "), 
+                                      });
+                                    }}
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
                                     onClick={() =>
                                       handleDeleteAttributeFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -396,7 +402,7 @@ function AttributeList() {
                       attributeSetId: "",
                       status: "",
                       show: false,
-                      value:[]
+                      value: [],
                     })
                   }
                 />
@@ -433,7 +439,7 @@ function AttributeList() {
                       }
                       value={addFormData?.value}
                     />
-                    
+
                     <label className="mt-3">Attribute Set</label>
                     <select
                       className="form-control"
@@ -465,7 +471,8 @@ function AttributeList() {
                     </select>
                     {addFormData?.name &&
                     addFormData?.status &&
-                    addFormData?.attributeSetId && addFormData?.value ?  (
+                    addFormData?.attributeSetId &&
+                    addFormData?.value ? (
                       <button
                         className="btn btn-success w-100 mt-4"
                         onClick={!isLoading && handleAddAttributeFunc}

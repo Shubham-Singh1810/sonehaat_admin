@@ -110,7 +110,7 @@ function AdminTransectionHistory() {
             <div className="col-lg-4 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }

@@ -26,7 +26,11 @@ export const getSubCategoryServ = async (formData) => {
 
 export const addSubCategoryServ = async (formData) => {
   try {
-    const response = await axios.post(BASE_URL + "sub-category/create", formData, getConfig());
+    const response = await axios.post(
+      BASE_URL + "sub-category/create",
+      formData,
+      getConfig()
+    );
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
@@ -37,7 +41,11 @@ export const addSubCategoryServ = async (formData) => {
 
 export const updateSubCategoryServ = async (formData) => {
   try {
-    const response = await axios.put(BASE_URL + "sub-category/update", formData, getConfig());
+    const response = await axios.put(
+      BASE_URL + "sub-category/update",
+      formData,
+      getConfig()
+    );
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
@@ -47,7 +55,10 @@ export const updateSubCategoryServ = async (formData) => {
 };
 export const deleteSubCategoryServ = async (id) => {
   try {
-    const response = await axios.delete(BASE_URL + "sub-category/delete/"+id,  getConfig());
+    const response = await axios.delete(
+      BASE_URL + "sub-category/delete/" + id,
+      getConfig()
+    );
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
@@ -57,11 +68,26 @@ export const deleteSubCategoryServ = async (id) => {
 };
 export const updateBannerServ = async (formData) => {
   try {
-    const response = await axios.put(BASE_URL + "sub-category/update-banner", formData);
+    const response = await axios.put(
+      BASE_URL + "sub-category/update-banner",
+      formData
+    );
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
     console.error("Error fetching data:", error);
+    throw error;
+  }
+};
+export const getSubCategoryDetailsServ = async (id) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}sub-category/details/${id}`,
+      getConfig()
+    );
+    return response;
+  } catch (error) {
+    console.error("Error fetching sub-category details:", error);
     throw error;
   }
 };

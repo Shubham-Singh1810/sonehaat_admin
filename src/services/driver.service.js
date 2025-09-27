@@ -63,3 +63,14 @@ export const dashboardDetailsServ = async () => {
     throw error;
   }
 };
+
+export const addDriverServ = async (formData) => {
+  try {
+    const response = await axios.post(BASE_URL + "driver/create", formData);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};

@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../Components/Pagination";
 function DriverWithdrawList() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -158,7 +159,7 @@ function DriverWithdrawList() {
               <div>
                 <input
                   placeholder="Search"
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e?.target?.value })
                   }
@@ -168,7 +169,7 @@ function DriverWithdrawList() {
             <div className="col-lg-4 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -319,6 +320,15 @@ function DriverWithdrawList() {
                 </table>
                 {details?.details?.transactionHistory?.length == 0 &&
                   !showSkelton && <NoRecordFound />}
+                                  {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>

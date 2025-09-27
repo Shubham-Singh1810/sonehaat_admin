@@ -6,6 +6,7 @@ import {
   addCategoryServ,
   deleteCategoryServ,
   updateCategoryServ,
+  getCategoryDetailsServ,
 } from "../../services/category.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -13,6 +14,11 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
+import { BsEye } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
+import Pagination from "../../Components/Pagination";
+
 function CategoriesList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -152,6 +158,21 @@ function CategoriesList() {
     }
     setIsLoading(false);
   };
+
+  const navigate = useNavigate();
+
+  const handleViewCategoryDetails = async (id) => {
+    try {
+      const res = await getCategoryDetailsServ(id);
+      const details = res?.data?.data;
+      navigate(`/category-details/${id}`, { state: { details } });
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Unable to fetch category details"
+      );
+    }
+  };
+
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Categories" selectedItem="Main Categories" />
@@ -194,7 +215,7 @@ function CategoriesList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -205,7 +226,7 @@ function CategoriesList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control "
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -219,8 +240,13 @@ function CategoriesList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
-                  style={{ background: "#6777EF" }}
+                  className="btn btn-primary w-100 "
+                  style={{ color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Category
@@ -317,13 +343,29 @@ function CategoriesList() {
                                   )}
                                 </td>
                                 <td className="font-weight-600 text-center">
-                                  {v?.specialApperence ? v?.specialApperence :"None"}
+                                  {v?.specialApperence
+                                    ? v?.specialApperence
+                                    : "None"}
                                 </td>
                                 <td className="text-center">
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
+
                                 <td className="text-center">
-                                  <a
+                                  <BsEye
+                                    size={16}
+                                    className="mx-1 text-primary"
+                                    style={{ cursor: "pointer" }}
+                                    title="View Details"
+                                    onClick={() =>
+                                      handleViewCategoryDetails(v?._id)
+                                    }
+                                  />
+
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
                                     onClick={() => {
                                       setEditFormData({
                                         name: v?.name,
@@ -331,21 +373,21 @@ function CategoriesList() {
                                         imgPrev: v?.image,
                                         status: v?.status,
                                         _id: v?._id,
-                                        specialApperence:v?.specialApperence
+                                        specialApperence: v?.specialApperence,
                                       });
                                     }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
+                                    title="Edit"
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                    title="Delete"
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -355,16 +397,22 @@ function CategoriesList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>
         </div>
       </div>
       {addFormData?.show && (
-        <div
-          className="modal fade show d-flex align-items-center  justify-content-center "
-          tabIndex="-1"
-        >
+        <div className="modal fade show d-flex align-items-center  justify-content-center ">
           <div className="modal-dialog">
             <div
               className="modal-content"
@@ -384,20 +432,14 @@ function CategoriesList() {
                       image: "",
                       status: "",
                       show: false,
-                      specialApperence:""
+                      specialApperence: "",
                     })
                   }
                 />
               </div>
 
               <div className="modal-body">
-                <div
-                  style={{
-                    wordWrap: "break-word",
-                    whiteSpace: "pre-wrap",
-                  }}
-                  className="d-flex justify-content-center w-100"
-                >
+                <div className="d-flex justify-content-center w-100">
                   <div className="w-100 px-2">
                     <h5 className="mb-4">Add Category</h5>
                     <div className="p-3 border rounded mb-2">
@@ -457,7 +499,6 @@ function CategoriesList() {
                     >
                       <option value="">Select Status</option>
                       <option value="Home">Home</option>
-                      
                     </select>
                     <button
                       className="btn btn-success w-100 mt-4"
@@ -519,7 +560,7 @@ function CategoriesList() {
                       name: "",
                       image: "",
                       status: "",
-                      specialApperence:"",
+                      specialApperence: "",
                       _id: "",
                     })
                   }
@@ -594,7 +635,6 @@ function CategoriesList() {
                     >
                       <option value="">Select Status</option>
                       <option value="Home">Home</option>
-                      
                     </select>
                     {editFormData?.name && editFormData?.status ? (
                       <button

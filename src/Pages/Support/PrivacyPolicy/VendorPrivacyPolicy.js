@@ -87,7 +87,7 @@ function VendorPrivacyPolicy() {
   };
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Support" selectedItem="Privacy Policy" />
+      <Sidebar selectedMenu="System Support" selectedItem="Privacy Policy" />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">

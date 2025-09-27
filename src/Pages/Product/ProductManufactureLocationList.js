@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
 import {
-    getProductLocationServ,
-    addProductLocationServ,
-    updateProductLocationServ,
-    deleteProductLocationServ,
+  getProductLocationServ,
+  addProductLocationServ,
+  updateProductLocationServ,
+  deleteProductLocationServ,
 } from "../../services/ProductLocation.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
 function ProductManufactureLocactionList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -116,7 +117,7 @@ function ProductManufactureLocactionList() {
   });
   const handleUpdateCategoryFunc = async () => {
     setIsLoading(true);
-   
+
     try {
       let response = await updateProductLocationServ(editFormData);
       if (response?.data?.statusCode == "200") {
@@ -140,7 +141,10 @@ function ProductManufactureLocactionList() {
   };
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Location Management" selectedItem="Product Manufacture Location" />
+      <Sidebar
+        selectedMenu="Location Management"
+        selectedItem="Product Manufacture Location"
+      />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">
@@ -175,12 +179,14 @@ function ProductManufactureLocactionList() {
           </div>
           <div className="row m-0 p-0 d-flex align-items-center my-4 topActionForm">
             <div className="col-lg-2 mb-2 col-md-12 col-12">
-              <h3 className="mb-0 text-bold text-secondary">Product Locations</h3>
+              <h3 className="mb-0 text-bold text-secondary">
+                Product Locations
+              </h3>
             </div>
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -191,7 +197,7 @@ function ProductManufactureLocactionList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -205,7 +211,7 @@ function ProductManufactureLocactionList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -293,8 +299,13 @@ function ProductManufactureLocactionList() {
                                 <td className="text-center">
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
+
                                 <td className="text-center">
-                                  <a
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
                                     onClick={() => {
                                       setEditFormData({
                                         name: v?.name,
@@ -304,18 +315,17 @@ function ProductManufactureLocactionList() {
                                         _id: v?._id,
                                       });
                                     }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -461,7 +471,7 @@ function ProductManufactureLocactionList() {
                 >
                   <div className="w-100 px-2">
                     <h5 className="mb-4">Update Product Location</h5>
-                    
+
                     <label className="mt-3">Name</label>
                     <input
                       className="form-control"

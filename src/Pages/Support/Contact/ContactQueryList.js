@@ -92,7 +92,7 @@ function ContactQueryList() {
   };
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Support" selectedItem="Contact Query" />
+      <Sidebar selectedMenu="System Support" selectedItem="Contact Query" />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">

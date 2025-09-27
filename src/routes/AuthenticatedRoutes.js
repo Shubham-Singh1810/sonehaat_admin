@@ -51,6 +51,17 @@ import UserList from '../Pages/User/UserList';
 import NotifyList from '../Pages/Notification/NotifyList';
 import DeliveryZipcode from '../Pages/DeliveryLocation/DeliveryZipcode';
 import CouponList from '../Pages/PromoCode/CouponList';
+import NLevelCategoryPage from '../Pages/Category/NlevelCategoryPage';
+import CategoryDetailsPage from '../Pages/Category/CategoryDetailsPage';
+import ProductUpdateStep1 from '../Pages/Product/ProductUpdateStep1';
+import OrderDetails from '../Pages/Order/orderDetails';
+import OrderInvoice from '../Pages/Order/OrderInvoice';
+import DriverAdd from '../Pages/Driver/DriverAdd';
+import VendorAdd from '../Pages/Vendor/VendorAdd';
+import EditVendor from '../Pages/Vendor/EditVendor';
+import EditDriver from '../Pages/Driver/EditDriver';
+import OperationalCityList from '../Pages/DeliveryLocation/OperationalCityList';
+import PickupLocationPage from '../Pages/DeliveryLocation/PickupLocation';
 
 function AuthenticatedRoutes() {
   return (
@@ -59,7 +70,9 @@ function AuthenticatedRoutes() {
 
         {/* categories  */}
         <Route path="/category-list" element={<CategoriesList/>}/>
+        <Route path="/category-details/:id" element={<CategoryDetailsPage />} />
         <Route path="/sub-category-list" element={<SubCategoriesList/>}/>
+        <Route path="/n-level-categories/:id" element={<NLevelCategoryPage />} />
 
         {/* attribute */}
         <Route path="/attribute-set-list" element={<AttributeSetList/>}/>
@@ -71,10 +84,14 @@ function AuthenticatedRoutes() {
         {/* drivers */}
         <Route path="/driver-list" element={<DriverList/>}/>
         <Route path="/driver-approval/:id" element={<DriverApproval/>}/>
+        <Route path="/add-driver" element={<DriverAdd/>}/>
+        <Route path="/edit-driver/:id" element={<EditDriver/>}/>
 
         {/* vendor */}
         <Route path="/vendor-list" element={<VendorList/>}/>
+        <Route path="/add-vendor" element={<VendorAdd/>}/>
         <Route path="/vendor-approval/:id" element={<VendorApproval/>}/>
+        <Route path="/edit-vendor/:id" element={<EditVendor/>}/>
 
         {/* Banner */}
         <Route path="/banner-list" element={<BannerList/>}/>
@@ -97,6 +114,7 @@ function AuthenticatedRoutes() {
         <Route path="/add-product" element={<AddProduct/>}/>
         <Route path="/product-approval/:id" element={<ProductApproval/>}/>
         <Route path="/product-details/:id" element={<ProductDetails/>}/>
+        <Route path="/update-product-step1/:id" element={<ProductUpdateStep1/>}/>
         <Route path="/update-product-step2/:id" element={<ProductUpdateStep2/>}/>
         <Route path="/update-product-step3/:id" element={<ProductUpdateStep3/>}/>
         <Route path="/update-product-attributes/:id" element={<ProductUpdateAttribute/>}/>
@@ -129,10 +147,12 @@ function AuthenticatedRoutes() {
 
         {/* order */}
         <Route path="/order-list" element={<OrderList/>}/>
+        <Route path="/order-details/:id" element={<OrderDetails/>}/>
         <Route path="/complete-order-list" element={<CompletedOrderList/>}/>
         <Route path="/cancel-order-list" element={<CancelledOrderList/>}/>
         <Route path="/track-order-list" element={<TrackOrderList/>}/>
         <Route path="/assign-driver" element={<AssignDriverOrders/>}/>
+        <Route path="/order-invoice/:id" element={<OrderInvoice />} />
 
         {/* fund management */}
         <Route path="/admin-transection-history" element={<AdminTransectionHistory/>}/>
@@ -144,9 +164,12 @@ function AuthenticatedRoutes() {
 
         {/* location management */}
         <Route path="/zipcode-list" element={<DeliveryZipcode/>}/>
+        <Route path="/operational-city-list" element={<OperationalCityList/>}/>
+        <Route path="/pickup-location-list" element={<PickupLocationPage/>}/>
 
         {/* promo code */}
         <Route path="/coupon-list" element={<CouponList/>}/>
+        <Route path="/categories/:id" element={<NLevelCategoryPage />} />
         
     </Routes>
   )

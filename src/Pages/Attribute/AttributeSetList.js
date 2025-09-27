@@ -7,15 +7,14 @@ import {
   updateAttributeSetServ,
   deleteAttributeSetServ,
 } from "../../services/attributeSet.services";
-import {
-getSubCategoryServ,
-} from "../../services/subCategory.service"
+import { getSubCategoryServ } from "../../services/subCategory.service";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
+import { BsPencil, BsTrash } from "react-icons/bs";
 function AttributeSetList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -137,20 +136,20 @@ function AttributeSetList() {
     }
     setIsLoading(false);
   };
-  const [subCategoryArr, setSubCategoryArr]=useState([]);
-  const getSubCategoryList =async ()=>{
+  const [subCategoryArr, setSubCategoryArr] = useState([]);
+  const getSubCategoryList = async () => {
     try {
-      let response = await getSubCategoryServ({status:true});
-      if(response?.data?.statusCode=="200"){
-        setSubCategoryArr(response?.data?.data)
+      let response = await getSubCategoryServ({ status: true });
+      if (response?.data?.statusCode == "200") {
+        setSubCategoryArr(response?.data?.data);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
-  useEffect(()=>{
-    getSubCategoryList()
-  }, [])
+  };
+  useEffect(() => {
+    getSubCategoryList();
+  }, []);
   return (
     <div className="bodyContainer">
       <Sidebar
@@ -196,7 +195,7 @@ function AttributeSetList() {
             <div className="col-lg-4 mb-2 col-md-12 col-12">
               <div>
                 <input
-                  className="form-control borderRadius24"
+                  className="form-control"
                   placeholder="Search"
                   onChange={(e) =>
                     setPayload({ ...payload, searchKey: e.target.value })
@@ -207,7 +206,7 @@ function AttributeSetList() {
             <div className="col-lg-3 mb-2  col-md-6 col-12">
               <div>
                 <select
-                  className="form-control borderRadius24"
+                  className="form-control"
                   onChange={(e) =>
                     setPayload({ ...payload, status: e.target.value })
                   }
@@ -221,7 +220,7 @@ function AttributeSetList() {
             <div className="col-lg-3 mb-2 col-md-6 col-12">
               <div>
                 <button
-                  className="btn btn-primary w-100 borderRadius24"
+                  className="btn btn-primary w-100"
                   style={{ background: "#6777EF" }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
@@ -316,8 +315,13 @@ function AttributeSetList() {
                                 <td className="text-center">
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
+
                                 <td className="text-center">
-                                  <a
+                                  <BsPencil
+                                    size={16}
+                                    className="mx-1 text-info"
+                                    style={{ cursor: "pointer" }}
+                                    title="Edit"
                                     onClick={() => {
                                       setEditFormData({
                                         name: v?.name,
@@ -326,18 +330,17 @@ function AttributeSetList() {
                                         subCategoryId: v?.subCategoryId,
                                       });
                                     }}
-                                    className="btn btn-info mx-2 text-light shadow-sm"
-                                  >
-                                    Edit
-                                  </a>
-                                  <a
+                                  />
+
+                                  <BsTrash
+                                    size={16}
+                                    className="mx-1 text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    title="Delete"
                                     onClick={() =>
                                       handleDeleteCategoryFunc(v?._id)
                                     }
-                                    className="btn btn-warning mx-2 text-light shadow-sm"
-                                  >
-                                    Delete
-                                  </a>
+                                  />
                                 </td>
                               </tr>
                               <div className="py-2"></div>
@@ -411,10 +414,8 @@ function AttributeSetList() {
                       value={addFormData?.subCategoryId}
                     >
                       <option value="">Select Status</option>
-                      {subCategoryArr?.map((v, i)=>{
-                        return(
-                          <option value={v?._id}>{v?.name}</option>
-                        )
+                      {subCategoryArr?.map((v, i) => {
+                        return <option value={v?._id}>{v?.name}</option>;
                       })}
                     </select>
                     <label className="mt-3">Status</label>
@@ -519,10 +520,8 @@ function AttributeSetList() {
                       value={editFormData?.subCategoryId}
                     >
                       <option value="">Select Status</option>
-                      {subCategoryArr?.map((v, i)=>{
-                        return(
-                          <option value={v?._id}>{v?.name}</option>
-                        )
+                      {subCategoryArr?.map((v, i) => {
+                        return <option value={v?._id}>{v?.name}</option>;
                       })}
                     </select>
                     <label className="mt-3">Status</label>

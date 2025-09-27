@@ -35,7 +35,7 @@ export const getVendorDetailsServ = async (id) => {
 };
 export const updateVendorProfile = async (formData) => {
   try {
-    const response = await axios.put(BASE_URL + "vender/update", formData);
+    const response = await axios.put(BASE_URL + "vender/update", formData, getConfig());
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
@@ -46,6 +46,17 @@ export const updateVendorProfile = async (formData) => {
 export const deleteVendorServ = async (id) => {
   try {
     const response = await axios.delete(BASE_URL + "vender/delete/"+id);
+    return response;
+  } catch (error) {
+    // Handle error (e.g., log or throw an error)
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
+
+export const addVenderServ = async (formData) => {
+  try {
+    const response = await axios.post(BASE_URL + "vender/create", formData);
     return response;
   } catch (error) {
     // Handle error (e.g., log or throw an error)
