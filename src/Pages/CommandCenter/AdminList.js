@@ -210,7 +210,12 @@ function AdminList() {
               <div>
                 <button
                   className="btn btn-primary w-100"
-                  style={{ background: "#6777EF" }}
+                  style={{ color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",}}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Admin
@@ -278,8 +283,10 @@ function AdminList() {
                       : list?.map((v, i) => {
                           return (
                             <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
+                              <tr key={v._id}>
+                                <td className="text-center">
+      {(payload.pageNo - 1) * payload.pageCount + i + 1}
+    </td>
                                 <td className="font-weight-600 text-center">
                                   <div>
                                     <img

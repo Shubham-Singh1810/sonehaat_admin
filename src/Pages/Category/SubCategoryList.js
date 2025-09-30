@@ -351,8 +351,10 @@ function SubCategoriesList() {
                       : list?.map((v, i) => {
                           return (
                             <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
+                              <tr key={v._id}>
+                                <td className="text-center">
+      {(payload.pageNo - 1) * payload.pageCount + i + 1}
+    </td>
                                 <td className="text-center">
                                   <img
                                     src={v?.image}

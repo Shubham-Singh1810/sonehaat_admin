@@ -11,9 +11,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+import Pagination from "../../Components/Pagination";
 function DriverTicketList() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
   const [payload, setPayload] = useState({
@@ -191,7 +192,7 @@ function DriverTicketList() {
                                 <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
-                               
+
                                 <td className="text-center">
                                   <Skeleton width={100} height={25} />
                                 </td>
@@ -203,8 +204,10 @@ function DriverTicketList() {
                       : list?.map((v, i) => {
                           return (
                             <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
+                              <tr key={v._id}>
+                                <td className="text-center">
+      {(payload.pageNo - 1) * payload.pageCount + i + 1}
+    </td>
                                 <td className="text-center">
                                   <img
                                     src={
@@ -235,10 +238,15 @@ function DriverTicketList() {
                                   {moment(v?.createdAt).format("DD-MM-YY")}
                                 </td>
                                 <td className="text-center">
-                                <div
+                                  <div
                                     className="badge py-2"
-                                    style={{ background: "#63ED7A", cursor:"pointer" }}
-                                    onClick={()=>navigate("/chat-box/"+v?._id)}
+                                    style={{
+                                      background: "#63ED7A",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() =>
+                                      navigate("/chat-box/" + v?._id)
+                                    }
                                   >
                                     View
                                   </div>
@@ -277,6 +285,15 @@ function DriverTicketList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                  <div className="d-flex justify-content-center my-3">
+                    <Pagination
+                      payload={payload}
+                      setPayload={setPayload}
+                      totalCount={statics?.totalCount || 0}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

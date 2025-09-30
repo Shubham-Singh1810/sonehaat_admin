@@ -289,7 +289,9 @@ function DriverList() {
                         ))
                       : list?.map((v, i) => (
                           <tr key={v._id}>
-                            <td className="text-center">{i + 1}</td>
+                            <td className="text-center">
+      {(payload.pageNo - 1) * payload.pageCount + i + 1}
+    </td>
                             <td className="text-center">
                               <img
                                 src={v?.profilePic}

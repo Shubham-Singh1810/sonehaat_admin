@@ -161,8 +161,10 @@ function ProductList() {
                   }
                 >
                   <option value="">Select Status</option>
-                  <option value={true}>Active</option>
-                  <option value={false}>Inactive</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="reUploaded">Re-Uploaded</option>
                 </select>
               </div>
             </div>
@@ -258,8 +260,12 @@ function ProductList() {
                       : list?.map((v, i) => {
                           return (
                             <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
+                              <tr key={v._id}>
+                                <td className="text-center">
+                                  {(payload.pageNo - 1) * payload.pageCount +
+                                    i +
+                                    1}
+                                </td>
                                 <td className="font-weight-600 text-center">
                                   {v?.name}
                                 </td>
@@ -283,31 +289,26 @@ function ProductList() {
                                 </td>
 
                                 <td className="text-center">
-                                  {v?.status ? (
+                                  {v?.status && (
                                     <div
-                                      className="badge py-2"
+                                      className="badge py-2 px-3"
                                       style={{
-                                        background: "#63ED7A",
                                         cursor: "pointer",
+                                        background:
+                                          v.status === "approved"
+                                            ? "#63ED7A" 
+                                            : v.status === "pending"
+                                            ? "#FFA426" 
+                                            : v.status === "rejected"
+                                            ? "#FF4D4F" 
+                                            : "#4C6EF5", 
                                       }}
                                       onClick={() =>
                                         navigate("/product-approval/" + v?._id)
                                       }
                                     >
-                                      Active
-                                    </div>
-                                  ) : (
-                                    <div
-                                      className="badge py-2 "
-                                      style={{
-                                        background: "#FFA426",
-                                        cursor: "pointer",
-                                      }}
-                                      onClick={() =>
-                                        navigate("/product-approval/" + v?._id)
-                                      }
-                                    >
-                                      Inactive
+                                      {v.status.charAt(0).toUpperCase() +
+                                        v.status.slice(1)}
                                     </div>
                                   )}
                                 </td>
@@ -352,14 +353,14 @@ function ProductList() {
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
                 {statics?.totalCount > 0 && (
-                <div className="d-flex justify-content-center my-3">
-                  <Pagination
-                    payload={payload}
-                    setPayload={setPayload}
-                    totalCount={statics?.totalCount || 0}
-                  />
-                </div>
-              )}
+                  <div className="d-flex justify-content-center my-3">
+                    <Pagination
+                      payload={payload}
+                      setPayload={setPayload}
+                      totalCount={statics?.totalCount || 0}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

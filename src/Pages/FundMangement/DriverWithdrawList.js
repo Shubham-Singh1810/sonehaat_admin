@@ -240,8 +240,10 @@ function DriverWithdrawList() {
                       : list?.map((v, i) => {
                           return (
                             <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
+                              <tr key={v._id}>
+                                <td className="text-center">
+      {(payload.pageNo - 1) * payload.pageCount + i + 1}
+    </td>
                                 <td className="d-flex justify-content-center">
                                   <div
                                     className="border p-2 px-4 d-flex align-items-center bg-light rounded"

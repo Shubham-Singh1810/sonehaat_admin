@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import { BsPencil, BsTrash } from "react-icons/bs";
+import Pagination from "../../Components/Pagination";
 function ProductManufactureLocactionList() {
   const [list, setList] = useState([]);
   const [statics, setStatics] = useState(null);
@@ -212,7 +213,12 @@ function ProductManufactureLocactionList() {
               <div>
                 <button
                   className="btn btn-primary w-100"
-                  style={{ background: "#6777EF" }}
+                  style={{ color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Location
@@ -273,8 +279,10 @@ function ProductManufactureLocactionList() {
                       : list?.map((v, i) => {
                           return (
                             <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
+                              <tr key={v._id}>
+                                <td className="text-center">
+      {(payload.pageNo - 1) * payload.pageCount + i + 1}
+    </td>
 
                                 <td className="font-weight-600 text-center">
                                   {v?.name}
@@ -335,6 +343,15 @@ function ProductManufactureLocactionList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>

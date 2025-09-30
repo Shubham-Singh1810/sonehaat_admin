@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import NoRecordFound from "../../Components/NoRecordFound";
 import {useNavigate} from "react-router-dom"
+import Pagination from "../../Components/Pagination";
 function UserTicketList() {
   const navigate = useNavigate()
   const [list, setList] = useState([]);
@@ -203,8 +204,10 @@ function UserTicketList() {
                       : list?.map((v, i) => {
                           return (
                             <>
-                              <tr>
-                                <td className="text-center">{i + 1}</td>
+                              <tr key={v._id}>
+                                <td className="text-center">
+      {(payload.pageNo - 1) * payload.pageCount + i + 1}
+    </td>
                                 <td className="text-center">
                                   <img
                                     src={
@@ -277,6 +280,15 @@ function UserTicketList() {
                   </tbody>
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
+                {statics?.totalCount > 0 && (
+                <div className="d-flex justify-content-center my-3">
+                  <Pagination
+                    payload={payload}
+                    setPayload={setPayload}
+                    totalCount={statics?.totalCount || 0}
+                  />
+                </div>
+              )}
               </div>
             </div>
           </div>
