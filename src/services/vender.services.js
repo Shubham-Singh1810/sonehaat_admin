@@ -64,3 +64,13 @@ export const addVenderServ = async (formData) => {
     throw error;
   }
 };
+
+export const getVendorProductListServ = async (formData) => {
+  try {
+    const response = await axios.post(BASE_URL + "vender/vendor-selected-products", formData);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching vendor product list:", error);
+    throw error;
+  }
+};

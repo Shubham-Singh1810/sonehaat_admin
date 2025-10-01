@@ -62,6 +62,7 @@ import EditVendor from '../Pages/Vendor/EditVendor';
 import EditDriver from '../Pages/Driver/EditDriver';
 import OperationalCityList from '../Pages/DeliveryLocation/OperationalCityList';
 import PickupLocationPage from '../Pages/DeliveryLocation/PickupLocation';
+import IntercityOrderList from '../Pages/Order/IntercityOrderList';
 
 function AuthenticatedRoutes() {
   return (
@@ -153,6 +154,8 @@ function AuthenticatedRoutes() {
         <Route path="/track-order-list" element={<TrackOrderList/>}/>
         <Route path="/assign-driver" element={<AssignDriverOrders/>}/>
         <Route path="/order-invoice/:id" element={<OrderInvoice />} />
+        <Route path="/intercity-order-list" element={<IntercityOrderList />} />
+
 
         {/* fund management */}
         <Route path="/admin-transection-history" element={<AdminTransectionHistory/>}/>

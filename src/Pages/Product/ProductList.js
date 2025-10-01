@@ -5,6 +5,9 @@ import {
   getProductServ,
   updateProductServ,
   deleteProductServ,
+  uploadExcelServ,
+  downloadProductExportServ,
+  downloadSampleProductFileServ,
 } from "../../services/product.services";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -15,6 +18,7 @@ import NoRecordFound from "../../Components/NoRecordFound";
 import { useNavigate } from "react-router-dom";
 import { BsEye, BsPencil, BsTrash } from "react-icons/bs";
 import Pagination from "../../Components/Pagination";
+import { triggerFileDownload } from "../../utils/fileDownload";
 
 function ProductList() {
   const navigate = useNavigate();
@@ -102,6 +106,70 @@ function ProductList() {
       }
     }
   };
+
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkForm, setBulkForm] = useState({
+    name: "",
+    file: null,
+  });
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleBulkUpload = async () => {
+    if (!bulkForm.name || !bulkForm.file) {
+      toast.error("Please enter a name and select a file");
+      return;
+    }
+
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", bulkForm.file);
+
+    try {
+      const res = await uploadExcelServ(formData);
+      if (res?.data?.statusCode === 200) {
+        toast.success(res?.data?.message || "Bulk upload successful!");
+        setShowBulkModal(false);
+        setBulkForm({ name: "", file: null });
+        handleGetProductFunc();
+      } else {
+        toast.error(res?.data?.message || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Bulk Upload Error:", err);
+      const errorData = err?.response?.data;
+      if (errorData?.statusCode === 409) {
+        toast.error(errorData.message);
+      } else if (errorData?.message) {
+        toast.error(errorData.message);
+      } else {
+        toast.error("Server Error during upload");
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDownload = async (format) => {
+    try {
+      const response = await downloadProductExportServ(payload, format);
+      const ext = format === "excel" ? "xlsx" : format;
+      triggerFileDownload(response.data, `productList.${ext}`);
+    } catch (err) {
+      toast.error("Download failed");
+    }
+  };
+
+  const handleDownloadSample = async (format) => {
+    try {
+      const res = await downloadSampleProductFileServ(format);
+      const ext = format === "excel" ? "xlsx" : format;
+      triggerFileDownload(res.data, `BulkProductUploadTemplate.${ext}`);
+    } catch (err) {
+      toast.error("Sample file download failed");
+    }
+  };
+
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Product Management" selectedItem="Products" />
@@ -185,6 +253,79 @@ function ProductList() {
                   Add Product
                 </button>
               </div>
+            </div>
+            <div className="col-lg-3 mb-2 col-md-6 col-12">
+              <button
+                className="btn w-100 text-light p-2"
+                style={{ background: "#354f52" }}
+                onClick={() => setShowBulkModal(true)}
+              >
+                Add Bulk Products
+              </button>
+            </div>
+            <div className="col-lg-3 mb-2 col-md-6 col-12 dropdown">
+              <button
+                className="btn w-100 text-light p-2 dropdown-toggle"
+                style={{ background: "#227C9D" }}
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Download
+              </button>
+              <ul className="dropdown-menu w-100">
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleDownload("txt")}
+                  >
+                    Download as TXT
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleDownload("excel")}
+                  >
+                    Download as Excel
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleDownload("csv")}
+                  >
+                    Download as CSV
+                  </button>
+                </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleDownloadSample("excel")}
+                  >
+                    Download Sample Excel
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleDownloadSample("csv")}
+                  >
+                    Download Sample CSV
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleDownloadSample("txt")}
+                  >
+                    Download Sample TXT
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
           <div className="mt-3">
@@ -460,6 +601,108 @@ function ProductList() {
         </div>
       )}
       {editFormData?._id && <div className="modal-backdrop fade show"></div>}
+      {showBulkModal && (
+        <>
+          <div
+            className="modal fade show d-flex align-items-center justify-content-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            tabIndex="-1"
+          >
+            <div className="modal-dialog">
+              <div
+                className="modal-content"
+                style={{
+                  borderRadius: "16px",
+                  background: "#f7f7f5",
+                  width: "364px",
+                }}
+              >
+                {/* Custom close button */}
+                <div className="d-flex justify-content-end pt-4 pb-0 px-4">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
+                    style={{ height: "20px", cursor: "pointer" }}
+                    onClick={() => setShowBulkModal(false)}
+                    alt="Close"
+                  />
+                </div>
+
+                {/* Modal Body */}
+                <div className="modal-body">
+                  <div
+                    style={{
+                      wordWrap: "break-word",
+                      whiteSpace: "pre-wrap",
+                    }}
+                    className="d-flex justify-content-center w-100"
+                  >
+                    <div className="w-100 px-2">
+                      <h5 className="mb-4">Upload Bulk Products</h5>
+
+                      <div className="mb-3">
+                        <label className="form-label">Bulk Name</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={bulkForm.name}
+                          onChange={(e) =>
+                            setBulkForm({ ...bulkForm, name: e.target.value })
+                          }
+                          placeholder="Enter bulk upload name"
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label">
+                          Upload File (CSV/Excel)
+                        </label>
+                        <input
+                          type="file"
+                          className="form-control"
+                          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                          onChange={(e) =>
+                            setBulkForm({
+                              ...bulkForm,
+                              file: e.target.files[0],
+                            })
+                          }
+                        />
+                      </div>
+
+                      <button
+                        className="btn btn-primary w-100 mt-3"
+                        onClick={handleBulkUpload}
+                        disabled={
+                          isUploading || !bulkForm.name || !bulkForm.file
+                        }
+                        style={{
+                          opacity: !bulkForm.name || !bulkForm.file ? 0.6 : 1,
+                        }}
+                      >
+                        {isUploading ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                            Uploading...
+                          </>
+                        ) : (
+                          "Upload"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Backdrop */}
+          <div className="modal-backdrop fade show"></div>
+        </>
+      )}
     </div>
   );
 }

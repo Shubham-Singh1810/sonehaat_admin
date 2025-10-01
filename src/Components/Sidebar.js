@@ -37,6 +37,10 @@ function Sidebar({ selectedMenu, selectedItem }) {
           path: "/complete-order-list",
         },
         {
+          name: "Intercity Orders",
+          path: "/intercity-order-list",
+        },
+        {
           name: "Cancelled Orders",
           path: "/cancel-order-list",
         }

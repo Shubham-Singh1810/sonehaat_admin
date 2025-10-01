@@ -66,11 +66,13 @@ function OperationalCityList() {
   const [addFormData, setAddFormData] = useState({
     name: "",
     status: "",
+    rate: "",
     show: false,
   });
   const [editFormData, setEditFormData] = useState({
     name: "",
     status: "",
+    rate: "",
     _id: "",
   });
 
@@ -102,7 +104,6 @@ function OperationalCityList() {
       }
     }
   };
-
 
   const handleUpdateCity = async () => {
     setIsLoading(true);
@@ -191,12 +192,14 @@ function OperationalCityList() {
             <div className="col-lg-2 mb-2">
               <button
                 className="btn btn-primary w-100"
-                style={{ color: "#fff",
-                    border: "none",
-                    // borderRadius: "24px",
-                    background:
-                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
+                style={{
+                  color: "#fff",
+                  border: "none",
+                  // borderRadius: "24px",
+                  background:
+                    "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                  boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                }}
                 onClick={() => setAddFormData({ ...addFormData, show: true })}
               >
                 Add City
@@ -216,6 +219,7 @@ function OperationalCityList() {
                     Sr. No
                   </th>
                   <th className="text-center py-3">Name</th>
+                  <th className="text-center py-3">Price/Km</th>
                   <th className="text-center py-3">Status</th>
                   <th className="text-center py-3">Created At</th>
                   <th
@@ -243,14 +247,18 @@ function OperationalCityList() {
                         <td className="text-center">
                           <Skeleton width={100} height={25} />
                         </td>
+                        <td className="text-center">
+                          <Skeleton width={100} height={25} />
+                        </td>
                       </tr>
                     ))
                   : list.map((v, i) => (
                       <tr key={v._id}>
                         <td className="text-center">
-      {(payload.pageNo - 1) * payload.pageCount + i + 1}
-    </td>
+                          {(payload.pageNo - 1) * payload.pageCount + i + 1}
+                        </td>
                         <td className="text-center">{v.name}</td>
+                        <td className="text-center">{v.rate}</td>
                         <td className="text-center">
                           {v.status ? (
                             <div
@@ -268,6 +276,7 @@ function OperationalCityList() {
                             </div>
                           )}
                         </td>
+
                         <td className="text-center">
                           {moment(v.createdAt).format("DD-MM-YY")}
                         </td>
@@ -281,6 +290,7 @@ function OperationalCityList() {
                               setEditFormData({
                                 name: v.name,
                                 status: v.status,
+                                rate: v.rate,
                                 _id: v._id,
                               })
                             }
@@ -299,190 +309,241 @@ function OperationalCityList() {
             </table>
             {list.length === 0 && !showSkelton && <NoRecordFound />}
             {statics?.totalCount > 0 && (
-                <div className="d-flex justify-content-center my-3">
-                  <Pagination
-                    payload={payload}
-                    setPayload={setPayload}
-                    totalCount={statics?.totalCount || 0}
-                  />
-                </div>
-              )}
+              <div className="d-flex justify-content-center my-3">
+                <Pagination
+                  payload={payload}
+                  setPayload={setPayload}
+                  totalCount={statics?.totalCount || 0}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Add Modal */}
-{addFormData?.show && (
-  <>
-    <div
-      className="modal fade show d-flex align-items-center justify-content-center"
-      tabIndex="-1"
-    >
-      <div className="modal-dialog">
-        <div
-          className="modal-content"
-          style={{ borderRadius: "16px", background: "#f7f7f5", width: "364px" }}
-        >
-          <div className="d-flex justify-content-end pt-4 pb-0 px-4">
-            <img
-              src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
-              alt="close"
-              style={{ height: "20px", cursor: "pointer" }}
-              onClick={() =>
-                setAddFormData({
-                  name: "",
-                  status: "",
-                  show: false,
-                })
-              }
-            />
-          </div>
+      {addFormData?.show && (
+        <>
+          <div
+            className="modal fade show d-flex align-items-center justify-content-center"
+            tabIndex="-1"
+          >
+            <div className="modal-dialog">
+              <div
+                className="modal-content"
+                style={{
+                  borderRadius: "16px",
+                  background: "#f7f7f5",
+                  width: "364px",
+                }}
+              >
+                <div className="d-flex justify-content-end pt-4 pb-0 px-4">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
+                    alt="close"
+                    style={{ height: "20px", cursor: "pointer" }}
+                    onClick={() =>
+                      setAddFormData({
+                        name: "",
+                        status: "",
+                        rate: "",
+                        show: false,
+                      })
+                    }
+                  />
+                </div>
 
-          <div className="modal-body">
-            <div className="d-flex justify-content-center w-100 px-2">
-              <div className="w-100">
-                <h5 className="mb-4">Add Operational City</h5>
+                <div className="modal-body">
+                  <div className="d-flex justify-content-center w-100 px-2">
+                    <div className="w-100">
+                      <h5 className="mb-4">Add Operational City</h5>
 
-                <label className="mt-3">Name</label>
-                <input
-                  className="form-control"
-                  type="text"
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, name: e.target.value })
-                  }
-                />
+                      <label className="mt-3">Name</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        onChange={(e) =>
+                          setAddFormData({
+                            ...addFormData,
+                            name: e.target.value,
+                          })
+                        }
+                      />
 
-                <label className="mt-3">Status</label>
-                <select
-                  className="form-control"
-                  onChange={(e) =>
-                    setAddFormData({ ...addFormData, status: e.target.value })
-                  }
-                >
-                  <option value="">Select Status</option>
-                  <option value={true}>Active</option>
-                  <option value={false}>Inactive</option>
-                </select>
+                      <label className="mt-3">Rate</label>
+                      <input
+                        className="form-control"
+                        type="number"
+                        value={addFormData?.rate}
+                        onChange={(e) =>
+                          setAddFormData({
+                            ...addFormData,
+                            rate: e.target.value,
+                          })
+                        }
+                      />
 
-                <button
-                  className="btn btn-success w-100 mt-4"
-                  onClick={
-                    addFormData?.name && addFormData?.status && !isLoading
-                      ? handleAddCity
-                      : undefined
-                  }
-                  disabled={
-                    !addFormData?.name || !addFormData?.status || isLoading
-                  }
-                  style={{
-                    opacity:
-                      !addFormData?.name || !addFormData?.status || isLoading
-                        ? "0.5"
-                        : "1",
-                  }}
-                >
-                  {isLoading ? "Saving..." : "Submit"}
-                </button>
+                      <label className="mt-3">Status</label>
+                      <select
+                        className="form-control"
+                        onChange={(e) =>
+                          setAddFormData({
+                            ...addFormData,
+                            status: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Status</option>
+                        <option value={true}>Active</option>
+                        <option value={false}>Inactive</option>
+                      </select>
+
+                      <button
+                        className="btn btn-success w-100 mt-4"
+                        onClick={
+                          addFormData?.name && addFormData?.status && !isLoading
+                            ? handleAddCity
+                            : undefined
+                        }
+                        disabled={
+                          !addFormData?.name ||
+                          !addFormData?.status ||
+                          isLoading
+                        }
+                        style={{
+                          opacity:
+                            !addFormData?.name ||
+                            !addFormData?.status ||
+                            isLoading
+                              ? "0.5"
+                              : "1",
+                        }}
+                      >
+                        {isLoading ? "Saving..." : "Submit"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div className="modal-backdrop fade show"></div>
-  </>
-)}
+          <div className="modal-backdrop fade show"></div>
+        </>
+      )}
 
-{/* Edit Modal */}
-{editFormData?._id && (
-  <>
-    <div
-      className="modal fade show d-flex align-items-center justify-content-center"
-      tabIndex="-1"
-    >
-      <div className="modal-dialog">
-        <div
-          className="modal-content"
-          style={{ borderRadius: "16px", background: "#f7f7f5", width: "364px" }}
-        >
-          <div className="d-flex justify-content-end pt-4 pb-0 px-4">
-            <img
-              src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
-              alt="close"
-              style={{ height: "20px", cursor: "pointer" }}
-              onClick={() =>
-                setEditFormData({
-                  name: "",
-                  status: "",
-                  _id: "",
-                })
-              }
-            />
-          </div>
+      {/* Edit Modal */}
+      {editFormData?._id && (
+        <>
+          <div
+            className="modal fade show d-flex align-items-center justify-content-center"
+            tabIndex="-1"
+          >
+            <div className="modal-dialog">
+              <div
+                className="modal-content"
+                style={{
+                  borderRadius: "16px",
+                  background: "#f7f7f5",
+                  width: "364px",
+                }}
+              >
+                <div className="d-flex justify-content-end pt-4 pb-0 px-4">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
+                    alt="close"
+                    style={{ height: "20px", cursor: "pointer" }}
+                    onClick={() =>
+                      setEditFormData({
+                        name: "",
+                        status: "",
+                        rate: "",
+                        _id: "",
+                      })
+                    }
+                  />
+                </div>
 
-          <div className="modal-body">
-            <div className="d-flex justify-content-center w-100 px-2">
-              <div className="w-100">
-                <h5 className="mb-4">Update Operational City</h5>
+                <div className="modal-body">
+                  <div className="d-flex justify-content-center w-100 px-2">
+                    <div className="w-100">
+                      <h5 className="mb-4">Update Operational City</h5>
 
-                <label className="mt-3">Name</label>
-                <input
-                  className="form-control"
-                  type="text"
-                  value={editFormData?.name}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      name: e.target.value,
-                    })
-                  }
-                />
+                      <label className="mt-3">Name</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        value={editFormData?.name}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            name: e.target.value,
+                          })
+                        }
+                      />
 
-                <label className="mt-3">Status</label>
-                <select
-                  className="form-control"
-                  value={editFormData?.status}
-                  onChange={(e) =>
-                    setEditFormData({
-                      ...editFormData,
-                      status: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">Select Status</option>
-                  <option value={true}>Active</option>
-                  <option value={false}>Inactive</option>
-                </select>
+                      <label className="mt-3">Rate</label>
+                      <input
+                        className="form-control"
+                        type="number"
+                        value={editFormData?.rate}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            rate: e.target.value,
+                          })
+                        }
+                      />
 
-                <button
-                  className="btn btn-success w-100 mt-4"
-                  onClick={
-                    !isLoading && editFormData?.name && editFormData?.status
-                      ? handleUpdateCity
-                      : undefined
-                  }
-                  disabled={
-                    !editFormData?.name || !editFormData?.status || isLoading
-                  }
-                  style={{
-                    opacity:
-                      !editFormData?.name || !editFormData?.status || isLoading
-                        ? "0.5"
-                        : "1",
-                  }}
-                >
-                  {isLoading ? "Saving..." : "Submit"}
-                </button>
+                      <label className="mt-3">Status</label>
+                      <select
+                        className="form-control"
+                        value={editFormData?.status}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            status: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Status</option>
+                        <option value={true}>Active</option>
+                        <option value={false}>Inactive</option>
+                      </select>
+
+                      <button
+                        className="btn btn-success w-100 mt-4"
+                        onClick={
+                          !isLoading &&
+                          editFormData?.name &&
+                          editFormData?.status
+                            ? handleUpdateCity
+                            : undefined
+                        }
+                        disabled={
+                          !editFormData?.name ||
+                          !editFormData?.status ||
+                          isLoading
+                        }
+                        style={{
+                          opacity:
+                            !editFormData?.name ||
+                            !editFormData?.status ||
+                            isLoading
+                              ? "0.5"
+                              : "1",
+                        }}
+                      >
+                        {isLoading ? "Saving..." : "Submit"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div className="modal-backdrop fade show"></div>
-  </>
-)}
-
+          <div className="modal-backdrop fade show"></div>
+        </>
+      )}
     </div>
   );
 }
