@@ -1,6 +1,6 @@
 // ...imports remain the same
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
 import Skeleton from "react-loading-skeleton";
@@ -15,10 +15,13 @@ import {
 } from "../../services/nLevelCategory.service";
 import { AiOutlinePlus } from "react-icons/ai";
 
+
 function CategoryDetailsPage() {
   const { id: categoryId } = useParams();
   const location = useLocation();
   const initDetails = location.state?.details || null;
+  const navigate = useNavigate();
+
 
   const [categoryDetails, setCategoryDetails] = useState(
     initDetails?.CategoryDetails || null
@@ -28,10 +31,12 @@ function CategoryDetailsPage() {
   );
   const [showSubListSkeleton, setShowSubListSkeleton] = useState(!initDetails);
 
+
   const [selectedSubCat, setSelectedSubCat] = useState(null);
   const [tree, setTree] = useState([]);
   const [path, setPath] = useState([]);
   const [showTreeSkeleton, setShowTreeSkeleton] = useState(false);
+
 
   const [isSaving, setIsSaving] = useState(false);
   const [addFormData, setAddFormData] = useState({
@@ -53,6 +58,7 @@ function CategoryDetailsPage() {
     levelIndex: 0,
     parentId: null,
   });
+
 
   useEffect(() => {
     if (!selectedSubCat && Array.isArray(subCategoryList) && subCategoryList.length > 0) {
@@ -81,6 +87,7 @@ function CategoryDetailsPage() {
     loadCategoryBundle();
   }, [categoryId], [subCategoryList]);
 
+
   const fetchTree = async (subCatId) => {
     setShowTreeSkeleton(true);
     try {
@@ -98,10 +105,12 @@ function CategoryDetailsPage() {
     setShowTreeSkeleton(false);
   };
 
+
   const handleSubClick = (sub) => {
     setSelectedSubCat(sub);
     fetchTree(sub._id);
   };
+
 
   const levels = useMemo(() => {
     const arr = [];
@@ -116,6 +125,7 @@ function CategoryDetailsPage() {
     return arr;
   }, [tree, path]);
 
+
   const handleSelect = (levelIndex, id) => {
     setPath((prev) => {
       const newPath = prev.slice(0, levelIndex);
@@ -124,8 +134,10 @@ function CategoryDetailsPage() {
     });
   };
 
+
   const getSelectedNodeAtLevel = (list, selectedId) =>
     list?.find?.((n) => n._id === selectedId);
+
 
   const openAddModal = (levelIndex, parentId = null) => {
     if (!selectedSubCat?._id) return toast.error("Select a subcategory first");
@@ -139,6 +151,7 @@ function CategoryDetailsPage() {
       parentId,
     });
   };
+
 
   const handleAddCategoryFunc = async () => {
     if (!addFormData.name || !addFormData.image || !addFormData.status) return;
@@ -163,6 +176,7 @@ function CategoryDetailsPage() {
     }
   };
 
+
   const openEditModal = (levelIndex, parentId, category) => {
     setEditFormData({
       show: true,
@@ -175,6 +189,7 @@ function CategoryDetailsPage() {
       parentId,
     });
   };
+
 
   const handleEditCategoryFunc = async () => {
     if (!editFormData.name || editFormData.status === "") return;
@@ -199,6 +214,7 @@ function CategoryDetailsPage() {
     }
   };
 
+
   const handleDeleteCategoryFunc = async (categoryId) => {
     if (!window.confirm("Are you sure you want to delete this category?"))
       return;
@@ -215,6 +231,7 @@ function CategoryDetailsPage() {
       setIsSaving(false);
     }
   };
+
 
   const SubBoxSkeleton = () => (
     <div
@@ -243,6 +260,7 @@ function CategoryDetailsPage() {
     </div>
   );
 
+
   const CardSkeleton = () => (
     <div
       style={{
@@ -266,6 +284,7 @@ function CategoryDetailsPage() {
     </div>
   );
   
+
 
   const ColumnSkeleton = () => (
     <div
@@ -294,6 +313,7 @@ function CategoryDetailsPage() {
     </div>
   );
   
+
 
   // Styled header components
   const Title = ({ text, image }) => (
@@ -384,6 +404,19 @@ function CategoryDetailsPage() {
       <div className="mainContainer">
         <TopNav />
         <div className="p-4">
+        <div className="mb-3">
+  <button
+    className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+    onClick={() => navigate("/category-list")}
+    style={{
+      fontSize: "0.9rem",
+      fontWeight: "500",
+    }}
+  >
+    ← Back
+  </button>
+</div>
+
           {categoryDetails ? (
             <Title
               text={categoryDetails?.name}
@@ -400,9 +433,11 @@ function CategoryDetailsPage() {
             </div>
           )}
 
+
           <p className="text-muted mb-4">
             Select a sub-category to view its N-level categories
           </p>
+
 
           <div className="row">
             <div className="col-md-3">
@@ -473,10 +508,12 @@ function CategoryDetailsPage() {
               </div>
             </div>
 
+
             <div className="col-md-9">
               {selectedSubCat && (
                 <h5 className="mb-3">N-Level of: {selectedSubCat.name}</h5>
               )}
+
 
               {showTreeSkeleton ? (
                 <div style={{ overflowX: "hidden", display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -523,6 +560,7 @@ function CategoryDetailsPage() {
                     );
                     if (!prevHasChildren) return null;
                   }
+
 
                   return (
                     <div
@@ -591,6 +629,7 @@ function CategoryDetailsPage() {
                               </div>
                             </div>
 
+
                             <div
                               className="categoryNlevel d-flex justify-content-center gap-2 mt-2"
                               style={{ fontSize: "0.85rem" }}
@@ -635,6 +674,7 @@ function CategoryDetailsPage() {
                               </button>
                             </div>
 
+
                             {isSelected && !hasChildren && (
                               <button
                                 className="btn btn-primary rounded-pill shadow-sm mt-2"
@@ -652,6 +692,7 @@ function CategoryDetailsPage() {
                           </div>
                         );
                       })}
+
 
                       <div
                         onClick={() => openAddModal(idx, path[idx - 1] || null)}
@@ -676,6 +717,7 @@ function CategoryDetailsPage() {
                   );
                 })
               )}
+
 
               {addFormData.show && (
                 <ModalForm
@@ -705,6 +747,7 @@ function CategoryDetailsPage() {
     </div>
   );
 }
+
 
 function ModalForm({ title, formData, setFormData, isLoading, onSubmit }) {
   return (
@@ -801,5 +844,6 @@ function ModalForm({ title, formData, setFormData, isLoading, onSubmit }) {
     </div>
   );
 }
+
 
 export default CategoryDetailsPage;
