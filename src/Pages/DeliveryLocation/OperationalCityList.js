@@ -417,6 +417,12 @@ function OperationalCityList() {
                             isLoading
                               ? "0.5"
                               : "1",
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                         }}
                       >
                         {isLoading ? "Saving..." : "Submit"}
@@ -531,6 +537,12 @@ function OperationalCityList() {
                             isLoading
                               ? "0.5"
                               : "1",
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                         }}
                       >
                         {isLoading ? "Saving..." : "Submit"}

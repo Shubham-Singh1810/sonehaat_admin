@@ -274,12 +274,14 @@ function CouponList() {
               <div>
                 <button
                   className="btn btn-primary w-100"
-                  style={{ color: "#fff",
+                  style={{
+                    color: "#fff",
                     border: "none",
                     // borderRadius: "24px",
                     background:
                       "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Coupon
@@ -367,8 +369,10 @@ function CouponList() {
                             <>
                               <tr key={v._id}>
                                 <td className="text-center">
-      {(payload.pageNo - 1) * payload.pageCount + i + 1}
-    </td>
+                                  {(payload.pageNo - 1) * payload.pageCount +
+                                    i +
+                                    1}
+                                </td>
                                 <td className="text-center">
                                   <img
                                     src={
@@ -730,6 +734,12 @@ function CouponList() {
                           !isLoading
                             ? "1"
                             : "0.5",
+                        color: "#fff",
+                        border: "none",
+                        // borderRadius: "24px",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                       }}
                     >
                       {isLoading ? "Saving..." : "Submit"}
@@ -1025,6 +1035,12 @@ function CouponList() {
                           !isLoading
                             ? "1"
                             : "0.5",
+                        color: "#fff",
+                        border: "none",
+                        // borderRadius: "24px",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                       }}
                     >
                       {isLoading ? "Saving..." : "Submit"}

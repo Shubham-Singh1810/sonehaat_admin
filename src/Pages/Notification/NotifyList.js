@@ -197,12 +197,14 @@ function NotifyList() {
               <div>
                 <button
                   className="btn btn-primary w-100"
-                  style={{ color: "#fff",
+                  style={{
+                    color: "#fff",
                     border: "none",
                     // borderRadius: "24px",
                     background:
                       "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",}}
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Notice
@@ -273,8 +275,10 @@ function NotifyList() {
                             <>
                               <tr key={v._id}>
                                 <td className="text-center">
-      {(payload.pageNo - 1) * payload.pageCount + i + 1}
-    </td>
+                                  {(payload.pageNo - 1) * payload.pageCount +
+                                    i +
+                                    1}
+                                </td>
                                 <td className="text-center">
                                   <img
                                     src={v?.icon}
@@ -499,6 +503,12 @@ function NotifyList() {
                           isLoading
                             ? "0.5"
                             : "1",
+                        color: "#fff",
+                        border: "none",
+                        // borderRadius: "24px",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                       }}
                     >
                       {isLoading ? "Saving..." : "Submit"}

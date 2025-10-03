@@ -102,7 +102,7 @@ function AddProduct() {
     setLoader(true);
     try {
       let finalPayload;
-      if(formData?.createdByAdmin != "No"){
+      if (formData?.createdByAdmin != "No") {
         finalPayload = {
           name: formData?.name,
           tags: formData?.tags,
@@ -112,9 +112,9 @@ function AddProduct() {
           hsnCode: formData?.hsnCode,
           shortDescription: formData?.shortDescription,
           createdByAdmin: formData?.createdByAdmin,
-        }
+        };
       }
-      if(formData?.createdByAdmin == "No"){
+      if (formData?.createdByAdmin == "No") {
         finalPayload = {
           name: formData?.name,
           tags: formData?.tags,
@@ -124,7 +124,7 @@ function AddProduct() {
           hsnCode: formData?.hsnCode,
           shortDescription: formData?.shortDescription,
           createdBy: formData?.createdBy,
-        }
+        };
       }
       let response = await addProductServ(finalPayload);
       if (response?.data?.statusCode == "200") {
@@ -149,7 +149,7 @@ function AddProduct() {
     }
     setLoader(false);
   };
-  
+
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Product Management" selectedItem="Add Product" />
@@ -311,20 +311,19 @@ function AddProduct() {
                   </div>
                 )}
 
-                <div className="col-12 mb-3">
-                  <label>Short Description*</label>
-                  <JoditEditor
-                    ref={editor}
-                    config={config}
-                    value={formData?.shortDescription}
-                    onChange={(newContent) => {
-                      setFormData({
-                        ...formData,
-                        shortDescription: newContent,
-                      });
-                    }}
-                  />
-                </div>
+                <JoditEditor
+                  ref={editor}
+                  config={config}
+                  value={formData?.shortDescription}
+                  onChange={(newContent) => {}}
+                  onBlur={(newContent) => {
+                    setFormData({
+                      ...formData,
+                      shortDescription: newContent,
+                    });
+                  }}
+                />
+
                 {loader ? (
                   <div className="col-12">
                     <button
@@ -333,7 +332,8 @@ function AddProduct() {
                         color: "#fff",
                         border: "none",
                         borderRadius: "24px",
-                        background: "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
                         boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                         opacity: "0.6",
                       }}
@@ -351,7 +351,8 @@ function AddProduct() {
                         color: "#fff",
                         border: "none",
                         borderRadius: "24px",
-                        background: "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
                         boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                       }}
                       onClick={handleSubmit}
@@ -367,7 +368,8 @@ function AddProduct() {
                         color: "#fff",
                         border: "none",
                         borderRadius: "24px",
-                        background: "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
                         boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                         opacity: "0.6",
                       }}

@@ -980,7 +980,15 @@ function ProductApproval() {
 
                 <div className="text-end mt-3">
                   <button
-                    className="btn btn-success"
+                    className="btn"
+                    style={{
+                      color: "#fff",
+                      border: "none",
+                      // borderRadius: "24px",
+                      background:
+                        "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                      boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                    }} 
                     onClick={handleSubmit}
                     disabled={
                       saving ||

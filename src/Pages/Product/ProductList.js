@@ -274,14 +274,14 @@ function ProductList() {
                 Download
               </button>
               <ul className="dropdown-menu w-100">
-                <li>
+                {/* <li>
                   <button
                     className="dropdown-item"
                     onClick={() => handleDownload("txt")}
                   >
                     Download as TXT
                   </button>
-                </li>
+                </li> */}
                 <li>
                   <button
                     className="dropdown-item"
@@ -290,14 +290,14 @@ function ProductList() {
                     Download as Excel
                   </button>
                 </li>
-                <li>
+                {/* <li>
                   <button
                     className="dropdown-item"
                     onClick={() => handleDownload("csv")}
                   >
                     Download as CSV
                   </button>
-                </li>
+                </li> */}
                 <li>
                   <hr className="dropdown-divider" />
                 </li>
@@ -309,22 +309,22 @@ function ProductList() {
                     Download Sample Excel
                   </button>
                 </li>
-                <li>
+                {/* <li>
                   <button
                     className="dropdown-item"
                     onClick={() => handleDownloadSample("csv")}
                   >
                     Download Sample CSV
                   </button>
-                </li>
-                <li>
+                </li> */}
+                {/* <li>
                   <button
                     className="dropdown-item"
                     onClick={() => handleDownloadSample("txt")}
                   >
                     Download Sample TXT
                   </button>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>

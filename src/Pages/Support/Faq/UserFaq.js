@@ -234,7 +234,14 @@ function UserFaq() {
               <div>
                 <button
                   className="btn btn-primary w-100"
-                  style={{ background: "#6777EF" }}
+                  style={{
+                    color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Faq
@@ -431,15 +438,31 @@ function UserFaq() {
                     addFormData?.answer &&
                     addFormData?.category ? (
                       <button
-                        className="btn btn-success w-100 mt-4"
+                        className="btn w-100 mt-4"
+                        style={{
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                         onClick={!isLoading && handleAddFaqFunc}
                       >
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
                     ) : (
                       <button
-                        className="btn btn-success w-100 mt-4"
-                        style={{ opacity: "0.5" }}
+                        className="btn w-100 mt-4"
+                        style={{
+                          opacity: "0.5",
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                       >
                         Submit
                       </button>
@@ -537,15 +560,31 @@ function UserFaq() {
                     editFormData?.answer &&
                     editFormData?.category ? (
                       <button
-                        className="btn btn-success w-100 mt-4"
+                        className="btn w-100 mt-4"
+                        style={{
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                         onClick={!isLoading && handleUpdateFaqFunc}
                       >
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
                     ) : (
                       <button
-                        className="btn btn-success w-100 mt-4"
-                        style={{ opacity: "0.5" }}
+                        className="btn w-100 mt-4"
+                        style={{
+                          opacity: "0.5",
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                       >
                         Submit
                       </button>

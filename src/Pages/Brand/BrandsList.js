@@ -459,15 +459,31 @@ function BrandsList() {
                     addFormData?.status &&
                     addFormData?.image ? (
                       <button
-                        className="btn btn-success w-100 mt-4"
+                        className="btn w-100 mt-4"
+                        style={{
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                         onClick={!isLoading && handleAddCategoryFunc}
                       >
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
                     ) : (
                       <button
-                        className="btn btn-success w-100 mt-4"
-                        style={{ opacity: "0.5" }}
+                        className="btn w-100 mt-4"
+                        style={{
+                          opacity: "0.5",
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                       >
                         Submit
                       </button>
@@ -567,15 +583,31 @@ function BrandsList() {
                     </select>
                     {editFormData?.name && editFormData?.status ? (
                       <button
-                        className="btn btn-success w-100 mt-4"
+                        className="btn w-100 mt-4"
+                        style={{
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                         onClick={!isLoading && handleUpdateCategoryFunc}
                       >
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
                     ) : (
                       <button
-                        className="btn btn-success w-100 mt-4"
-                        style={{ opacity: "0.5" }}
+                        className="btn w-100 mt-4"
+                        style={{
+                          opacity: "0.5",
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                       >
                         Submit
                       </button>

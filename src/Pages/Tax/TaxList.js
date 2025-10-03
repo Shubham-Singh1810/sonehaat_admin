@@ -204,12 +204,14 @@ function TaxList() {
               <div>
                 <button
                   className="btn btn-primary w-100"
-                  style={{ color: "#fff",
+                  style={{
+                    color: "#fff",
                     border: "none",
                     // borderRadius: "24px",
                     background:
                       "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Tax
@@ -276,8 +278,10 @@ function TaxList() {
                             <>
                               <tr key={v._id}>
                                 <td className="text-center">
-      {(payload.pageNo - 1) * payload.pageCount + i + 1}
-    </td>
+                                  {(payload.pageNo - 1) * payload.pageCount +
+                                    i +
+                                    1}
+                                </td>
 
                                 <td className="font-weight-600 text-center">
                                   {v?.name}
@@ -341,14 +345,14 @@ function TaxList() {
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
                 {statics?.totalCount > 0 && (
-                <div className="d-flex justify-content-center my-3">
-                  <Pagination
-                    payload={payload}
-                    setPayload={setPayload}
-                    totalCount={statics?.totalCount || 0}
-                  />
-                </div>
-              )}
+                  <div className="d-flex justify-content-center my-3">
+                    <Pagination
+                      payload={payload}
+                      setPayload={setPayload}
+                      totalCount={statics?.totalCount || 0}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -444,6 +448,12 @@ function TaxList() {
                           isLoading
                             ? "0.5"
                             : "1",
+                        color: "#fff",
+                        border: "none",
+                        // borderRadius: "24px",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                       }}
                     >
                       {isLoading ? "Saving..." : "Submit"}
@@ -538,15 +548,31 @@ function TaxList() {
                     </select>
                     {editFormData?.name && editFormData?.status ? (
                       <button
-                        className="btn btn-success w-100 mt-4"
+                        className="btn w-100 mt-4"
+                        style={{
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                         onClick={!isLoading && handleUpdateCategoryFunc}
                       >
                         {isLoading ? "Saving..." : "Submit"}
                       </button>
                     ) : (
                       <button
-                        className="btn btn-success w-100 mt-4"
-                        style={{ opacity: "0.5" }}
+                        className="btn w-100 mt-4"
+                        style={{
+                          opacity: "0.5",
+                          color: "#fff",
+                          border: "none",
+                          // borderRadius: "24px",
+                          background:
+                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        }}
                       >
                         Submit
                       </button>

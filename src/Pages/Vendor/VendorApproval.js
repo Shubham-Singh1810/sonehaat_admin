@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,227 +7,282 @@ import {
   updateVendorProfile,
 } from "../../services/vender.services";
 import { toast } from "react-toastify";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+
+const DEFAULT_REASON = "waiting for approval";
 
 const VendorApproval = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const [details, setDetails] = useState(null);
-  const [formData, setFormData] = useState({
-    isProfilePicApproved: "",
-    profilePicRejectReason: "",
-    isFirstNameApproved: "",
-    firstNameRejectReason: "",
-    isLastNameApproved: "",
-    lastNameRejectReason: "",
-    isEmailApproved: "",
-    emailRejectReason: "",
-    isPhoneApproved: "",
-    phoneRejectReason: "",
-    isStoreLogoApproved: "",
-    storeLogoRejectReason: "",
-    isBusinessLicenseApproved: "",
-    businessLicenseRejectReason: "",
-    isStoreNameApproved: "",
-    storeNameRejectReason: "",
-    isStoreUrlApproved: "",
-    storeUrlRejectReason: "",
-    isGstNumberApproved: "",
-    gstNumberRejectReason: "",
-    isStoreDescriptionApproved: "",
-    storeDescriptionRejectReason: "",
-    isPincodeApproved: "",
-    pincodeRejectReason: "",
-    isStoreAddressApproved: "",
-    storeAddressRejectReason: "",
 
-    isSignatureApproved: "",
-    signatureRejectReason: "",
-    isPassBookApproved: "",
-    passBookRejectReason: "",
-    isAdharCardApproved: "",
-    adharCardRejectReason: "",
-    isAccountNumberApproved: "",
-    accountNumberRejectReason: "",
-    isIfscCodeApproved: "",
-    ifscCodeRejectReason: "",
-    isAccountHolderNameApproved: "",
-    accountHolderNameRejectReason: "",
-    isBankNameApproved: "",
-    bankNameRejectReason: "",
-    isBankBranchCodeApproved: "",
-    bankBranchCodeRejectReason: "",
-    isUpiIdApproved: "",
-    upiIdRejectReason: "",
-    isPanNumberApproved: "",
-    panNumberRejectReason: "",
+  const [details, setDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+
+  // State mirrors existing vendor fields, default reasons set
+  const [formData, setFormData] = useState({
+    // Personal
+    isProfilePicApproved: false,
+    profilePicRejectReason: DEFAULT_REASON,
+    isFirstNameApproved: false,
+    firstNameRejectReason: DEFAULT_REASON,
+    isLastNameApproved: false,
+    lastNameRejectReason: DEFAULT_REASON,
+    isEmailApproved: false,
+    emailRejectReason: DEFAULT_REASON,
+    isPhoneApproved: false,
+    phoneRejectReason: DEFAULT_REASON,
+
+    // Store
+    isStoreLogoApproved: false,
+    storeLogoRejectReason: DEFAULT_REASON,
+    isBusinessLicenseApproved: false,
+    businessLicenseRejectReason: DEFAULT_REASON,
+    isStoreNameApproved: false,
+    storeNameRejectReason: DEFAULT_REASON,
+    isStoreUrlApproved: false,
+    storeUrlRejectReason: DEFAULT_REASON,
+    isGstNumberApproved: false,
+    gstNumberRejectReason: DEFAULT_REASON,
+    isStoreDescriptionApproved: false,
+    storeDescriptionRejectReason: DEFAULT_REASON,
+    isPincodeApproved: false,
+    pincodeRejectReason: DEFAULT_REASON,
+    isStoreAddressApproved: false,
+    storeAddressRejectReason: DEFAULT_REASON,
+
+    // Account / KYC
+    isSignatureApproved: false,
+    signatureRejectReason: DEFAULT_REASON,
+    isPassBookApproved: false,
+    passBookRejectReason: DEFAULT_REASON,
+    isAdharCardApproved: false,
+    adharCardRejectReason: DEFAULT_REASON,
+    isAccountNumberApproved: false,
+    accountNumberRejectReason: DEFAULT_REASON,
+    isIfscCodeApproved: false,
+    ifscCodeRejectReason: DEFAULT_REASON,
+    isAccountHolderNameApproved: false,
+    accountHolderNameRejectReason: DEFAULT_REASON,
+    isBankNameApproved: false,
+    bankNameRejectReason: DEFAULT_REASON,
+    isBankBranchCodeApproved: false,
+    bankBranchCodeRejectReason: DEFAULT_REASON,
+    isUpiIdApproved: false,
+    upiIdRejectReason: DEFAULT_REASON,
+    isPanNumberApproved: false,
+    panNumberRejectReason: DEFAULT_REASON,
+
+    // Status
     profileStatus: "",
   });
 
-  const getVendorDetailsFunc = async () => {
+  // Map isXApproved -> xRejectReason
+  const reasonKeyOf = useCallback((approvedKey) => {
+    const base = approvedKey
+      .replace(/^is/, "")
+      .replace(/Approved$/, "RejectReason");
+    return base.charAt(0).toLowerCase() + base.slice(1);
+  }, []);
+
+  // All approved keys
+  const approvalKeys = useMemo(
+    () =>
+      Object.keys(formData).filter(
+        (k) => k.startsWith("is") && k.endsWith("Approved")
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(Object.keys(formData))]
+  );
+
+  const allApproved = useMemo(
+    () => approvalKeys.every((k) => formData[k] === true),
+    [approvalKeys, formData]
+  );
+
+  // Normalize one approve/reason pair
+  const normalizePair = (obj, approvedKey) => {
+    const rKey = reasonKeyOf(approvedKey);
+    if (!(rKey in obj)) return obj;
+    if (obj[approvedKey] === true) {
+      obj[rKey] = "";
+    } else {
+      if (!obj[rKey]) obj[rKey] = DEFAULT_REASON;
+    }
+    return obj;
+  };
+
+  // Normalize all pairs
+  const normalizeAll = (state) => {
+    const next = { ...state };
+    approvalKeys.forEach((aKey) => normalizePair(next, aKey));
+    return next;
+  };
+
+  // Fetch and hydrate with normalization
+  const getVendorDetailsFunc = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await getVendorDetailsServ(params.id);
       if (response?.data?.statusCode == "200") {
         const data = response.data.data?.venderDetails;
         setDetails(data);
-        setFormData({
-          isProfilePicApproved: data.isProfilePicApproved,
-          profilePicRejectReason: data.profilePicRejectReason,
 
-          isFirstNameApproved: data.isFirstNameApproved,
-          firstNameRejectReason: data.firstNameRejectReason,
-
-          isLastNameApproved: data.isLastNameApproved,
-          lastNameRejectReason: data.lastNameRejectReason,
-
-          isEmailApproved: data.isEmailApproved,
-          emailRejectReason: data.emailRejectReason,
-
-          isPhoneApproved: data.isPhoneApproved,
-          phoneRejectReason: data.phoneRejectReason,
-
-          isStoreLogoApproved: data.isStoreLogoApproved,
-          storeLogoRejectReason: data.storeLogoRejectReason,
-
-          isBusinessLicenseApproved: data.isBusinessLicenseApproved,
-          businessLicenseRejectReason: data.businessLicenseRejectReason,
-
-          isStoreNameApproved: data.isStoreNameApproved,
-          storeNameRejectReason: data.storeNameRejectReason,
-
-          isStoreUrlApproved: data.isStoreUrlApproved,
-          storeUrlRejectReason: data.storeUrlRejectReason,
-
-          isGstNumberApproved: data.isGstNumberApproved,
-          gstNumberRejectReason: data.gstNumberRejectReason,
-
-          isStoreDescriptionApproved: data.isStoreDescriptionApproved,
-          storeDescriptionRejectReason: data.storeDescriptionRejectReason,
-
-          isPincodeApproved: data.isPincodeApproved,
-          pincodeRejectReason: data.pincodeRejectReason,
-
-          isStoreAddressApproved: data.isStoreAddressApproved,
-          storeAddressRejectReason: data.storeAddressRejectReason,
-
-          isSignatureApproved: data.isSignatureApproved,
-          signatureRejectReason: data.signatureRejectReason,
-
-          isPassBookApproved: data.isPassBookApproved,
-          passBookRejectReason: data.passBookRejectReason,
-
-          isAdharCardApproved: data.isAdharCardApproved,
-          adharCardRejectReason: data.adharCardRejectReason,
-
-          isAccountNumberApproved: data.isAccountNumberApproved,
-          accountNumberRejectReason: data.accountNumberRejectReason,
-
-          isIfscCodeApproved: data.isIfscCodeApproved,
-          ifscCodeRejectReason: data.ifscCodeRejectReason,
-
-          isAccountHolderNameApproved: data.isAccountHolderNameApproved,
-          accountHolderNameRejectReason: data.accountHolderNameRejectReason,
-
-          isBankNameApproved: data.isBankNameApproved,
-          bankNameRejectReason: data.bankNameRejectReason,
-
-          isBankBranchCodeApproved: data.isBankBranchCodeApproved,
-          bankBranchCodeRejectReason: data.bankBranchCodeRejectReason,
-
-          isUpiIdApproved: data.isUpiIdApproved,
-          upiIdRejectReason: data.upiIdRejectReason,
-
-          isPanNumberApproved: data.isPanNumberApproved,
-          panNumberRejectReason: data.panNumberRejectReason,
+        setFormData((prev) => {
+          const next = { ...prev };
+          // approvals
+          approvalKeys.forEach((aKey) => {
+            next[aKey] = data?.[aKey] ?? prev[aKey];
+            const rKey = reasonKeyOf(aKey);
+            if (rKey in next) {
+              const apiReason = data?.[rKey];
+              next[rKey] =
+                typeof apiReason === "string" ? apiReason : prev[rKey];
+            }
+          });
+          next.profileStatus = data?.profileStatus ?? prev.profileStatus;
+          // fix mismatches from backend
+          return normalizeAll(next);
         });
+      } else {
+        toast.error(response?.data?.message || "Failed to load vendor details");
       }
     } catch (err) {
-      console.log(err);
+      toast.error("Failed to load vendor details");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [params.id, approvalKeys, reasonKeyOf]);
 
   useEffect(() => {
     getVendorDetailsFunc();
-  }, [params?.id]);
+  }, [getVendorDetailsFunc]);
 
-  
-
-  
-  const updateFormData = () => {
-    if (formData?.profileStatus == "approved") {
-      setFormData({
-        isProfilePicApproved: true,
-        profilePicRejectReason: "",
-        isFirstNameApproved: true,
-        firstNameRejectReason: "",
-        isLastNameApproved: true,
-        lastNameRejectReason: "",
-        isEmailApproved: true,
-        emailRejectReason: "",
-        isPhoneApproved: true,
-        phoneRejectReason: "",
-
-        isStoreLogoApproved: true,
-        storeLogoRejectReason: "",
-        isBusinessLicenseApproved: true,
-        businessLicenseRejectReason: "",
-        isStoreNameApproved: true,
-        storeNameRejectReason: "",
-        isStoreUrlApproved: true,
-        storeUrlRejectReason: "",
-        isGstNumberApproved: true,
-        gstNumberRejectReason: "",
-        isStoreDescriptionApproved: true,
-        storeDescriptionRejectReason: "",
-        isPincodeApproved: true,
-        pincodeRejectReason: "",
-        isStoreAddressApproved: true,
-        storeAddressRejectReason: "",
-        isStoreAddressApproved: true,
-        storeAddressRejectReason: "",
-
-        isSignatureApproved: true,
-        signatureRejectReason: "",
-        isPassBookApproved: true,
-        passBookRejectReason: "",
-        isAdharCardApproved: true,
-        adharCardRejectReason: "",
-        isAccountNumberApproved: true,
-        accountNumberRejectReason: "",
-        isIfscCodeApproved: true,
-        ifscCodeRejectReason: "",
-        isAccountHolderNameApproved: true,
-        accountHolderNameRejectReason: "",
-        isBankNameApproved: true,
-        bankNameRejectReason: "",
-        isBankBranchCodeApproved: true,
-        bankBranchCodeRejectReason: "",
-        isUpiIdApproved: true,
-        upiIdRejectReason: "",
-        isPanNumberApproved: true,
-        panNumberRejectReason: "",
-
-        profileStatus: "approved",
-      });
-    }
-  };
+  // Status guard like ProductApproval
   useEffect(() => {
-    updateFormData();
-  }, [formData?.profileStatus]);
-  const [loader, setLoader]=useState(false)
+    if (formData.profileStatus === "approved" && !allApproved)
+      setShowWarning(true);
+    else setShowWarning(false);
+  }, [formData.profileStatus, allApproved]);
+
+  // Select All
+  const handleSelectAll = useCallback(
+    (checked) => {
+      setFormData((prev) => {
+        const next = { ...prev };
+        approvalKeys.forEach((key) => {
+          next[key] = checked;
+          const rKey = reasonKeyOf(key);
+          if (rKey in next)
+            next[rKey] = checked ? "" : next[rKey] || DEFAULT_REASON;
+        });
+        return next;
+      });
+    },
+    [approvalKeys, reasonKeyOf]
+  );
+
+  // Per-field toggle
+  const handleToggleApproved = useCallback(
+    (approvedKey, checked) => {
+      setFormData((prev) => {
+        const next = { ...prev, [approvedKey]: checked };
+        const rKey = reasonKeyOf(approvedKey);
+        if (rKey in next)
+          next[rKey] = checked ? "" : prev[rKey] || DEFAULT_REASON;
+        return next;
+      });
+    },
+    [reasonKeyOf]
+  );
+
+  // Reason input change
+  const handleReasonChange = useCallback((reasonKey, value) => {
+    setFormData((prev) =>
+      prev[reasonKey] === value ? prev : { ...prev, [reasonKey]: value }
+    );
+  }, []);
+
+  // Submit with final normalization
   const handleProfileUpdate = async () => {
-    setLoader(true)
+    setSaving(true);
     try {
-      let response = await updateVendorProfile({ ...formData, id: params?.id });
-      console.log(response?.data?.statusCode);
-      if (response?.data?.statusCode == 200) {
-        toast.success(response?.data?.message);
+      const payload = normalizeAll({ ...formData, id: params?.id });
+      const response = await updateVendorProfile(payload);
+      if (
+        response?.data?.statusCode == 200 ||
+        response?.data?.statusCode == "200"
+      ) {
+        toast.success(
+          response?.data?.message || "Vendor approval updated successfully!"
+        );
         navigate("/vendor-list");
+      } else {
+        toast.error(
+          response?.data?.message || "Failed to update vendor approval."
+        );
       }
     } catch (error) {
       toast.error("Internal Server Error");
+    } finally {
+      setSaving(false);
     }
-    setLoader(false)
   };
+
+  const Loader = () => (
+    <div className="bodyContainer">
+      <Sidebar selectedMenu="Product Management" selectedItem="Add Product" />
+      <div className="mainContainer">
+        <TopNav />
+        <div className="p-lg-4 p-md-3 p-2">
+          <div className="row mx-0 p-0">
+            <h4 className="mb-4">
+              <Skeleton height={40} width={200} />
+            </h4>
+            <div className="p-3 shadow rounded mb-3" style={{ background: "#E6DFCF" }}>
+              <Skeleton height={30} width={120} className="mb-3" />
+              <div className="row">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="col-6 mb-3">
+                    <Skeleton height={20} width={100} className="mb-1" />
+                    <Skeleton height={45} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-3 shadow rounded mb-3" style={{ background: "#DAF0D5" }}>
+              <Skeleton height={30} width={120} className="mb-3" />
+              <div className="row">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="col-6 mb-3">
+                    <Skeleton height={20} width={100} className="mb-1" />
+                    <Skeleton height={45} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-3 shadow rounded mb-3" style={{ background: "#F6F0D6" }}>
+              <Skeleton height={30} width={160} className="mb-3" />
+              <div className="row">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="col-4 mb-3">
+                    <Skeleton height={150} />
+                    <Skeleton height={20} width={140} className="mt-2" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Skeleton height={50} width={180} className="mt-3" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) return <Loader />;
+
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Vendors" selectedItem="Manage Vendors" />
@@ -245,6 +300,19 @@ const VendorApproval = () => {
             }}
           >
             <h3 className="text-secondary mb-4">Vendor Approval</h3>
+
+            {/* Select All */}
+            <div className="mb-3">
+              <input
+                type="checkbox"
+                className="me-2"
+                checked={allApproved}
+                onChange={(e) => handleSelectAll(e.target.checked)}
+              />
+              <label className="fw-bold">Select All Fields for Approval</label>
+            </div>
+
+            {/* Personal Details */}
             <div className="px-3 py-1 mb-3 shadow border rounded">
               <div className="d-flex align-items-center my-3">
                 <i
@@ -257,31 +325,32 @@ const VendorApproval = () => {
                 ></i>
                 <h5> Personal Details</h5>
               </div>
-
               <div className="row">
                 {/* Profile Pic */}
                 <div className="col-4">
                   <div className="d-flex justify-content-center">
                     <div>
-                      <img
-                        src={details?.profilePic}
-                        style={{
-                          height: "120px",
-                          width: "120px",
-                          borderRadius: "50%",
-                        }}
-                        alt="profile"
-                      />
+                      {details?.profilePic && (
+                        <img
+                          src={details.profilePic}
+                          style={{
+                            height: "120px",
+                            width: "120px",
+                            borderRadius: "50%",
+                          }}
+                          alt="profile"
+                        />
+                      )}
                       <div className="d-flex mb-2">
                         <input
                           type="checkbox"
                           className="me-2"
                           checked={formData.isProfilePicApproved === true}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isProfilePicApproved: e.target.checked,
-                            })
+                            handleToggleApproved(
+                              "isProfilePicApproved",
+                              e.target.checked
+                            )
                           }
                         />
                         <label>Profile Pic</label>
@@ -291,10 +360,10 @@ const VendorApproval = () => {
                           className="form-control mt-2"
                           value={formData.profilePicRejectReason}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              profilePicRejectReason: e.target.value,
-                            })
+                            handleReasonChange(
+                              "profilePicRejectReason",
+                              e.target.value
+                            )
                           }
                         />
                       )}
@@ -312,17 +381,17 @@ const VendorApproval = () => {
                           className="me-2"
                           checked={formData.isFirstNameApproved === true}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isFirstNameApproved: e.target.checked,
-                            })
+                            handleToggleApproved(
+                              "isFirstNameApproved",
+                              e.target.checked
+                            )
                           }
                         />
                         <label>First Name</label>
                       </div>
                       <input
                         className="form-control"
-                        value={details?.firstName}
+                        value={details?.firstName || ""}
                         readOnly
                       />
                       {!formData.isFirstNameApproved && (
@@ -330,10 +399,10 @@ const VendorApproval = () => {
                           className="form-control mt-2"
                           value={formData.firstNameRejectReason}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              firstNameRejectReason: e.target.value,
-                            })
+                            handleReasonChange(
+                              "firstNameRejectReason",
+                              e.target.value
+                            )
                           }
                         />
                       )}
@@ -349,17 +418,17 @@ const VendorApproval = () => {
                           className="me-2"
                           checked={formData.isLastNameApproved === true}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isLastNameApproved: e.target.checked,
-                            })
+                            handleToggleApproved(
+                              "isLastNameApproved",
+                              e.target.checked
+                            )
                           }
                         />
                         <label>Last Name</label>
                       </div>
                       <input
                         className="form-control"
-                        value={details?.lastName}
+                        value={details?.lastName || ""}
                         readOnly
                       />
                       {!formData.isLastNameApproved && (
@@ -367,10 +436,10 @@ const VendorApproval = () => {
                           className="form-control mt-2"
                           value={formData.lastNameRejectReason}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              lastNameRejectReason: e.target.value,
-                            })
+                            handleReasonChange(
+                              "lastNameRejectReason",
+                              e.target.value
+                            )
                           }
                         />
                       )}
@@ -386,17 +455,17 @@ const VendorApproval = () => {
                           className="me-2"
                           checked={formData.isEmailApproved === true}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isEmailApproved: e.target.checked,
-                            })
+                            handleToggleApproved(
+                              "isEmailApproved",
+                              e.target.checked
+                            )
                           }
                         />
                         <label>Email</label>
                       </div>
                       <input
                         className="form-control"
-                        value={details?.email}
+                        value={details?.email || ""}
                         readOnly
                       />
                       {!formData.isEmailApproved && (
@@ -404,10 +473,10 @@ const VendorApproval = () => {
                           className="form-control mt-2"
                           value={formData.emailRejectReason}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              emailRejectReason: e.target.value,
-                            })
+                            handleReasonChange(
+                              "emailRejectReason",
+                              e.target.value
+                            )
                           }
                         />
                       )}
@@ -423,17 +492,17 @@ const VendorApproval = () => {
                           className="me-2"
                           checked={formData.isPhoneApproved === true}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isPhoneApproved: e.target.checked,
-                            })
+                            handleToggleApproved(
+                              "isPhoneApproved",
+                              e.target.checked
+                            )
                           }
                         />
                         <label>Phone</label>
                       </div>
                       <input
                         className="form-control"
-                        value={details?.phone}
+                        value={details?.phone || ""}
                         readOnly
                       />
                       {!formData.isPhoneApproved && (
@@ -441,10 +510,10 @@ const VendorApproval = () => {
                           className="form-control mt-2"
                           value={formData.phoneRejectReason}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              phoneRejectReason: e.target.value,
-                            })
+                            handleReasonChange(
+                              "phoneRejectReason",
+                              e.target.value
+                            )
                           }
                         />
                       )}
@@ -452,337 +521,769 @@ const VendorApproval = () => {
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="px-3 py-1 mb-3 shadow border rounded">
-              <div className="d-flex align-items-center my-3">
-                <i
-                  className="fa fa-circle text-secondary me-2"
-                  style={{
-                    fontSize: "10px",
-                    position: "relative",
-                    top: "-3px",
-                  }}
-                ></i>
-                <h5> Store Details</h5>
-              </div>
 
-              <div className="row">
-                <div className="col-4">
-                  <div className="d-flex justify-content-center">
-                    <div>
-                      <img
-                        src={details?.storeLogo}
-                        style={{
-                          height: "120px",
-                          width: "120px",
-                          borderRadius: "50%",
-                        }}
-                        alt="profile"
-                      />
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isStoreLogoApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isStoreLogoApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Store Logo</label>
-                      </div>
-                      {!formData.isStoreLogoApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.storeLogoRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              storeLogoRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="d-flex justify-content-center">
-                    <div>
-                      <img
-                        src={details?.bussinessLicense}
-                        style={{
-                          height: "120px",
-                          width: "120px",
-                          borderRadius: "50%",
-                        }}
-                        alt="profile"
-                      />
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isBusinessLicenseApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isBusinessLicenseApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Business Licences</label>
-                      </div>
-                      {!formData.isBusinessLicenseApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.businessLicenseRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              businessLicenseRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
+              {/* Store Details */}
+              <div className="px-3 py-1 mb-3 shadow border rounded">
+                <div className="d-flex align-items-center my-3">
+                  <i
+                    className="fa fa-circle text-secondary me-2"
+                    style={{
+                      fontSize: "10px",
+                      position: "relative",
+                      top: "-3px",
+                    }}
+                  ></i>
+                  <h5> Store Details</h5>
                 </div>
 
-                <div className="col-12 row">
+                <div className="row">
+                  {/* Store Logo */}
                   <div className="col-4">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isStoreNameApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isStoreNameApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Store Name</label>
+                    <div className="d-flex justify-content-center">
+                      <div>
+                        {details?.storeLogo && (
+                          <img
+                            src={details.storeLogo}
+                            style={{
+                              height: "120px",
+                              width: "120px",
+                              borderRadius: "50%",
+                            }}
+                            alt="store-logo"
+                          />
+                        )}
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isStoreLogoApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isStoreLogoApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Store Logo</label>
+                        </div>
+                        {!formData.isStoreLogoApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.storeLogoRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "storeLogoRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
                       </div>
-                      <input
-                        className="form-control"
-                        value={details?.storeName}
-                        readOnly
-                      />
-                      {!formData.isStoreNameApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.storeNameRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              storeNameRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
                     </div>
                   </div>
 
+                  {/* Business License */}
                   <div className="col-4">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isStoreUrlApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isStoreUrlApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Store Url</label>
+                    <div className="d-flex justify-content-center">
+                      <div>
+                        {details?.bussinessLicense && (
+                          <img
+                            src={details.bussinessLicense}
+                            style={{
+                              height: "120px",
+                              width: "120px",
+                              borderRadius: "50%",
+                            }}
+                            alt="business-license"
+                          />
+                        )}
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={
+                              formData.isBusinessLicenseApproved === true
+                            }
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isBusinessLicenseApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Business Licences</label>
+                        </div>
+                        {!formData.isBusinessLicenseApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.businessLicenseRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "businessLicenseRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
                       </div>
-                      <input
-                        className="form-control"
-                        value={details?.storeUrl}
-                        readOnly
-                      />
-                      {!formData.isStoreUrlApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.storeUrlRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              storeUrlRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isGstNumberApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isGstNumberApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>GST Number</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.gstNumber}
-                        readOnly
-                      />
-                      {!formData.isGstNumberApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.gstNumberRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              gstNumberRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
                     </div>
                   </div>
 
-                  <div className="col-12">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isStoreDescriptionApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isStoreDescriptionApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Store Description</label>
-                      </div>
-                      <textarea
-                        className="form-control"
-                        value={details?.storeDescription}
-                        readOnly
-                      />
-                      {!formData.isStoreDescriptionApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.storeDescriptionRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              storeDescriptionRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-12 row  ">
-                    <div className="col-4">
-                      <div className="shadow-sm p-3 mb-3">
-                        <div className="d-flex mb-2">
-                          <label>State</label>
-                        </div>
-                        <input
-                          className="form-control"
-                          value={details?.state}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                    <div className="col-4">
-                      <div className="shadow-sm p-3 mb-3">
-                        <div className="d-flex mb-2">
-                          <label>District</label>
-                        </div>
-                        <input
-                          className="form-control"
-                          value={details?.district}
-                          readOnly
-                        />
-                      </div>
-                    </div>
+                  {/* Store fields */}
+                  <div className="col-12 row">
                     <div className="col-4">
                       <div className="shadow-sm p-3 mb-3">
                         <div className="d-flex mb-2">
                           <input
                             type="checkbox"
                             className="me-2"
-                            checked={formData.isPincodeApproved === true}
+                            checked={formData.isStoreNameApproved === true}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                isPincodeApproved: e.target.checked,
-                              })
+                              handleToggleApproved(
+                                "isStoreNameApproved",
+                                e.target.checked
+                              )
                             }
                           />
-                          <label>Pincode</label>
+                          <label>Store Name</label>
                         </div>
                         <input
                           className="form-control"
-                          value={details?.pincode}
+                          value={details?.storeName || ""}
                           readOnly
                         />
-                        {!formData.isPincodeApproved && (
+                        {!formData.isStoreNameApproved && (
                           <input
                             className="form-control mt-2"
-                            value={formData.pincodeRejectReason}
+                            value={formData.storeNameRejectReason}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                pincodeRejectReason: e.target.value,
-                              })
+                              handleReasonChange(
+                                "storeNameRejectReason",
+                                e.target.value
+                              )
                             }
                           />
                         )}
                       </div>
                     </div>
+
+                    <div className="col-4">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isStoreUrlApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isStoreUrlApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Store Url</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.storeUrl || ""}
+                          readOnly
+                        />
+                        {!formData.isStoreUrlApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.storeUrlRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "storeUrlRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="col-4">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isGstNumberApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isGstNumberApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>GST Number</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.gstNumber || ""}
+                          readOnly
+                        />
+                        {!formData.isGstNumberApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.gstNumberRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "gstNumberRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
                     <div className="col-12">
                       <div className="shadow-sm p-3 mb-3">
                         <div className="d-flex mb-2">
                           <input
                             type="checkbox"
                             className="me-2"
-                            checked={formData.isStoreAddressApproved === true}
+                            checked={
+                              formData.isStoreDescriptionApproved === true
+                            }
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                isStoreAddressApproved: e.target.checked,
-                              })
+                              handleToggleApproved(
+                                "isStoreDescriptionApproved",
+                                e.target.checked
+                              )
                             }
                           />
-                          <label>Address</label>
+                          <label>Store Description</label>
                         </div>
                         <textarea
                           className="form-control"
-                          value={details?.address}
+                          value={details?.storeDescription || ""}
                           readOnly
                         />
-                        {!formData.isStoreAddressApproved && (
+                        {!formData.isStoreDescriptionApproved && (
                           <input
                             className="form-control mt-2"
-                            value={formData.storeAddressRejectReason}
+                            value={formData.storeDescriptionRejectReason}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                storeAddressRejectReason: e.target.value,
-                              })
+                              handleReasonChange(
+                                "storeDescriptionRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="col-12 row">
+                      <div className="col-4">
+                        <div className="shadow-sm p-3 mb-3">
+                          <div className="d-flex mb-2">
+                            <label>State</label>
+                          </div>
+                          <input
+                            className="form-control"
+                            value={details?.state || ""}
+                            readOnly
+                          />
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <div className="shadow-sm p-3 mb-3">
+                          <div className="d-flex mb-2">
+                            <label>District</label>
+                          </div>
+                          <input
+                            className="form-control"
+                            value={details?.district || ""}
+                            readOnly
+                          />
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <div className="shadow-sm p-3 mb-3">
+                          <div className="d-flex mb-2">
+                            <input
+                              type="checkbox"
+                              className="me-2"
+                              checked={formData.isPincodeApproved === true}
+                              onChange={(e) =>
+                                handleToggleApproved(
+                                  "isPincodeApproved",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                            <label>Pincode</label>
+                          </div>
+                          <input
+                            className="form-control"
+                            value={details?.pincode || ""}
+                            readOnly
+                          />
+                          {!formData.isPincodeApproved && (
+                            <input
+                              className="form-control mt-2"
+                              value={formData.pincodeRejectReason}
+                              onChange={(e) =>
+                                handleReasonChange(
+                                  "pincodeRejectReason",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <div className="shadow-sm p-3 mb-3">
+                          <div className="d-flex mb-2">
+                            <input
+                              type="checkbox"
+                              className="me-2"
+                              checked={formData.isStoreAddressApproved === true}
+                              onChange={(e) =>
+                                handleToggleApproved(
+                                  "isStoreAddressApproved",
+                                  e.target.checked
+                                )
+                              }
+                            />
+                            <label>Address</label>
+                          </div>
+                          <textarea
+                            className="form-control"
+                            value={details?.address || ""}
+                            readOnly
+                          />
+                          {!formData.isStoreAddressApproved && (
+                            <input
+                              className="form-control mt-2"
+                              value={formData.storeAddressRejectReason}
+                              onChange={(e) =>
+                                handleReasonChange(
+                                  "storeAddressRejectReason",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Details */}
+              <div className="px-3 py-1 mb-3 shadow border rounded">
+                <div className="d-flex align-items-center my-3">
+                  <i
+                    className="fa fa-circle text-secondary me-2"
+                    style={{
+                      fontSize: "10px",
+                      position: "relative",
+                      top: "-3px",
+                    }}
+                  ></i>
+                  <h5>Account Details</h5>
+                </div>
+
+                <div className="row">
+                  {/* Signature */}
+                  <div className="col-4">
+                    <div className="d-flex justify-content-center">
+                      <div>
+                        {details?.signature && (
+                          <img
+                            src={details.signature}
+                            style={{
+                              height: "120px",
+                              width: "120px",
+                              borderRadius: "50%",
+                            }}
+                            alt="signature"
+                          />
+                        )}
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isSignatureApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isSignatureApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Signature</label>
+                        </div>
+                        {!formData.isSignatureApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.signatureRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "signatureRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Passbook */}
+                  <div className="col-4">
+                    <div className="d-flex justify-content-center">
+                      <div>
+                        {details?.passBook && (
+                          <img
+                            src={details.passBook}
+                            style={{
+                              height: "120px",
+                              width: "120px",
+                              borderRadius: "50%",
+                            }}
+                            alt="passbook"
+                          />
+                        )}
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isPassBookApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isPassBookApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Passbook</label>
+                        </div>
+                        {!formData.isPassBookApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.passBookRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "passBookRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Adhar */}
+                  <div className="col-4">
+                    <div className="d-flex justify-content-center">
+                      <div>
+                        {details?.adharCard && (
+                          <img
+                            src={details.adharCard}
+                            style={{
+                              height: "120px",
+                              width: "120px",
+                              borderRadius: "50%",
+                            }}
+                            alt="adhar"
+                          />
+                        )}
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isAdharCardApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isAdharCardApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Adhar Card</label>
+                        </div>
+                        {!formData.isAdharCardApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.adharCardRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "adharCardRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Banking rows */}
+                  <div className="col-12 row">
+                    {/* Account Number */}
+                    <div className="col-6">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isAccountNumberApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isAccountNumberApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Account Number</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.accountNumber || ""}
+                          readOnly
+                        />
+                        {!formData.isAccountNumberApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.accountNumberRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "accountNumberRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* IFSC */}
+                    <div className="col-6">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isIfscCodeApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isIfscCodeApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>IFSC Code</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.ifscCode || ""}
+                          readOnly
+                        />
+                        {!formData.isIfscCodeApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.ifscCodeRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "ifscCodeRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Account Holder Name */}
+                    <div className="col-6">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={
+                              formData.isAccountHolderNameApproved === true
+                            }
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isAccountHolderNameApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Account Holder Name</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.accountHolderName || ""}
+                          readOnly
+                        />
+                        {!formData.isAccountHolderNameApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.accountHolderNameRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "accountHolderNameRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bank Name */}
+                    <div className="col-6">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isBankNameApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isBankNameApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Bank Name</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.bankName || ""}
+                          readOnly
+                        />
+                        {!formData.isBankNameApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.bankNameRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "bankNameRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bank Branch Code */}
+                    <div className="col-6">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isBankBranchCodeApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isBankBranchCodeApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Bank Branch Code</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.bankBranchCode || ""}
+                          readOnly
+                        />
+                        {!formData.isBankBranchCodeApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.bankBranchCodeRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "bankBranchCodeRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* UPI Id */}
+                    <div className="col-6">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isUpiIdApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isUpiIdApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>UPI Id</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.upiId || ""}
+                          readOnly
+                        />
+                        {!formData.isUpiIdApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.upiIdRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "upiIdRejectReason",
+                                e.target.value
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* PAN Number */}
+                    <div className="col-6">
+                      <div className="shadow-sm p-3 mb-3">
+                        <div className="d-flex mb-2">
+                          <input
+                            type="checkbox"
+                            className="me-2"
+                            checked={formData.isPanNumberApproved === true}
+                            onChange={(e) =>
+                              handleToggleApproved(
+                                "isPanNumberApproved",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label>Pan Number</label>
+                        </div>
+                        <input
+                          className="form-control"
+                          value={details?.panNumber || ""}
+                          readOnly
+                        />
+                        {!formData.isPanNumberApproved && (
+                          <input
+                            className="form-control mt-2"
+                            value={formData.panNumberRejectReason}
+                            onChange={(e) =>
+                              handleReasonChange(
+                                "panNumberRejectReason",
+                                e.target.value
+                              )
                             }
                           />
                         )}
@@ -791,444 +1292,59 @@ const VendorApproval = () => {
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="px-3 py-1 mb-3 shadow border rounded">
-              <div className="d-flex align-items-center my-3">
-                <i
-                  className="fa fa-circle text-secondary me-2"
+              {/* Footer actions */}
+              <div className="col-12">
+                <div className="shadow-sm p-3 mb-3">
+                  <div className="d-flex mb-2">
+                    <label>Profile Status</label>
+                  </div>
+                  <select
+                    className="form-control"
+                    value={formData.profileStatus}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData((prev) => ({ ...prev, profileStatus: val }));
+                      if (val === "approved" && !allApproved)
+                        setShowWarning(true);
+                      else setShowWarning(false);
+                    }}
+                  >
+                    <option value="">Select</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                  {showWarning && formData.profileStatus === "approved" && (
+                    <small className="text-danger">
+                      Please select all vendor fields to approve before
+                      submitting.
+                    </small>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-end mt-3">
+                <button
+                  className="btn"
                   style={{
-                    fontSize: "10px",
-                    position: "relative",
-                    top: "-3px",
+                    color: "#fff",
+                    border: "none",
+                    // borderRadius: "24px",
+                    background:
+                      "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                   }}
-                ></i>
-                <h5>Account Details</h5>
-              </div>
-
-              <div className="row">
-                {/* Profile Pic */}
-                <div className="col-4">
-                  <div className="d-flex justify-content-center">
-                    <div>
-                      <img
-                        src={details?.signature}
-                        style={{
-                          height: "120px",
-                          width: "120px",
-                          borderRadius: "50%",
-                        }}
-                        alt="profile"
-                      />
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isSignatureApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isSignatureApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Signature</label>
-                      </div>
-                      {!formData.isSignatureApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.signatureRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              signatureRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="d-flex justify-content-center">
-                    <div>
-                      <img
-                        src={details?.passBook}
-                        style={{
-                          height: "120px",
-                          width: "120px",
-                          borderRadius: "50%",
-                        }}
-                        alt="profile"
-                      />
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isPassBookApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isPassBookApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Passbook</label>
-                      </div>
-                      {!formData.isPassBookApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.passBookRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              passBookRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="d-flex justify-content-center">
-                    <div>
-                      <img
-                        src={details?.adharCard}
-                        style={{
-                          height: "120px",
-                          width: "120px",
-                          borderRadius: "50%",
-                        }}
-                        alt="profile"
-                      />
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isAdharCardApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isAdharCardApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Adhar Card</label>
-                      </div>
-                      {!formData.isAdharCardApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.adharCardRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              adharCardRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-12 row">
-                  <div className="col-6">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isAccountNumberApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isAccountNumberApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Account Number</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.accountNumber}
-                        readOnly
-                      />
-                      {!formData.isAccountNumberApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.accountNumberRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              accountNumberRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isIfscCodeApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isIfscCodeApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>IFCS Code</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.ifscCode}
-                        readOnly
-                      />
-                      {!formData.isIfscCodeApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.ifscCodeRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              ifscCodeRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="col-6">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={
-                            formData.isAccountHolderNameApproved === true
-                          }
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isAccountHolderNameApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Account Holder Name</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.accountHolderName}
-                        readOnly
-                      />
-                      {!formData.isAccountHolderNameApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.accountHolderNameRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              accountHolderNameRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="col-6">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isBankNameApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isBankNameApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Bank Name</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.bankName}
-                        readOnly
-                      />
-                      {!formData.isBankNameApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.bankNameRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              bankNameRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isBankBranchCodeApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isBankBranchCodeApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Bank Branch Code</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.bankBranchCode}
-                        readOnly
-                      />
-                      {!formData.isBankBranchCodeApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.bankBranchCodeRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              bankBranchCodeRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isUpiIdApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isUpiIdApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>UPI Id</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.upiId}
-                        readOnly
-                      />
-                      {!formData.isUpiIdApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.upiIdRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              upiIdRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="shadow-sm p-3 mb-3">
-                      <div className="d-flex mb-2">
-                        <input
-                          type="checkbox"
-                          className="me-2"
-                          checked={formData.isPanNumberApproved === true}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isPanNumberApproved: e.target.checked,
-                            })
-                          }
-                        />
-                        <label>Pan Number</label>
-                      </div>
-                      <input
-                        className="form-control"
-                        value={details?.panNumber}
-                        readOnly
-                      />
-                      {!formData.isPanNumberApproved && (
-                        <input
-                          className="form-control mt-2"
-                          value={formData.panNumberRejectReason}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              panNumberRejectReason: e.target.value,
-                            })
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-12">
-              <div className="shadow-sm p-3 mb-3">
-                <div className="d-flex mb-2">
-                  <label>Profile Status</label>
-                </div>
-                <select
-                  className="form-control"
-                  value={formData.profileStatus}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      profileStatus: e.target.value,
-                    })
+                  onClick={handleProfileUpdate}
+                  disabled={
+                    saving ||
+                    !formData.profileStatus ||
+                    (formData.profileStatus === "approved" && !allApproved)
                   }
                 >
-                  <option value="">Select</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
+                  {saving ? "Submitting..." : "Submit Approval"}
+                </button>
               </div>
             </div>
-            {loader ?  <button
-              className="btn-success"
-              style={{
-                borderRadius: "20px",
-                width: "100%",
-                opacity: "0.6",
-              }}
-             
-            >
-              Updating ..
-            </button>: <button
-              className="btn-success"
-              style={{
-                borderRadius: "20px",
-                width: "100%",
-                opacity: "0.6",
-              }}
-              onClick={() => handleProfileUpdate()}
-            >
-              Submit
-            </button>}
-           
           </div>
         </div>
       </div>
