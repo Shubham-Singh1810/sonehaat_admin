@@ -99,14 +99,24 @@ const OrderDetails = () => {
 
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Orders" selectedItem="Orders" />
+      <Sidebar selectedMenu="Orders" selectedItem="All Orders" />
       <div className="mainContainer">
         <TopNav />
         <div className="container-fluid p-lg-4 p-md-3 p-2">
           <div className="row g-4">
+            
             {/* Left Column */}
             <div className="col-lg-8">
               <div className="card shadow-sm p-4">
+              <div className="mb-3">
+                <button
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={() => navigate("/order-list")}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h4 className="mb-0">
                     Order #{(order?._id || order?.orderId || "").toString().slice(0, 8).toUpperCase()}

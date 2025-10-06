@@ -15,6 +15,7 @@ const DEFAULT_REASON = "waiting for approval";
 function DriverApproval() {
   const params = useParams();
   const navigate = useNavigate();
+ const [showDialog, setShowDialog] = useState(false);
 
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -270,6 +271,77 @@ function DriverApproval() {
     </div>
   );
 
+  const handleBackClick = () => {
+    // Compare current formData with details from API
+    const hasChanges =
+      JSON.stringify(formData) !==
+      JSON.stringify({
+        // Only include the fields that are editable
+        isProfilePicApproved: details?.isProfilePicApproved ?? false,
+        profilePicRejectReason: details?.profilePicRejectReason ?? DEFAULT_REASON,
+        isDlFrontImageApproved: details?.isDlFrontImageApproved ?? false,
+        dlFrontImageRejectReason: details?.dlFrontImageRejectReason ?? DEFAULT_REASON,
+        isDlBackImageApproved: details?.isDlBackImageApproved ?? false,
+        dlBackImageRejectReason: details?.dlBackImageRejectReason ?? DEFAULT_REASON,
+        isFirstNameApproved: details?.isFirstNameApproved ?? false,
+        firstNameRejectReason: details?.firstNameRejectReason ?? DEFAULT_REASON,
+        isLastNameApproved: details?.isLastNameApproved ?? false,
+        lastNameRejectReason: details?.lastNameRejectReason ?? DEFAULT_REASON,
+        isEmailApproved: details?.isEmailApproved ?? false,
+        emailRejectReason: details?.emailRejectReason ?? DEFAULT_REASON,
+        isPhoneApproved: details?.isPhoneApproved ?? false,
+        phoneRejectReason: details?.phoneRejectReason ?? DEFAULT_REASON,
+        isAddressApproved: details?.isAddressApproved ?? false,
+        addressRejectReason: details?.addressRejectReason ?? DEFAULT_REASON,
+        isPincodeApproved: details?.isPincodeApproved ?? false,
+        pincodeRejectReason: details?.pincodeRejectReason ?? DEFAULT_REASON,
+        isIfscCodeApproved: details?.isIfscCodeApproved ?? false,
+        ifscCodeRejectReason: details?.ifscCodeRejectReason ?? DEFAULT_REASON,
+        isAccountNumberApproved: details?.isAccountNumberApproved ?? false,
+        accountNumberRejectReason: details?.accountNumberRejectReason ?? DEFAULT_REASON,
+        isAccountHolderNameApproved: details?.isAccountHolderNameApproved ?? false,
+        accountHolderNameRejectReason: details?.accountHolderNameRejectReason ?? DEFAULT_REASON,
+        isBankNameApproved: details?.isBankNameApproved ?? false,
+        bankNameRejectReason: details?.bankNameRejectReason ?? DEFAULT_REASON,
+        isBankBranchCodeApproved: details?.isBankBranchCodeApproved ?? false,
+        bankBranchCodeRejectReason: details?.bankBranchCodeRejectReason ?? DEFAULT_REASON,
+        isUpiIdApproved: details?.isUpiIdApproved ?? false,
+        upiIdRejectReason: details?.upiIdRejectReason ?? DEFAULT_REASON,
+        isPanNumberApproved: details?.isPanNumberApproved ?? false,
+        panNumberRejectReason: details?.panNumberRejectReason ?? DEFAULT_REASON,
+        isSignatureApproved: details?.isSignatureApproved ?? false,
+        signatureRejectReason: details?.signatureRejectReason ?? DEFAULT_REASON,
+        isAdharCardApproved: details?.isAdharCardApproved ?? false,
+        adharCardRejectReason: details?.adharCardRejectReason ?? DEFAULT_REASON,
+        isVehicleNumberApproved: details?.isVehicleNumberApproved ?? false,
+        vehicleNumberRejectReason: details?.vehicleNumberRejectReason ?? DEFAULT_REASON,
+        isVehicleTypeApproved: details?.isVehicleTypeApproved ?? false,
+        vehicleTypeRejectReason: details?.vehicleTypeRejectReason ?? DEFAULT_REASON,
+        isVehicleImageApproved: details?.isVehicleImageApproved ?? false,
+        vehicleImageRejectReason: details?.vehicleImageRejectReason ?? DEFAULT_REASON,
+        profileStatus: details?.profileStatus ?? "",
+      });
+  
+    if (!hasChanges) {
+      navigate("/driver-list");
+    } else {
+      setShowDialog(true);
+    }
+  };
+  
+
+  const handleDialogAction = (action) => {
+    if (action === "save") {
+      setShowDialog(false);
+      handleSubmit();
+    } else if (action === "dontSave") {
+      setShowDialog(false);
+      navigate("/driver-list");
+    } else if (action === "cancel") {
+      setShowDialog(false);
+    }
+  };
+
   if (loading) return <Loader />;
 
   return (
@@ -286,6 +358,17 @@ function DriverApproval() {
                     Approve Driver
                   </h4>
                 </div>
+
+                <div className="mb-3">
+                <button
+                  type="button"
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={handleBackClick}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
 
                 <div className="mb-3">
                   <input
@@ -799,6 +882,91 @@ function DriverApproval() {
               </div>
             </div>
           </div>
+          {showDialog && (
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+              style={{
+                background: "rgba(0, 0, 0, 0.35)",
+                backdropFilter: "blur(3px)",
+                zIndex: 1050,
+              }}
+            >
+              <div
+                className="bg-white shadow-lg rounded-4 p-4 text-center animate__animated animate__fadeIn"
+                style={{
+                  width: "420px",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  boxShadow: "0 10px 35px rgba(0,0,0,0.1)",
+                }}
+              >
+                <h5
+                  className="fw-semibold mb-3"
+                  style={{
+                    color: "#1d1d1f",
+                    fontSize: "1.1rem",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  Do you want to save the entered information?
+                </h5>
+                <p
+                  className="text-muted mb-4"
+                  style={{
+                    fontSize: "0.9rem",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  Choose “Save” to keep your changes, or “Don’t Save” to discard
+                  them.
+                </p>
+
+                <div className="d-flex justify-content-center gap-3">
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(52, 152, 219), rgb(41, 128, 185))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("save")}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(231, 76, 60), rgb(192, 57, 43))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("dontSave")}
+                  >
+                   Don’t Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-light px-4 py-2"
+                    style={{
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      fontWeight: 500,
+                    }}
+                    onClick={() => handleDialogAction("cancel")}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div> 
     </div>

@@ -241,12 +241,14 @@ function CategoriesList() {
               <div>
                 <button
                   className="btn btn-primary w-100 "
-                  style={{ color: "#fff",
+                  style={{
+                    color: "#fff",
                     border: "none",
                     // borderRadius: "24px",
                     background:
                       "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
+                    boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                  }}
                   onClick={() => setAddFormData({ ...addFormData, show: true })}
                 >
                   Add Category
@@ -316,8 +318,10 @@ function CategoriesList() {
                             <>
                               <tr key={v._id}>
                                 <td className="text-center">
-      {(payload.pageNo - 1) * payload.pageCount + i + 1}
-    </td>
+                                  {(payload.pageNo - 1) * payload.pageCount +
+                                    i +
+                                    1}
+                                </td>
                                 <td className="text-center">
                                   <img
                                     src={v?.image}
@@ -400,14 +404,14 @@ function CategoriesList() {
                 </table>
                 {list.length == 0 && !showSkelton && <NoRecordFound />}
                 {statics?.totalCount > 0 && (
-                <div className="d-flex justify-content-center my-3">
-                  <Pagination
-                    payload={payload}
-                    setPayload={setPayload}
-                    totalCount={statics?.totalCount || 0}
-                  />
-                </div>
-              )}
+                  <div className="d-flex justify-content-center my-3">
+                    <Pagination
+                      payload={payload}
+                      setPayload={setPayload}
+                      totalCount={statics?.totalCount || 0}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -444,11 +448,24 @@ function CategoriesList() {
                 <div className="d-flex justify-content-center w-100">
                   <div className="w-100 px-2">
                     <h5 className="mb-4">Add Category</h5>
-                    <div className="p-3 border rounded mb-2">
+                    <div
+                      className="p-3 border rounded mb-2"
+                      style={{
+                        height: "120px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
                       {addFormData?.imgPrev ? (
                         <img
                           src={addFormData?.imgPrev}
-                          className="img-fluid w-100 shadow rounded"
+                          className="shadow rounded"
+                          style={{
+                            maxHeight: "100%",
+                            maxWidth: "100%",
+                            objectFit: "contain",
+                          }}
                         />
                       ) : (
                         <p className="mb-0 text-center">No Item Selected !</p>
@@ -526,12 +543,12 @@ function CategoriesList() {
                           isLoading
                             ? "0.5"
                             : "1",
-                            color: "#fff",
-                          border: "none",
-                          // borderRadius: "24px",
-                          background:
-                            "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                          boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                        color: "#fff",
+                        border: "none",
+                        // borderRadius: "24px",
+                        background:
+                          "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                        boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                       }}
                     >
                       {isLoading ? "Saving..." : "Submit"}
@@ -585,10 +602,23 @@ function CategoriesList() {
                 >
                   <div className="w-100 px-2">
                     <h5 className="mb-4">Update Category</h5>
-                    <div className="p-3 border rounded mb-2">
+                    <div
+                      className="p-3 border rounded mb-2"
+                      style={{
+                        height: "120px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
                       <img
                         src={editFormData?.imgPrev}
-                        className="img-fluid w-100 shadow rounded"
+                        className="shadow rounded"
+                        style={{
+                          maxHeight: "100%",
+                          maxWidth: "100%",
+                          objectFit: "contain",
+                        }}
                       />
                     </div>
                     <label className="">Upload Image</label>

@@ -42,6 +42,7 @@ const initialState = {
 const EditDriver = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
 
   const [formData, setFormData] = useState(initialState);
   const [files, setFiles] = useState({
@@ -126,7 +127,7 @@ const EditDriver = () => {
   }, [formData, saving]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!isValid) return;
     setSaving(true);
     try {
@@ -227,6 +228,47 @@ const EditDriver = () => {
     };
     fetchCities();
   }, []);
+
+  const handleBackClick = () => {
+    const hasChanges =
+      JSON.stringify(formData) !==
+        JSON.stringify({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          address: "",
+          pincode: "",
+          ifscCode: "",
+          upiId: "",
+          accountNumber: "",
+          accountHolderName: "",
+          bankName: "",
+          bankBranchCode: "",
+          panNumber: "",
+          vehicleType: "",
+          vehicleNo: "",
+          operationalCity: "",
+        }) || Object.values(files).some((f) => f !== null);
+
+    if (!hasChanges) {
+      navigate("/driver-list");
+    } else {
+      setShowDialog(true);
+    }
+  };
+
+  const handleDialogAction = (action) => {
+    if (action === "save") {
+      setShowDialog(false);
+      handleSubmit();
+    } else if (action === "dontSave") {
+      setShowDialog(false);
+      navigate("/driver-list");
+    } else if (action === "cancel") {
+      setShowDialog(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -395,7 +437,16 @@ const EditDriver = () => {
                   </h4>
                 </div>
               </div>
-
+              <div className="mb-3">
+                <button
+                  type="button"
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={handleBackClick}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
               {/* Identity & DL */}
               <div className="px-3 py-1 mb-3 shadow border rounded">
                 <SectionHeader title="Identity & License" />
@@ -824,6 +875,91 @@ const EditDriver = () => {
                 {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
+            {showDialog && (
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+              style={{
+                background: "rgba(0, 0, 0, 0.35)",
+                backdropFilter: "blur(3px)",
+                zIndex: 1050,
+              }}
+            >
+              <div
+                className="bg-white shadow-lg rounded-4 p-4 text-center animate__animated animate__fadeIn"
+                style={{
+                  width: "420px",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  boxShadow: "0 10px 35px rgba(0,0,0,0.1)",
+                }}
+              >
+                <h5
+                  className="fw-semibold mb-3"
+                  style={{
+                    color: "#1d1d1f",
+                    fontSize: "1.1rem",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  Do you want to save the entered information?
+                </h5>
+                <p
+                  className="text-muted mb-4"
+                  style={{
+                    fontSize: "0.9rem",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  Choose “Save” to keep your changes, or “Don’t Save” to discard
+                  them.
+                </p>
+
+                <div className="d-flex justify-content-center gap-3">
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(52, 152, 219), rgb(41, 128, 185))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("save")}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(231, 76, 60), rgb(192, 57, 43))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("dontSave")}
+                  >
+                   Don’t Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-light px-4 py-2"
+                    style={{
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      fontWeight: 500,
+                    }}
+                    onClick={() => handleDialogAction("cancel")}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           </div>
         </form>
       </div>

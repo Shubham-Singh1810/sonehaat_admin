@@ -23,6 +23,8 @@ function ProductUpdateStep2() {
   const navigate = useNavigate();
   const editor = useRef(null);
   const contentRef = useRef("");
+  const { id } = useParams();
+
 
   const config = { placeholder: "Start typing...", height: "400px" };
 
@@ -519,12 +521,14 @@ function ProductUpdateStep2() {
               </button>
               <button
                 className="btn btn-primary"
-                style={{ color: "#fff",
+                style={{
+                  color: "#fff",
                   border: "none",
                   // borderRadius: "24px",
                   background:
                     "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                  boxShadow: "0 4px 12px rgba(255,103,30,0.45)", }}
+                  boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                }}
                 onClick={applyNLevelSelection}
                 disabled={!selectedNLevelId}
               >
@@ -537,12 +541,54 @@ function ProductUpdateStep2() {
     );
   };
 
+  const [showDialog, setShowDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(false);
+
+  const handleBackClick = () => {
+    const isFormDirty = Object.values(formData).some(
+      (val) => val && val !== "" && !(Array.isArray(val) && val.length === 0)
+    );
+
+    // if user has entered some info but not all required fields
+    if (isFormDirty) {
+      setShowDialog(true);
+    } else {
+      navigate(`/update-product-step1/${id}`);
+    }
+  };
+
+  const handleDialogAction = async (action) => {
+    if (action === "save") {
+      try {
+        await updateProductFunc();
+      } catch (e) {
+        console.error(e);
+      }
+      setShowDialog(false);
+      navigate(`/update-product-step1/${id}`);
+    } else if (action === "dontSave") {
+      setShowDialog(false);
+      navigate(`/update-product-step1/${id}`);
+    } else {
+      // Cancel
+      setShowDialog(false);
+    }
+  };
+
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Product Management" selectedItem="Add Product" />
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">
+          <div
+            className="row mx-0 p-0"
+            style={{
+              position: "relative",
+              top: "-75px",
+              marginBottom: "-75px",
+            }}
+          ></div>
           <div className="mt-3">
             <div className="card-body px-2">
               <div className="d-flex">
@@ -555,6 +601,15 @@ function ProductUpdateStep2() {
               </div>
             </div>
 
+            <div className="mb-3">
+              <button
+                className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                onClick={handleBackClick}
+                style={{ fontSize: "0.9rem", fontWeight: "500" }}
+              >
+                ← Back
+              </button>
+            </div>
             <div className="row">
               <div className="col-6 mb-3">
                 <label>Min Order Quantity</label>
@@ -643,23 +698,31 @@ function ProductUpdateStep2() {
 
               <div className="col-6 mb-3">
                 <label>Select Category</label>
-                <select
-                  className="form-control"
-                  value={formData?.categoryId}
-                  onChange={(e) =>
+                <Select
+                  options={categoryList?.map((v) => ({
+                    label: v?.name,
+                    value: String(v?._id),
+                  }))}
+                  value={
+                    categoryList
+                      .filter((v) => String(v._id) === formData?.categoryId)
+                      .map((v) => ({
+                        label: v?.name,
+                        value: String(v?._id),
+                      }))[0] || null
+                  }
+                  onChange={(selected) =>
                     setFormData({
                       ...formData,
-                      categoryId: String(e.target.value),
+                      categoryId: selected ? selected.value : "",
+                      subCategoryId: "", // clear subcategory when category changes
+                      nLevelCategoryId: "", // clear N-level category
                     })
                   }
-                >
-                  <option>Select</option>
-                  {categoryList?.map((v) => (
-                    <option key={v?._id} value={String(v?._id)}>
-                      {v?.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Select Category..."
+                  isClearable
+                  classNamePrefix="select"
+                />
               </div>
 
               <div className="col-6 mb-3">
@@ -775,7 +838,8 @@ function ProductUpdateStep2() {
                         </>
                       ) : (
                         <>
-                          {formData?.nLevelCategoryId ? "Change" : "Choose"} N‑Level
+                          {formData?.nLevelCategoryId ? "Change" : "Choose"}{" "}
+                          N‑Level
                         </>
                       )}
                     </button>
@@ -982,6 +1046,91 @@ function ProductUpdateStep2() {
               </div>
             </div>
           </div>
+         {showDialog && (
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+              style={{
+                background: "rgba(0, 0, 0, 0.35)",
+                backdropFilter: "blur(3px)",
+                zIndex: 1050,
+              }}
+            >
+              <div
+                className="bg-white shadow-lg rounded-4 p-4 text-center animate__animated animate__fadeIn"
+                style={{
+                  width: "420px",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  boxShadow: "0 10px 35px rgba(0,0,0,0.1)",
+                }}
+              >
+                <h5
+                  className="fw-semibold mb-3"
+                  style={{
+                    color: "#1d1d1f",
+                    fontSize: "1.1rem",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  Do you want to save the entered information?
+                </h5>
+                <p
+                  className="text-muted mb-4"
+                  style={{
+                    fontSize: "0.9rem",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  Choose “Save” to keep your changes, or “Don’t Save” to discard
+                  them.
+                </p>
+
+                <div className="d-flex justify-content-center gap-3">
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(52, 152, 219), rgb(41, 128, 185))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("save")}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(231, 76, 60), rgb(192, 57, 43))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("dontSave")}
+                  >
+                   Don’t Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-light px-4 py-2"
+                    style={{
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      fontWeight: 500,
+                    }}
+                    onClick={() => handleDialogAction("cancel")}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <NLevelPickerModal />

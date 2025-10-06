@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
 import Sidebar from "../../Components/Sidebar";
 import TopNav from "../../Components/TopNav";
@@ -13,6 +13,7 @@ const OrderInvoice = () => {
   const [order, setOrder] = useState(null);
   const invoiceRef = useRef();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handlePrint = useReactToPrint({
     content: () => invoiceRef.current,
@@ -72,11 +73,20 @@ const OrderInvoice = () => {
 
   return (
     <div className="bodyContainer">
-      <Sidebar selectedMenu="Orders" selectedItem="Orders" />
+      <Sidebar selectedMenu="Orders" selectedItem="All Orders" />
       <div className="mainContainer">
         <TopNav />
         <div className="container-fluid p-lg-4 p-md-3 p-2">
           <div className="card shadow-sm p-4">
+          <div className="mb-3">
+                <button
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={() => navigate(`/order-details/${id}`)}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
             {/* Printable area */}
             <div ref={invoiceRef} className="p-4 print-area">
               <div className="d-flex justify-content-between mb-4">

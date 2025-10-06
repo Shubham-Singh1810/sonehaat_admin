@@ -196,6 +196,16 @@ function DriverAdd() {
                 </h4>
               </div>
             </div>
+            <div className="mb-3">
+                <button
+                  type="button"
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={() => navigate("/driver-list")}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();

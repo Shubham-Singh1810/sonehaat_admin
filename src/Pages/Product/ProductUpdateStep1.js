@@ -23,6 +23,7 @@ function ProductUpdateStep1() {
   const navigate = useNavigate();
   const editor = useRef(null);
   const config = { placeholder: "Start typing...", height: "300px" };
+  const [showDialog, setShowDialog] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -91,7 +92,7 @@ function ProductUpdateStep1() {
 
   const [loader, setLoader] = useState(false);
   // ProductUpdateStep1.jsx
-const handleUpdateAndNext = async () => {
+  const handleUpdateAndNext = async () => {
     setLoader(true);
     try {
       const isAdminCreate = formData?.createdByAdmin === "Yes";
@@ -104,12 +105,16 @@ const handleUpdateAndNext = async () => {
         madeIn: formData?.madeIn,
         hsnCode: formData?.hsnCode,
         shortDescription: formData?.shortDescription,
-        createdBy: isAdminCreate ? null : (formData?.createdBy || null),
-        createdByAdmin: isAdminCreate ? (localStorage.getItem("adminId") || null) : null,
+        createdBy: isAdminCreate ? null : formData?.createdBy || null,
+        createdByAdmin: isAdminCreate
+          ? localStorage.getItem("adminId") || null
+          : null,
       };
       // remove keys with null to avoid unintended overwrites if you prefer
-      Object.keys(payload).forEach(k => payload[k] === null && delete payload[k]);
-  
+      Object.keys(payload).forEach(
+        (k) => payload[k] === null && delete payload[k]
+      );
+
       const resp = await updateProductServ(payload);
       if (resp?.data?.statusCode == "200") {
         toast.success(resp?.data?.message);
@@ -123,7 +128,62 @@ const handleUpdateAndNext = async () => {
       setLoader(false);
     }
   };
-  
+  const handleBackClick = () => {
+    const isFormDirty = Object.values(formData).some(
+      (val) => val && val !== "" && !(Array.isArray(val) && val.length === 0)
+    );
+
+    // if user has entered some info but not all required fields
+    if (isFormDirty) {
+      setShowDialog(true);
+    } else {
+      navigate(`/product-list`);
+    }
+  };
+
+  const handleDialogAction = async (action) => {
+    if (action === "save") {
+      setLoader(true);
+      try {
+        const isAdminCreate = formData?.createdByAdmin === "Yes";
+        const payload = {
+          _id: String(params?.id),
+          name: formData?.name,
+          tags: formData?.tags,
+          productType: formData?.productType,
+          tax: formData?.tax,
+          madeIn: formData?.madeIn,
+          hsnCode: formData?.hsnCode,
+          shortDescription: formData?.shortDescription,
+          createdBy: isAdminCreate ? null : formData?.createdBy || null,
+          createdByAdmin: isAdminCreate
+            ? localStorage.getItem("adminId") || null
+            : null,
+        };
+        Object.keys(payload).forEach(
+          (k) => payload[k] === null && delete payload[k]
+        );
+
+        const resp = await updateProductServ(payload);
+        if (resp?.data?.statusCode == "200") {
+          toast.success("Saved successfully");
+          navigate(`/product-list`);
+        } else {
+          toast.error("Something went wrong");
+        }
+      } catch (e) {
+        toast.error("Internal Server Error");
+      } finally {
+        setLoader(false);
+        setShowDialog(false);
+      }
+    } else if (action === "dontSave") {
+      setShowDialog(false);
+      navigate(`/product-list`);
+    } else {
+      setShowDialog(false);
+    }
+  };
 
   return (
     <div className="bodyContainer">
@@ -131,6 +191,14 @@ const handleUpdateAndNext = async () => {
       <div className="mainContainer">
         <TopNav />
         <div className="p-lg-4 p-md-3 p-2">
+          <div
+            className="row mx-0 p-0"
+            style={{
+              position: "relative",
+              top: "-75px",
+              marginBottom: "-75px",
+            }}
+          ></div>
           <div className="mt-3">
             <div className="card-body px-2">
               <div className="table-responsive table-invoice">
@@ -143,7 +211,15 @@ const handleUpdateAndNext = async () => {
                   </h4>
                 </div>
               </div>
-
+              <div className="mb-3">
+                <button
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={handleBackClick}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
               {/* Same form as AddProduct, but values from formData and button text changed */}
               <div className="row">
                 <div className="col-6 mb-3">
@@ -215,7 +291,6 @@ const handleUpdateAndNext = async () => {
                     ))}
                   </select>
                 </div>
-                
 
                 <div className="col-6 mb-3">
                   <label>Made In*</label>
@@ -302,11 +377,12 @@ const handleUpdateAndNext = async () => {
                   <button
                     className="btn btn-primary w-100"
                     style={{
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "24px",
-                        background: "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-                        boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "24px",
+                      background:
+                        "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                      boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                     }}
                     onClick={handleUpdateAndNext}
                   >
@@ -316,6 +392,91 @@ const handleUpdateAndNext = async () => {
               </div>
             </div>
           </div>
+          {showDialog && (
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+              style={{
+                background: "rgba(0, 0, 0, 0.35)",
+                backdropFilter: "blur(3px)",
+                zIndex: 1050,
+              }}
+            >
+              <div
+                className="bg-white shadow-lg rounded-4 p-4 text-center animate__animated animate__fadeIn"
+                style={{
+                  width: "420px",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  boxShadow: "0 10px 35px rgba(0,0,0,0.1)",
+                }}
+              >
+                <h5
+                  className="fw-semibold mb-3"
+                  style={{
+                    color: "#1d1d1f",
+                    fontSize: "1.1rem",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  Do you want to save the entered information?
+                </h5>
+                <p
+                  className="text-muted mb-4"
+                  style={{
+                    fontSize: "0.9rem",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  Choose “Save” to keep your changes, or “Don’t Save” to discard
+                  them.
+                </p>
+
+                <div className="d-flex justify-content-center gap-3">
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(52, 152, 219), rgb(41, 128, 185))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("save")}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(231, 76, 60), rgb(192, 57, 43))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("dontSave")}
+                  >
+                   Don’t Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-light px-4 py-2"
+                    style={{
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      fontWeight: 500,
+                    }}
+                    onClick={() => handleDialogAction("cancel")}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

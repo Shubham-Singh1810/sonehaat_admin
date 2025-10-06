@@ -177,6 +177,15 @@ function AddProduct() {
                   </h4>
                 </div>
               </div>
+              <div className="mb-3">
+                <button
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={() => navigate("/product-list")}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
               <div className="row">
                 <div className="col-6 mb-3">
                   <label>Product Name*</label>

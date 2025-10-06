@@ -182,7 +182,15 @@ const VendorAdd = () => {
                   </h4>
                 </div>
               </div>
-
+              <div className="mb-3">
+                <button
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={() => navigate("/vendor-list")}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
+              </div>
               {/* Personal Details */}
               <div className="px-3 py-1 mb-3 shadow border rounded">
                 <div className="d-flex align-items-center my-3">

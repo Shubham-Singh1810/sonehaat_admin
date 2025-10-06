@@ -10,12 +10,13 @@ import {
   updateProductVideoServ,
   updateProductGalleryServ,
   getProductDetailsServ,
-  deleteProductGalleryServ
+  deleteProductGalleryServ,
 } from "../../services/product.services";
 import { useParams, useNavigate } from "react-router-dom";
 function ProductUpdateStep3() {
   const navigate = useNavigate();
   const params = useParams();
+  const [showDialog, setShowDialog] = useState(false);
   const uploadHeroImage = async (img) => {
     try {
       const formData = new FormData();
@@ -24,7 +25,7 @@ function ProductUpdateStep3() {
       let response = await updateProductHeroImage(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
-        getProductDetails()
+        getProductDetails();
       } else {
         toast.error("Something went wrong");
       }
@@ -40,7 +41,7 @@ function ProductUpdateStep3() {
       let response = await updateProductVideoServ(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
-        getProductDetails()
+        getProductDetails();
       } else {
         toast.error("Something went wrong");
       }
@@ -56,7 +57,7 @@ function ProductUpdateStep3() {
       let response = await updateProductGalleryServ(formData);
       if (response?.data?.statusCode == "200") {
         toast.success(response?.data?.message);
-        getProductDetails()
+        getProductDetails();
       } else {
         toast.error("Something went wrong");
       }
@@ -84,17 +85,45 @@ function ProductUpdateStep3() {
   useEffect(() => {
     getProductDetails();
   }, []);
-  const deleteProductGalleryFunc =async (index)=>{
+  const deleteProductGalleryFunc = async (index) => {
     try {
-      let response = await deleteProductGalleryServ({id:params?.id, index:index});
-      if(response?.data?.statusCode=="200"){
-        toast.success(response?.data?.message)
-        getProductDetails()
+      let response = await deleteProductGalleryServ({
+        id: params?.id,
+        index: index,
+      });
+      if (response?.data?.statusCode == "200") {
+        toast.success(response?.data?.message);
+        getProductDetails();
       }
     } catch (error) {
-      toast.error("Internal Server Error")
+      toast.error("Internal Server Error");
     }
-  }
+  };
+  const handleBackClick = () => {
+    const isModified =
+      details.productHeroImage ||
+      details.productVideo ||
+      details.productGallery.length > 0;
+    if (isModified) {
+      setShowDialog(true);
+    } else {
+      navigate("/update-product-step2/" + params?.id);
+    }
+  };
+
+  const handleDialogAction = (action) => {
+    if (action === "save") {
+      toast.success("Changes saved successfully");
+      setShowDialog(false);
+      navigate("/update-product-step2/" + params?.id);
+    } else if (action === "dontSave") {
+      setShowDialog(false);
+      navigate("/update-product-step2/" + params?.id);
+    } else {
+      // Cancel
+      setShowDialog(false);
+    }
+  };
   return (
     <div className="bodyContainer">
       <Sidebar selectedMenu="Product Management" selectedItem="Add Product" />
@@ -121,6 +150,15 @@ function ProductUpdateStep3() {
                     Update Product : Step 3/4
                   </h4>
                 </div>
+              </div>
+              <div className="mb-3">
+                <button
+                  className="btn btn-light shadow-sm border rounded-pill px-4 py-2"
+                  onClick={handleBackClick}
+                  style={{ fontSize: "0.9rem", fontWeight: "500" }}
+                >
+                  ← Back
+                </button>
               </div>
               <div className="row">
                 <div className="col-4 mb-3">
@@ -196,7 +234,7 @@ function ProductUpdateStep3() {
                                 position: "relative",
                                 marginBottom: "-20px",
                               }}
-                              onClick={()=>deleteProductGalleryFunc(i)}
+                              onClick={() => deleteProductGalleryFunc(i)}
                               src="https://cdn-icons-png.flaticon.com/128/9068/9068699.png"
                             />
                           </div>
@@ -216,12 +254,15 @@ function ProductUpdateStep3() {
                     className="btn btn-primary w-100"
                     style={{
                       color: "#fff",
-      border: "none",
-      borderRadius: "24px",
-      background: "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
-      boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
+                      border: "none",
+                      borderRadius: "24px",
+                      background:
+                        "linear-gradient(180deg, rgb(255,103,30), rgb(242,92,20))",
+                      boxShadow: "0 4px 12px rgba(255,103,30,0.45)",
                     }}
-                    onClick={()=>navigate("/update-product-attributes/"+params?.id)}
+                    onClick={() =>
+                      navigate("/update-product-attributes/" + params?.id)
+                    }
                   >
                     Next
                   </button>
@@ -229,6 +270,91 @@ function ProductUpdateStep3() {
               </div>
             </div>
           </div>
+         {showDialog && (
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+              style={{
+                background: "rgba(0, 0, 0, 0.35)",
+                backdropFilter: "blur(3px)",
+                zIndex: 1050,
+              }}
+            >
+              <div
+                className="bg-white shadow-lg rounded-4 p-4 text-center animate__animated animate__fadeIn"
+                style={{
+                  width: "420px",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  boxShadow: "0 10px 35px rgba(0,0,0,0.1)",
+                }}
+              >
+                <h5
+                  className="fw-semibold mb-3"
+                  style={{
+                    color: "#1d1d1f",
+                    fontSize: "1.1rem",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  Do you want to save the entered information?
+                </h5>
+                <p
+                  className="text-muted mb-4"
+                  style={{
+                    fontSize: "0.9rem",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  Choose “Save” to keep your changes, or “Don’t Save” to discard
+                  them.
+                </p>
+
+                <div className="d-flex justify-content-center gap-3">
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(52, 152, 219), rgb(41, 128, 185))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("save")}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn px-4 py-2 text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgb(231, 76, 60), rgb(192, 57, 43))",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: 500,
+                      transition: "0.2s",
+                    }}
+                    onClick={() => handleDialogAction("dontSave")}
+                  >
+                   Don’t Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-light px-4 py-2"
+                    style={{
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                      fontWeight: 500,
+                    }}
+                    onClick={() => handleDialogAction("cancel")}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
